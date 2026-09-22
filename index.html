@@ -673,6 +673,32 @@ nav.top{gap:.8rem;overflow:visible;padding:.45rem 3rem .45rem 1rem}
   .tower.go .deck{animation:tw-deck .4s var(--d) cubic-bezier(.2,.8,.2,1) both!important}
   .tower.go .flag{animation:tw-unfurl .6s 3.1s cubic-bezier(.2,.8,.2,1.2) both!important}
 }
+
+/* music: songs list + corner mini player */
+.yt-list{margin:0;padding:0;list-style:none}
+.yt-list li{border-bottom:1px solid rgba(0,0,0,.35)}
+.yt-play{display:grid;grid-template-columns:auto 1fr;column-gap:.7rem;align-items:center;width:100%;background:none;border:0;padding:.5rem 0;color:inherit;text-align:right;cursor:pointer}
+.yt-play .ic{grid-row:span 2;display:grid;place-items:center;width:2.4rem;height:2.4rem;background:#000;color:#fff;font-size:1rem}
+.yt-play b{font-family:var(--display);font-size:1.7rem;font-weight:700;line-height:1}
+.yt-play small{font-size:.9rem;opacity:.8}
+.yt-play:hover .ic,.yt-play.now .ic{background:var(--yellow);color:#000}
+.yt-inline{background:#000;color:#fff;border:0;font-family:var(--display);font-size:1.1rem;padding:0 .6rem;margin-right:.4rem;cursor:pointer}
+.yt-inline:hover{background:var(--yellow);color:#000}
+.mp{position:fixed;left:12px;bottom:12px;z-index:90;font-family:var(--display);color:#fff}
+.mp-pill{display:flex;align-items:center;gap:.5rem;background:#000;color:#fff;border:2px solid var(--yellow);font-family:var(--display);font-size:1.3rem;padding:.15rem .9rem;cursor:pointer}
+.mp-pill:hover{background:var(--yellow);color:#000}
+.mp-box{display:none;width:260px;background:#000;border:2px solid #fff;box-shadow:6px 6px 0 rgba(0,0,0,.35)}
+.mp.on .mp-box{display:block}
+.mp.on .mp-pill{display:none}
+.mp-vid{aspect-ratio:16/9;background:#111}
+.mp-vid iframe,.mp-vid>div{width:100%;height:100%;display:block;border:0}
+.mp-ctl{display:flex;align-items:center;gap:.3rem;padding:.25rem .4rem}
+.mp-t{flex:1;min-width:0;font-size:1.2rem;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mp-ctl button{background:none;border:1px solid #444;color:#fff;font-size:1.05rem;line-height:1;width:2.1rem;height:2.1rem;cursor:pointer;flex-shrink:0}
+.mp-ctl button:hover{background:var(--yellow);color:#000;border-color:var(--yellow)}
+.mp-ctl .mute[aria-pressed="true"]{background:var(--flag);border-color:var(--flag)}
+.arena.open~.mp,body.arena-open .mp{display:none}
+@media (max-width:700px){.mp{left:8px;bottom:8px}.mp-box{width:210px}.mp-pill{font-size:1.15rem}}
 </style>
 </head>
 <body>
@@ -892,8 +918,16 @@ nav.top{gap:.8rem;overflow:visible;padding:.45rem 3rem .45rem 1rem}
           <li><b>נשיא מסוכן</b></li>
           <li><b>ברוכים הבאים לגיהנום</b></li>
           <li><b>מי מזיע לידי</b> · ראפ</li>
-          <li><b>שיר שכבת סיני</b> · שמיניות</li>
+          <li><b>שיר שכבת סיני</b> · שמיניות <button class="yt-inline" data-song="1" aria-label="האזנה לשיר שכבת סיני">▶ האזנה</button></li>
           <li><b>הראפ באנגלית</b></li>
+        </ul>
+      </div>
+      <div>
+        <h3>שירים ביוטיוב</h3>
+        <ul class="yt-list">
+          <li><button class="yt-play" data-song="0"><span class="ic" aria-hidden="true">▶</span><b>נשיא קוד</b><small>חנוכה 2016 · תורן, תבור</small></button></li>
+          <li><button class="yt-play" data-song="1"><span class="ic" aria-hidden="true">▶</span><b>בשירים של הנשיא</b><small>פסטיבל אביב 2006 · שכבת סיני</small></button></li>
+          <li><button class="yt-play" data-song="2"><span class="ic" aria-hidden="true">▶</span><b>בחורה מהנשיא</b><small>פסטיבל אביב 2008 · לוטן</small></button></li>
         </ul>
       </div>
       <div>
@@ -2100,5 +2134,88 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
 })();
 </script>
 <script>(()=>{const t=document.querySelector(".tower");if(!t)return;t.addEventListener("click",()=>{t.classList.remove("go");void t.getBoundingClientRect();t.classList.add("go")})})()</script>
+<div class="mp" id="mp">
+  <button class="mp-pill" id="mpPill" aria-label="ניגון שירי השבט"><span aria-hidden="true">♪</span>שירי השבט</button>
+  <div class="mp-box" role="region" aria-label="נגן שירי השבט">
+    <div class="mp-vid"><div id="mpFrame"></div></div>
+    <div class="mp-ctl">
+      <span class="mp-t" id="mpTitle"></span>
+      <button class="mute" id="mpMute" aria-pressed="false" aria-label="השתקה" title="השתקה">🔊</button>
+      <button id="mpNext" aria-label="השיר הבא" title="השיר הבא">⏭</button>
+      <button id="mpClose" aria-label="סגירת הנגן" title="סגירת הנגן">✕</button>
+    </div>
+  </div>
+</div>
+<script>
+/* Songs start with sound on the visitor's first tap or click (browsers block sound before that).
+   Muting or closing is remembered, and then nothing plays until the visitor picks a song. */
+(()=>{
+  const SONGS=[
+    {id:'sOKO6HHATAU',t:'נשיא קוד'},
+    {id:'R5oGkxelx2M',t:'בשירים של הנשיא'},
+    {id:'bTnIb3hxO5k',t:'בחורה מהנשיא'}
+  ];
+  const KEY='music:off';
+  const off={get(){try{return localStorage.getItem(KEY)==='1'}catch(e){return false}},
+             set(v){try{v?localStorage.setItem(KEY,'1'):localStorage.removeItem(KEY)}catch(e){}}};
+  const mp=document.getElementById('mp'),title=document.getElementById('mpTitle'),muteB=document.getElementById('mpMute');
+  const arena=document.getElementById('arena');
+  let player=null,ready=false,cur=0,started=false,resume=false,apiP=null;
+  const gameOpen=()=>arena&&arena.classList.contains('open');
+  function api(){
+    if(window.YT&&YT.Player) return Promise.resolve();
+    if(apiP) return apiP;
+    return apiP=new Promise(res=>{
+      const prev=window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady=()=>{if(prev)try{prev()}catch(e){};res()};
+      const sc=document.createElement('script');sc.src='https://www.youtube.com/iframe_api';document.head.appendChild(sc);
+    });
+  }
+  function setMuted(m){
+    muteB.setAttribute('aria-pressed',m);muteB.textContent=m?'🔇':'🔊';
+    muteB.setAttribute('aria-label',m?'הפעלת קול':'השתקה');muteB.title=m?'הפעלת קול':'השתקה';
+    if(ready){m?player.mute():player.unMute()}
+  }
+  function mark(){
+    title.textContent=SONGS[cur].t;
+    document.querySelectorAll('.yt-play').forEach(b=>b.classList.toggle('now',+b.dataset.song===cur));
+  }
+  function play(i){
+    started=true;cur=i;off.set(false);setMuted(false);mark();mp.classList.add('on');
+    if(ready){player.loadVideoById(SONGS[cur].id);if(gameOpen()){player.pauseVideo();resume=true}return}
+    if(player) return;
+    player='loading';
+    api().then(()=>{
+      player=new YT.Player('mpFrame',{videoId:SONGS[cur].id,
+        playerVars:{autoplay:1,playsinline:1,rel:0},
+        events:{
+          onReady(e){ready=true;e.target.unMute();if(SONGS[cur].id!==(e.target.getVideoData()||{}).video_id) e.target.loadVideoById(SONGS[cur].id);
+            if(gameOpen()){e.target.pauseVideo();resume=true}else e.target.playVideo()},
+          onStateChange(e){if(e.data===YT.PlayerState.ENDED) play((cur+1)%SONGS.length)}
+        }});
+    });
+  }
+  document.getElementById('mpPill').onclick=()=>play(cur);
+  document.getElementById('mpNext').onclick=()=>play((cur+1)%SONGS.length);
+  muteB.onclick=()=>{const m=muteB.getAttribute('aria-pressed')!=='true';setMuted(m);off.set(m)};
+  document.getElementById('mpClose').onclick=()=>{if(ready) player.stopVideo();mp.classList.remove('on');off.set(true);resume=false};
+  document.addEventListener('click',e=>{const b=e.target.closest('.yt-play,.yt-inline');if(b) play(+b.dataset.song)});
+  // first tap/click/key anywhere starts the music, unless the visitor turned it off before
+  function first(e){
+    removeEventListener('pointerdown',first,true);removeEventListener('keydown',first,true);
+    if(off.get()||started) return;
+    if(e.target.closest&&e.target.closest('.mp,.yt-play,.yt-inline')) return;
+    play(0);
+  }
+  addEventListener('pointerdown',first,true);addEventListener('keydown',first,true);
+  // hide and pause while a game is open, resume when it closes
+  if(arena) new MutationObserver(()=>{
+    document.body.classList.toggle('arena-open',gameOpen());
+    if(!ready) return;
+    if(gameOpen()){if(player.getPlayerState()===YT.PlayerState.PLAYING){player.pauseVideo();resume=true}}
+    else if(resume){resume=false;if(mp.classList.contains('on')) player.playVideo()}
+  }).observe(arena,{attributes:true,attributeFilter:['class']});
+})();
+</script>
 </body>
 </html>
