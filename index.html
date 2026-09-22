@@ -684,7 +684,7 @@ nav.top{gap:.8rem;overflow:visible;padding:.45rem 3rem .45rem 1rem}
 .yt-play:hover .ic,.yt-play.now .ic{background:var(--yellow);color:#000}
 .yt-inline{background:#000;color:#fff;border:0;font-family:var(--display);font-size:1.1rem;padding:0 .6rem;margin-right:.4rem;cursor:pointer}
 .yt-inline:hover{background:var(--yellow);color:#000}
-.mp{position:fixed;left:12px;bottom:12px;z-index:90;font-family:var(--display);color:#fff}
+.mp{position:fixed;left:12px;bottom:12px;z-index:150;font-family:var(--display);color:#fff}
 .mp-pill{display:flex;align-items:center;gap:.5rem;background:#000;color:#fff;border:2px solid var(--yellow);font-family:var(--display);font-size:1.3rem;padding:.15rem .9rem;cursor:pointer}
 .mp-pill:hover{background:var(--yellow);color:#000}
 .mp-box{display:none;width:260px;background:#000;border:2px solid #fff;box-shadow:6px 6px 0 rgba(0,0,0,.35)}
@@ -697,8 +697,17 @@ nav.top{gap:.8rem;overflow:visible;padding:.45rem 3rem .45rem 1rem}
 .mp-ctl button{background:none;border:1px solid #444;color:#fff;font-size:1.05rem;line-height:1;width:2.1rem;height:2.1rem;cursor:pointer;flex-shrink:0}
 .mp-ctl button:hover{background:var(--yellow);color:#000;border-color:var(--yellow)}
 .mp-ctl .mute[aria-pressed="true"]{background:var(--flag);border-color:var(--flag)}
-.arena.open~.mp,body.arena-open .mp{display:none}
-@media (max-width:700px){.mp{left:8px;bottom:8px}.mp-box{width:210px}.mp-pill{font-size:1.15rem}}
+/* during a game the player becomes a slim strip in the game's top bar, so it never covers game controls */
+body.arena-open .mp{top:5px;bottom:auto;left:1rem}
+body.arena-open .mp.on .mp-box{display:flex;align-items:center;width:auto;border-width:1px;box-shadow:none}
+body.arena-open .mp-vid{width:80px;flex-shrink:0}
+body.arena-open .mp-t{display:none}
+body.arena-open .mp-ctl{padding:0 .3rem;gap:.25rem}
+body.arena-open .mp-ctl button{width:1.8rem;height:1.8rem;font-size:.95rem}
+body.arena-open .mp-pill{font-size:1.1rem;padding:.1rem .6rem}
+body.arena-open.music-on .arena-bar{padding-left:calc(2rem + 190px)}
+body.arena-open.music-on .arena-bar h3{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:700px){.mp{left:8px;bottom:8px}.mp-box{width:210px}.mp-pill{font-size:1.15rem}body.arena-open.music-on .arena-bar{padding-left:calc(1.5rem + 150px);gap:.6rem}body.arena-open.music-on .arena-bar img{display:none}body.arena-open.music-on .arena-bar .x{white-space:nowrap;flex-shrink:0;font-size:1.2rem;padding:0 .6rem}body.arena-open.music-on .arena-bar h3{font-size:1.6rem}body.arena-open #mpNext{display:none}body.arena-open .mp{left:.6rem}}
 </style>
 </head>
 <body>
@@ -918,17 +927,13 @@ nav.top{gap:.8rem;overflow:visible;padding:.45rem 3rem .45rem 1rem}
           <li><b>נשיא מסוכן</b></li>
           <li><b>ברוכים הבאים לגיהנום</b></li>
           <li><b>מי מזיע לידי</b> · ראפ</li>
-          <li><b>שיר שכבת סיני</b> · שמיניות <button class="yt-inline" data-song="1" aria-label="האזנה לשיר שכבת סיני">▶ האזנה</button></li>
+          <li><b>שיר שכבת סיני</b> · שמיניות <button class="yt-inline" data-yt="R5oGkxelx2M" aria-label="האזנה לשיר שכבת סיני">▶ האזנה</button></li>
           <li><b>הראפ באנגלית</b></li>
         </ul>
       </div>
       <div>
         <h3>שירים ביוטיוב</h3>
-        <ul class="yt-list">
-          <li><button class="yt-play" data-song="0"><span class="ic" aria-hidden="true">▶</span><b>נשיא קוד</b><small>חנוכה 2016 · תורן, תבור</small></button></li>
-          <li><button class="yt-play" data-song="1"><span class="ic" aria-hidden="true">▶</span><b>בשירים של הנשיא</b><small>פסטיבל אביב 2006 · שכבת סיני</small></button></li>
-          <li><button class="yt-play" data-song="2"><span class="ic" aria-hidden="true">▶</span><b>בחורה מהנשיא</b><small>פסטיבל אביב 2008 · לוטן</small></button></li>
-        </ul>
+        <ul class="yt-list" id="ytList"></ul>
       </div>
       <div>
         <h3>המדריך המלא</h3>
@@ -2148,20 +2153,30 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
 </div>
 <script>
 /* Songs start with sound on the visitor's first tap or click (browsers block sound before that).
-   Muting or closing is remembered, and then nothing plays until the visitor picks a song. */
+   Muting or closing is remembered, and then nothing plays until the visitor picks a song.
+   The player stays on top during games, in a smaller size. */
 (()=>{
   const SONGS=[
-    {id:'sOKO6HHATAU',t:'נשיא קוד'},
-    {id:'R5oGkxelx2M',t:'בשירים של הנשיא'},
-    {id:'bTnIb3hxO5k',t:'בחורה מהנשיא'}
+    {id:'NLv15OAh0T4',t:'שכבת ירדן',s:'חמישיות'},
+    {id:'555IA1GIUIY',t:'NAC code',s:'ג׳ינגל חנוכה 67'},
+    {id:'mkSQvYFaTbM',t:'קוזינות במדבר',s:'ג׳ינגל 88 · שכבת כפיר'},
+    {id:'aVOrvan1gWY',t:'פעילים 2023',s:'שיאן שמיניות'},
+    {id:'0UDZLA4e_j4',t:'שיר המרכז',s:'נדב קמיל'},
+    {id:'m_8QqDVAdyg',t:'זה לא הסוף',s:'פסטיבל אביב 2012 · שניר'},
+    {id:'V8APn9g3AMM',t:'ג׳ינגל פעילים 2020/21',s:'פעילים'},
+    {id:'lJ2cQzwd-Zg',t:'ג׳ינגל פעילים 2013-14',s:'פעילים'},
+    {id:'bTnIb3hxO5k',t:'בחורה מהנשיא',s:'פסטיבל אביב 2008 · לוטן'},
+    {id:'R5oGkxelx2M',t:'בשירים של הנשיא',s:'פסטיבל אביב 2006 · שכבת סיני'},
+    {id:'sOKO6HHATAU',t:'נשיא קוד',s:'חנוכה 2016 · תורן, תבור'}
   ];
+  const list=document.getElementById('ytList');
+  if(list) list.innerHTML=SONGS.map((x,i)=>`<li><button class="yt-play" data-song="${i}"><span class="ic" aria-hidden="true">▶</span><b>${x.t}</b><small>${x.s}</small></button></li>`).join('');
   const KEY='music:off';
   const off={get(){try{return localStorage.getItem(KEY)==='1'}catch(e){return false}},
              set(v){try{v?localStorage.setItem(KEY,'1'):localStorage.removeItem(KEY)}catch(e){}}};
   const mp=document.getElementById('mp'),title=document.getElementById('mpTitle'),muteB=document.getElementById('mpMute');
   const arena=document.getElementById('arena');
-  let player=null,ready=false,cur=0,started=false,resume=false,apiP=null;
-  const gameOpen=()=>arena&&arena.classList.contains('open');
+  let player=null,ready=false,cur=0,started=false,apiP=null;
   function api(){
     if(window.YT&&YT.Player) return Promise.resolve();
     if(apiP) return apiP;
@@ -2181,8 +2196,8 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
     document.querySelectorAll('.yt-play').forEach(b=>b.classList.toggle('now',+b.dataset.song===cur));
   }
   function play(i){
-    started=true;cur=i;off.set(false);setMuted(false);mark();mp.classList.add('on');
-    if(ready){player.loadVideoById(SONGS[cur].id);if(gameOpen()){player.pauseVideo();resume=true}return}
+    started=true;cur=i;off.set(false);setMuted(false);mark();mp.classList.add('on');document.body.classList.add('music-on');
+    if(ready){player.loadVideoById(SONGS[cur].id);return}
     if(player) return;
     player='loading';
     api().then(()=>{
@@ -2190,7 +2205,7 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
         playerVars:{autoplay:1,playsinline:1,rel:0},
         events:{
           onReady(e){ready=true;e.target.unMute();if(SONGS[cur].id!==(e.target.getVideoData()||{}).video_id) e.target.loadVideoById(SONGS[cur].id);
-            if(gameOpen()){e.target.pauseVideo();resume=true}else e.target.playVideo()},
+            e.target.playVideo()},
           onStateChange(e){if(e.data===YT.PlayerState.ENDED) play((cur+1)%SONGS.length)}
         }});
     });
@@ -2198,8 +2213,8 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
   document.getElementById('mpPill').onclick=()=>play(cur);
   document.getElementById('mpNext').onclick=()=>play((cur+1)%SONGS.length);
   muteB.onclick=()=>{const m=muteB.getAttribute('aria-pressed')!=='true';setMuted(m);off.set(m)};
-  document.getElementById('mpClose').onclick=()=>{if(ready) player.stopVideo();mp.classList.remove('on');off.set(true);resume=false};
-  document.addEventListener('click',e=>{const b=e.target.closest('.yt-play,.yt-inline');if(b) play(+b.dataset.song)});
+  document.getElementById('mpClose').onclick=()=>{if(ready) player.stopVideo();mp.classList.remove('on');document.body.classList.remove('music-on');off.set(true)};
+  document.addEventListener('click',e=>{const b=e.target.closest('.yt-play,.yt-inline');if(!b) return;const i=b.dataset.yt?SONGS.findIndex(x=>x.id===b.dataset.yt):+b.dataset.song;if(i>=0) play(i)});
   // first tap/click/key anywhere starts the music, unless the visitor turned it off before
   function first(e){
     removeEventListener('pointerdown',first,true);removeEventListener('keydown',first,true);
@@ -2208,13 +2223,8 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
     play(0);
   }
   addEventListener('pointerdown',first,true);addEventListener('keydown',first,true);
-  // hide and pause while a game is open, resume when it closes
-  if(arena) new MutationObserver(()=>{
-    document.body.classList.toggle('arena-open',gameOpen());
-    if(!ready) return;
-    if(gameOpen()){if(player.getPlayerState()===YT.PlayerState.PLAYING){player.pauseVideo();resume=true}}
-    else if(resume){resume=false;if(mp.classList.contains('on')) player.playVideo()}
-  }).observe(arena,{attributes:true,attributeFilter:['class']});
+  // shrink the player while a game is open
+  if(arena) new MutationObserver(()=>document.body.classList.toggle('arena-open',arena.classList.contains('open'))).observe(arena,{attributes:true,attributeFilter:['class']});
 })();
 </script>
 </body>
