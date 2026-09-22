@@ -664,8 +664,8 @@ nav.top{gap:.8rem;overflow:visible;padding:.45rem 3rem .45rem 1rem}
 @keyframes tw-deck{from{transform:scaleX(0)}}
 @keyframes tw-unfurl{from{transform:scaleX(0)}}
 @keyframes tw-wave{0%,100%{transform:none}50%{transform:skewY(4deg) scaleX(.92)}}
-/* phone: the tower stands to the left of the word, bigger, with room above for the flag */
-@media (max-width:700px){.hero{padding-top:6rem}.tower{height:2.3em;width:.8625em;right:1.95em}}
+/* phone: the tower stands in the left third, beside the emblem, around mid-screen */
+@media (max-width:700px){.hero{padding-top:6rem}.tower{height:2.15em;width:.806em;right:auto;left:.1em;bottom:auto;top:1.95em}}
 /* the build plays even with reduced motion; only the endless flag wave is skipped */
 @media (prefers-reduced-motion: reduce){
   .tower.go .d{animation:tw-draw var(--t) var(--d) cubic-bezier(.5,0,.3,1) both!important}
