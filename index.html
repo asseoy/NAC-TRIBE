@@ -744,7 +744,10 @@ body.arena-open.music-on .arena-bar h3{min-width:0;overflow:hidden;text-overflow
 .jg-ctl{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap}
 .jg-ctl .bigbtn[hidden]{display:none}
 .jg-left{color:#8d867e}
-.jg-next{margin-right:auto}
+.jg-after{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:0 0 .8rem}
+.jg-after:empty{display:none}
+.jg-after .bigbtn{font-size:1.7rem;padding:.5rem 1.4rem}
+.jg-count{color:#8d867e;font-family:var(--display);font-size:1.3rem}
 @media (max-width:700px){.jg-top{font-size:1.2rem;gap:.6rem;margin-bottom:.5rem}.jg-msg{font-size:1.3rem}.jg-ctl .bigbtn{font-size:1.4rem;padding:.5rem 1rem}.jg-tap{font-size:1.2rem}}
 body.jingle-on .mp{display:none}
 body.jingle-on .arena-bar{padding-left:1rem!important}
@@ -1246,7 +1249,7 @@ const GAMES=[
   how:'הקלידו שם של מתקן או שנה ובחרו מהרשימה.',
   lv:{easy:'8 ניחושים, "קרוב" עד שנתיים, ורמזים שנפתחים מוקדם. המתקן הנסתר תמיד שער, תורן, מחסן, מנגנון או חופשי.',mid:'6 ניחושים, "קרוב" עד שנה אחת.',hard:'5 ניחושים, בלי רמזים, ו"קרוב" רק בשנה אחת. המתקן הנסתר יכול להיות כל מתקן במאגר.'}},
  {id:'jingle',title:'נחשו את הג׳ינגל',art:'jingle',fmt:v=>v+' נק׳',
-  desc:'15 שניות מתוך ג׳ינגל או שיר של השבט. זהו אותו וכתבו את השם שלו. כל השירים של האתר בכל משחק, בסדר אקראי.',
+  desc:'15 שניות מתוך ג׳ינגל או שיר של השבט. זהו אותו וכתבו את השם שלו. 10 ג׳ינגלים בכל משחק, מתוך יותר מ־45 ג׳ינגלים ושירים.',
   how:'הקישו על המסך האדום או על "השמעה", הקשיבו, והקלידו את שם השיר. בחרו אותו מהרשימה.',
   lv:{easy:'3 ניסיונות לכל שיר, אפשר לשמוע שוב כמה שרוצים, ורמז אחרי טעות.',mid:'2 ניסיונות לכל שיר והשמעה חוזרת אחת.',hard:'ניסיון אחד, בלי השמעה חוזרת, והקטע נלקח מאמצע השיר.'}},
  {id:'hl',title:'מי קודם?',art:'hl',fmt:v=>'רצף '+v,
@@ -1708,10 +1711,11 @@ function jinglePlay(stage,lvl,ctl){
   const CLIP=15,PTS=[100,60,30];
   const M=window.tribeMusic;
   if(!M){stage.innerHTML='<p style="text-align:center">הנגן לא נטען. נסו לרענן את הדף.</p>';return}
-  const S=M.songs;
-  const order=shuffle(S.map((_,i)=>i));
+  const S=M.gameSongs||M.songs;
+  const order=shuffle(S.map((_,i)=>i)).slice(0,10);
+  const names=[...new Set(S.map(x=>x.t))];
   const desk=matchMedia('(hover:hover) and (pointer:fine)').matches;
-  let round=0,score=0,marks=[],player=null,ready=false,dead=false,st=null,list=[],act=0;
+  let round=0,score=0,marks=[],player=null,ready=false,dead=false,st=null,list=[],act=0,unlocked=false;
   M.hold(true);
   // The red cover lets taps through to the YouTube player underneath: phones (iPhone above all)
   // only start a YouTube video from a tap on the player itself. Transparent shields keep taps off
@@ -1720,15 +1724,16 @@ function jinglePlay(stage,lvl,ctl){
     <div class="jg-top">${ctl.tag()}<span class="jg-r"></span><span class="jg-s"></span></div>
     <div class="picker jg-pick"><label class="sr" for="jgIn">שם השיר</label><input id="jgIn" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" placeholder="הקלידו את שם השיר"><div class="sugg" hidden></div></div>
     <p class="jg-msg" aria-live="polite"></p>
+    <div class="jg-after"></div>
     <div class="jg-screen"><div id="jgFrame"></div>
       <div class="jg-cover"><div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><b>?</b><small class="jg-tap">הקישו כאן כדי להשמיע</small></div>
       <div class="jg-shield t"></div><div class="jg-shield b"></div></div>
     <div class="jg-bar" aria-hidden="true"><i></i></div>
-    <div class="jg-ctl"><button class="bigbtn" data-act="play" disabled>טוען…</button><span class="jg-left"></span><span class="jg-next"></span></div>
+    <div class="jg-ctl"><button class="bigbtn" data-act="play" disabled>טוען…</button><span class="jg-left"></span></div>
   </div>`;
   ctl.wire(stage);
   const q=k=>stage.querySelector(k);
-  const screen=q('.jg-screen'),cover=q('.jg-cover'),tap=q('.jg-tap'),bar=q('.jg-bar i'),playB=q('[data-act=play]'),left=q('.jg-left'),msg=q('.jg-msg'),inp=q('#jgIn'),sg=q('.sugg'),nextBox=q('.jg-next');
+  const screen=q('.jg-screen'),cover=q('.jg-cover'),tap=q('.jg-tap'),bar=q('.jg-bar i'),playB=q('[data-act=play]'),left=q('.jg-left'),msg=q('.jg-msg'),inp=q('#jgIn'),sg=q('.sugg'),after=q('.jg-after');
   const say=(t,cls='')=>{msg.textContent=t;msg.className='jg-msg '+cls};
   const state=()=>ready?player.getPlayerState():-1;
   function hud(){q('.jg-r').textContent=`שיר ${round+1} מתוך ${order.length}`;q('.jg-s').textContent=`${score} נק׳`}
@@ -1741,11 +1746,14 @@ function jinglePlay(stage,lvl,ctl){
     playB.disabled=st.replays<=0;playB.textContent='↻ שוב';
     left.textContent=st.replays>=99?'':st.replays>0?'נשארה השמעה חוזרת אחת':'אין עוד השמעות חוזרות';
   }
-  function setup(){
-    st={i:order[round],tries:0,replays:C.replays,played:false,done:false,fixed:false,wrong:new Set(),start:C.from+Math.floor(Math.random()*C.span),asked:0};
+  // auto: the next jingle starts by itself (after the first one, phones allow it)
+  function setup(auto){
+    if(st) clearInterval(st.timer);
+    st={i:order[round],tries:0,replays:C.replays,played:false,done:false,fixed:false,wrong:new Set(),start:C.from+Math.floor(Math.random()*C.span),asked:0,timer:null};
     screen.classList.remove('open');cover.classList.remove('playing');bar.style.transform='scaleX(1)';
-    inp.value='';inp.disabled=false;sg.hidden=true;nextBox.innerHTML='';say('');
-    if(ready) player.cueVideoById({videoId:S[st.i].id,startSeconds:st.start});
+    inp.value='';inp.disabled=false;sg.hidden=true;after.innerHTML='';say('');
+    if(ready){const v={videoId:S[st.i].id,startSeconds:st.start};
+      if(auto&&unlocked){player.loadVideoById(v);st.asked=performance.now()}else player.cueVideoById(v)}
     hud();playLabel();
   }
   playB.onclick=()=>{
@@ -1762,7 +1770,7 @@ function jinglePlay(stage,lvl,ctl){
     // the play button was pressed but the phone refused to start the video: point at the red screen
     if(!st.played&&st.asked&&!playing&&performance.now()-st.asked>1500){st.asked=0;say('הקישו על המסך האדום כדי להשמיע','no')}
     if(!playing||st.done) return;
-    if(!st.played){st.played=true;say('');playLabel()}
+    if(!st.played){st.played=true;unlocked=true;say('');playLabel()}
     if(!st.fixed){const d=player.getDuration();if(d){st.fixed=true;if(st.start>d-CLIP-1){st.start=Math.max(0,Math.floor(d-CLIP-1));player.seekTo(st.start,true);return}}}
     const el=player.getCurrentTime()-st.start;
     if(el<-1){player.seekTo(st.start,true);return}
@@ -1770,22 +1778,24 @@ function jinglePlay(stage,lvl,ctl){
     if(el>=CLIP){player.pauseVideo();if(!st.replays) say('נגמרו 15 השניות. מה השיר?')}
   },150);
   function show(){const v=inp.value.trim().toLowerCase();if(!v){sg.hidden=true;return}
-    list=S.map((x,k)=>({x,k})).filter(o=>!st.wrong.has(o.k)&&o.x.t.toLowerCase().includes(v)).slice(0,6);act=0;
-    sg.innerHTML=list.length?list.map((o,j)=>`<button data-k="${o.k}" class="${j===0?'act':''}"><span>${esc(o.x.t)}</span></button>`).join(''):'<div style="padding:.5rem .9rem;color:#8d867e">אין שיר כזה ברשימה</div>';sg.hidden=false}
+    list=names.filter(n=>!st.wrong.has(n)&&n.toLowerCase().includes(v)).slice(0,6);act=0;
+    sg.innerHTML=list.length?list.map((n,j)=>`<button data-k="${j}" class="${j===0?'act':''}"><span>${esc(n)}</span></button>`).join(''):'<div style="padding:.5rem .9rem;color:#8d867e">אין שיר כזה ברשימה</div>';sg.hidden=false}
   inp.oninput=show;
   inp.onfocus=()=>{if(!desk) q('.jg').scrollIntoView({block:'start'});if(inp.value) show()};
   inp.onkeydown=e=>{if(sg.hidden||!list.length) return;
-    if(e.key==='ArrowDown') act=(act+1)%list.length;else if(e.key==='ArrowUp') act=(act-1+list.length)%list.length;else if(e.key==='Enter'){e.preventDefault();guess(list[act].k);return}else return;
+    if(e.key==='ArrowDown') act=(act+1)%list.length;else if(e.key==='ArrowUp') act=(act-1+list.length)%list.length;else if(e.key==='Enter'){e.preventDefault();guess(list[act]);return}else return;
     e.preventDefault();sg.querySelectorAll('button').forEach((b,j)=>b.classList.toggle('act',j===act))};
-  sg.onclick=e=>{const b=e.target.closest('button');if(b) guess(+b.dataset.k)};
-  function guess(k){
+  sg.onclick=e=>{const b=e.target.closest('button');if(b) guess(list[+b.dataset.k])};
+  // answers are checked by name, so two videos of the same song both count
+  function guess(name){
     if(st.done) return;
     inp.value='';sg.hidden=true;
-    if(k===st.i){const p=PTS[st.tries];score+=p;marks.push('🟩');sound('win');reveal(`נכון! ${S[st.i].t} · +${p}`,'ok');return}
-    st.tries++;st.wrong.add(k);sound('bad');
+    if(!name) return;
+    if(name===S[st.i].t){const p=PTS[st.tries];score+=p;marks.push('🟩');sound('win');reveal(`נכון! ${S[st.i].t} · +${p}`,'ok');return}
+    st.tries++;st.wrong.add(name);sound('bad');
     if(st.tries>=C.tries){marks.push('⬛');reveal(`השיר היה ${S[st.i].t}`,'no');return}
     const n=C.tries-st.tries;
-    say(`לא ${S[k].t}. ${n===1?'נשאר ניסיון אחד':`נשארו ${n} ניסיונות`}.`+(C.hint?` רמז: ${S[st.i].s}`:''),'no');
+    say(`לא ${name}. ${n===1?'נשאר ניסיון אחד':`נשארו ${n} ניסיונות`}.`+(C.hint?` רמז: ${S[st.i].s||'האות הראשונה היא '+S[st.i].t[0]}`:''),'no');
     if(desk) inp.focus({preventScroll:true});
   }
   function reveal(t,cls){
@@ -1793,10 +1803,14 @@ function jinglePlay(stage,lvl,ctl){
     screen.classList.add('open');cover.classList.remove('playing');bar.style.transform='scaleX(0)';
     // let the song keep playing with the video showing
     if(ready&&st.played) player.playVideo();
-    const last=round>=order.length-1;
-    nextBox.innerHTML=`<button class="bigbtn" data-act="next">${last?'לתוצאות':'לשיר הבא ←'}</button>`;
-    const nb=nextBox.querySelector('button');nb.onclick=()=>{if(last) finish();else{round++;setup();if(!desk) q('.jg').scrollIntoView({block:'start'})}};
-    if(desk) nb.focus({preventScroll:true});
+    // a big "next" button right under the answer, and the next jingle starts by itself after a few seconds
+    const last=round>=order.length-1;let left=7;
+    after.innerHTML=`<button class="bigbtn" data-act="next">${last?'לתוצאות ←':'▶ לג׳ינגל הבא'}</button><span class="jg-count"></span>`;
+    const cnt=after.querySelector('.jg-count'),nb=after.querySelector('button');
+    const tick=()=>{cnt.textContent=(last?'התוצאות בעוד ':'הבא מתחיל בעוד ')+left};
+    const go=()=>{clearInterval(st.timer);if(last) finish();else{round++;setup(true);if(!desk) q('.jg').scrollIntoView({block:'start'})}};
+    nb.onclick=go;tick();st.timer=setInterval(()=>{if(--left<=0) go();else tick()},1000);
+    if(!desk) q('.jg').scrollIntoView({block:'start'});else nb.focus({preventScroll:true});
   }
   function finish(){
     if(ready) player.stopVideo();
@@ -1816,7 +1830,7 @@ function jinglePlay(stage,lvl,ctl){
     player=new YT.Player('jgFrame',{playerVars:{controls:0,disablekb:1,playsinline:1,rel:0,fs:0,iv_load_policy:3},
       events:{onReady(){if(dead) return;ready=true;player.cueVideoById({videoId:S[st.i].id,startSeconds:st.start});playLabel()}}});
   });
-  return ()=>{dead=true;clearInterval(poll);try{if(player&&player.destroy) player.destroy()}catch(e){}M.hold(false)};
+  return ()=>{dead=true;clearInterval(poll);if(st) clearInterval(st.timer);try{if(player&&player.destroy) player.destroy()}catch(e){}M.hold(false)};
 }
 
 /* ================= GAME: HIGHER / LOWER ================= */
@@ -2332,6 +2346,45 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
     {id:'R5oGkxelx2M',t:'בשירים של הנשיא',s:'פסטיבל אביב 2006 · שכבת סיני'},
     {id:'sOKO6HHATAU',t:'נשיא קוד',s:'חנוכה 2016 · תורן, תבור'}
   ];
+  // jingles from the tribe's YouTube playlist: part of the jingle game only, not the corner player
+  const GAME_ONLY=[
+    {id:'VVaq5R6OBU8',t:'הארנב המתוסכל',s:'פסטיבל אביב 2004 · שכבת עוצמה'},
+    {id:'9t0U4Dom3bA',t:'חלוץ 2016',s:''},
+    {id:'KOqie3f3wi0',t:'הנשיאפיקציה',s:'ג׳ינגל 67 · רותם'},
+    {id:'iCGvR85b0cQ',t:'ג׳ינגל חנוכה 2013',s:'רמון ותמיר'},
+    {id:'Gz1RYfr0Upw',t:'חנוכה 2011',s:'שכבת שהם ושכבת איתן'},
+    {id:'cHbph_I2d6g',t:'מאסטר אוף בלוגובס',s:'תורן 2005 · רותם, סיני, לביא'},
+    {id:'LYMIrROr9jI',t:'מחנה קיץ 2008',s:'לוטן'},
+    {id:'rBcoQYz5M5Y',t:'זה לא הסוף',s:'שכבת שניר'},
+    {id:'aoqYD6-e1Gg',t:'סמינר שכבה 2024',s:'שכבת רותם · 70 שנות מחנאות'},
+    {id:'lx_Qg9M3fk0',t:'ג׳ינגל 67 סהר',s:'רותם · 2023'},
+    {id:'5ylgJMABmkY',t:'ג׳ינגל פתיחת שנה 2019-20',s:'חמישיות שיאן'},
+    {id:'lMHcMpgZ6RI',t:'ג׳ינגל חנוכה 2015 ארד',s:'ארד שביעיות, תורן שישיות'},
+    {id:'V1oc13ZhBEE',t:'מחנאות',s:'פסטיבל אביב 2023 · שיאן שמיניות'},
+    {id:'xY1fLgqb1h8',t:'טראנשיא מסוכן',s:'2017'},
+    {id:'JhtMLaGnbyg',t:'שום דבר לא כבד מדי',s:''},
+    {id:'vABLyRDHyzk',t:'ג׳ינגל שכבת לוטן',s:'2008'},
+    {id:'jO5B8wkx8tM',t:'אין הנהגה בלי הנשיא',s:''},
+    {id:'RRmUVuqhef0',t:'שירת הסטיקר',s:'פסטיבל אביב 2015 · שכבת רמון'},
+    {id:'hvxr-_N42iE',t:'ג׳ינגל מחסן מערכת',s:'מחנה קיץ 2014'},
+    {id:'0gnIyfr5o6I',t:'מיאו',s:'ג׳ינגל פעילים 2020'},
+    {id:'PtsDAr5e-Pw',t:'מלכי הדפיקות',s:'ג׳ינגל השעיה · רותם'},
+    {id:'J3vt5_rAm5o',t:'ההנהגה בלהבות',s:'שיאן 88'},
+    {id:'9g8T8dMloH0',t:'דיס חברי שכבג',s:'צופים מהצד'},
+    {id:'f3_BjFX-cXc',t:'טרורותם',s:'ג׳ינגל אתגר 2023'},
+    {id:'q8d_tHd5AKw',t:'יוטיוב אמן',s:'צוות המרכזים הצעירים'},
+    {id:'ylIzQb6C-g0',t:'ג׳ינגל חנוכה 2015 תמיר',s:'שכבת תמיר שמיניסטים'},
+    {id:'Flq6Ydm9M8k',t:'תמיד שרים שירים',s:'פסטיבל אביב 2014 · שוהם'},
+    {id:'Q4O3sSt0HxU',t:'ג׳ינגל פעילים 2017-18',s:'תורן, תבור, גלעד'},
+    {id:'SWNH6eAU6as',t:'נשיאגרפיה אלימה',s:'violent na-cgraphy'},
+    {id:'RMCqGGHttHM',t:'לא תשכחו את השם',s:'ג׳ינגל חלוץ 2021'},
+    {id:'8_vww3nZaUU',t:'אנחנו שוב זוכים',s:''},
+    {id:'3sQJ1j3k3ac',t:'בסלון של לוציפר השטן',s:''},
+    {id:'Wg78Sbba2OE',t:'מי מזיע לידי',s:'הראפ'},
+    {id:'raBwWeRtt4Q',t:'עכשיו אני מצהיר',s:''},
+    {id:'FQho0Fnp93g',t:'חמיאל',s:'ג׳ינגל חנוכה · שכבת שוהם'},
+    {id:'hs11o2M8VCI',t:'NA-C Against the Malshin',s:'גדוד שיאן · טיול אתגר'}
+  ];
   const list=document.getElementById('ytList');
   if(list) list.innerHTML=SONGS.map((x,i)=>`<li><button class="yt-play" data-song="${i}"><span class="ic" aria-hidden="true">▶</span><b>${x.t}</b><small>${x.s}</small></button></li>`).join('');
   const KEY='music:off';
@@ -2388,7 +2441,7 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
   }
   addEventListener('pointerdown',first,true);addEventListener('keydown',first,true);
   // a game that plays its own audio (the jingle game) borrows the sound: hold(true) pauses this player, hold(false) resumes it
-  window.tribeMusic={songs:SONGS,api,
+  window.tribeMusic={songs:SONGS,gameSongs:SONGS.concat(GAME_ONLY.filter(g=>!SONGS.some(x=>x.id===g.id))),api,
     hold(v){
       clearTimeout(holdT);
       if(v){if(!hold) resumeAfter=resumeAfter||(started&&mp.classList.contains('on')&&ready&&player.getPlayerState()===YT.PlayerState.PLAYING);
