@@ -1249,7 +1249,7 @@ const GAMES=[
   how:'הקלידו שם של מתקן או שנה ובחרו מהרשימה.',
   lv:{easy:'8 ניחושים, "קרוב" עד שנתיים, ורמזים שנפתחים מוקדם. המתקן הנסתר תמיד שער, תורן, מחסן, מנגנון או חופשי.',mid:'6 ניחושים, "קרוב" עד שנה אחת.',hard:'5 ניחושים, בלי רמזים, ו"קרוב" רק בשנה אחת. המתקן הנסתר יכול להיות כל מתקן במאגר.'}},
  {id:'jingle',title:'נחשו את הג׳ינגל',art:'jingle',fmt:v=>v+' נק׳',
-  desc:'15 שניות מתוך ג׳ינגל או שיר של השבט. זהו אותו וכתבו את השם שלו. 10 ג׳ינגלים בכל משחק, מתוך יותר מ־45 ג׳ינגלים ושירים.',
+  desc:'15 שניות מתוך ג׳ינגל או שיר של השבט. זהו אותו וכתבו את השם שלו. 25 ג׳ינגלים בכל משחק, מתוך כמעט 70 ג׳ינגלים ושירים.',
   how:'הקישו על המסך האדום או על "השמעה", הקשיבו, והקלידו את שם השיר. בחרו אותו מהרשימה.',
   lv:{easy:'3 ניסיונות לכל שיר, אפשר לשמוע שוב כמה שרוצים, ורמז אחרי טעות.',mid:'2 ניסיונות לכל שיר והשמעה חוזרת אחת.',hard:'ניסיון אחד, בלי השמעה חוזרת, והקטע נלקח מאמצע השיר.'}},
  {id:'hl',title:'מי קודם?',art:'hl',fmt:v=>'רצף '+v,
@@ -1712,7 +1712,7 @@ function jinglePlay(stage,lvl,ctl){
   const M=window.tribeMusic;
   if(!M){stage.innerHTML='<p style="text-align:center">הנגן לא נטען. נסו לרענן את הדף.</p>';return}
   const S=M.gameSongs||M.songs;
-  const order=shuffle(S.map((_,i)=>i)).slice(0,10);
+  const order=shuffle(S.map((_,i)=>i)).slice(0,25);
   const names=[...new Set(S.map(x=>x.t))];
   const desk=matchMedia('(hover:hover) and (pointer:fine)').matches;
   let round=0,score=0,marks=[],player=null,ready=false,dead=false,st=null,list=[],act=0,unlocked=false;
@@ -2383,7 +2383,30 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
     {id:'Wg78Sbba2OE',t:'מי מזיע לידי',s:'הראפ'},
     {id:'raBwWeRtt4Q',t:'עכשיו אני מצהיר',s:''},
     {id:'FQho0Fnp93g',t:'חמיאל',s:'ג׳ינגל חנוכה · שכבת שוהם'},
-    {id:'hs11o2M8VCI',t:'NA-C Against the Malshin',s:'גדוד שיאן · טיול אתגר'}
+    {id:'hs11o2M8VCI',t:'NA-C Against the Malshin',s:'גדוד שיאן · טיול אתגר'},
+    // second playlist
+    {id:'ithTaX6iMfM',t:'ג׳ינגל הדרכה 2015-16',s:''},
+    {id:'BMgtw-p4wVU',t:'אם לא נמות',s:'2018-19'},
+    {id:'hMss5Ipwwuk',t:'ג׳ינגל פעילים 2019-20',s:''},
+    {id:'j71wZpmZoBE',t:'ג׳ינגל הדרכה 2018-19',s:''},
+    {id:'e7yr2vhiak0',t:'השיר שלי',s:''},
+    {id:'wiFyRKiMyfM',t:'סהר במדבר',s:'חנוכה 88'},
+    {id:'HmfLxDIKiaA',t:'סהר באתגר 2022',s:''},
+    {id:'QwwPTrDldGg',t:'ג׳ינגל ו׳ 2021-22',s:''},
+    {id:'MseGlJhLR84',t:'בשירים של הנשיא',s:'פסטיבל אביב 2006 · סיני'},
+    {id:'o3HZC3bGGlw',t:'Harlem Shake',s:''},
+    {id:'lvOOtBmw1qc',t:'ג׳ינגל הדרכה 2021-22',s:'כפיר, שיאן, עוז'},
+    {id:'sfkq3mdPw5Q',t:'ג׳ינגל חנוכה 2013',s:'רמון, תמיר'},
+    {id:'mY5tGJyao-Y',t:'הנשיא אימפריה',s:'מוקדש לצ׳יקו'},
+    {id:'A-NVl5he4Hw',t:'שוברים ת׳מוסכמות',s:'פסטיבל אביב 2025 · סהר שמיניות'},
+    {id:'hr8octBH6S8',t:'מחנה קיץ 2017',s:'ארד, תורן, תבור'},
+    {id:'RUOFZKDBjL0',t:'אדום ושחור',s:'פסטיבל אביב 2007 · לביא'},
+    {id:'wsye8vAP2lg',t:'לנו אין מעצורים',s:'פסטיבל אביב 2016 · תמיר'},
+    {id:'K4g3Nsj8mBo',t:'ג׳ינגל חמישיות 2021-22',s:'גדוד סהר'},
+    {id:'Pw3GOiuyD4I',t:'ג׳ינגל מחנה קיץ 2000',s:''},
+    {id:'9jhN3LiEInc',t:'נכבוש את השמיים',s:'פסטיבל אביב 2017 · ארד'},
+    {id:'K2lA2PTOjj0',t:'שוברים ת׳מוסכמות',s:'פסטיבל אביב 2025'},
+    {id:'pMFHp0FG4d0',t:'שאנטי',s:'ג׳ינגל פעילים 2025'}
   ];
   const list=document.getElementById('ytList');
   if(list) list.innerHTML=SONGS.map((x,i)=>`<li><button class="yt-play" data-song="${i}"><span class="ic" aria-hidden="true">▶</span><b>${x.t}</b><small>${x.s}</small></button></li>`).join('');
