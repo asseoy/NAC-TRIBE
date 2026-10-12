@@ -1645,7 +1645,7 @@ function drawCord(ctx,pts,w,alpha,pal){
     let ux=tx[j]+(tx[j+1]-tx[j])*f,uy=ty[j]+(ty[j+1]-ty[j])*f;const ul=Math.hypot(ux,uy)||1;ux/=ul;uy/=ul;
     const side=k%2?-1:1,cx=px-uy*side*w*.19,cy=py+ux*side*w*.19;
     const ca=Math.cos(ang),sa=Math.sin(ang)*side,dx=ux*ca-uy*sa,dy=ux*sa+uy*ca;
-    braidLens(ctx,cx,cy,dx,dy,-dy,dx,hl,hw,pal?pal[k%4]:BRAID[BRAID_SEQ[k%4]],lw);
+    braidLens(ctx,cx,cy,dx,dy,-dy,dx,hl,hw,pal?(typeof pal==='function'?pal(k):pal[k%4]):BRAID[BRAID_SEQ[k%4]],lw);
   }
   // a soft sheen on the rounded front end
   const g=ctx.createRadialGradient(x[0]-w*.12,y[0]-w*.14,0,x[0],y[0],w*.55);
@@ -2724,6 +2724,28 @@ function racePlay(stage,lvl,ctl){
 }
 
 /* ================= GAME: PLANGA SNAKE ================= */
+/* braid colours for the snake: every logo eaten re-weaves the cord in a new
+   three-colour combination (a main colour doubled, as on the real cord). No yellow. */
+const PS_COLS=[['אדום','#ec2a3a'],['בורדו','#8e1b2a'],['שחור','#34343a'],['אפור','#8e8e95'],['לבן','#ececee'],['כחול','#2f6fe0'],['נייבי','#22306e'],
+  ['תכלת','#5fb6f0'],['ירוק','#2fa84a'],['ירוק כהה','#1f6b34'],['טורקיז','#1fb5a8'],['סגול','#7b3fc4'],['ורוד','#f06aa8'],['מג׳נטה','#c42a8c'],['חום','#7a4a2a']];
+function psTri(hex){
+  const n=parseInt(hex.slice(1),16),c=[n>>16,n>>8&255,n&255];
+  const mix=(t,f)=>'#'+c.map(v=>Math.round(v+(t-v)*f).toString(16).padStart(2,'0')).join('');
+  return [mix(255,.38),hex,mix(0,.45)];
+}
+function psLum(hex){const n=parseInt(hex.slice(1),16);return (.299*(n>>16)+.587*(n>>8&255)+.114*(n&255))/255}
+const PS_TRIBE={pal:[BRAID.light,BRAID.red,BRAID.red,BRAID.dark],name:'אדום · שחור · אפור',cols:['#ec2a3a','#47474c','#c3c3c6'],key:'tribe'};
+function psPalette(prev){
+  for(let tries=0;tries<200;tries++){
+    const [m,a,b]=shuffle(PS_COLS.map((_,i)=>i)).slice(0,3),L=[m,a,b].map(i=>psLum(PS_COLS[i][1]));
+    const key=[m,a,b].join('-');
+    if(prev&&prev.key===key) continue;
+    if(Math.max(...L)-Math.min(...L)<.32) continue;            // keep the weave readable
+    const [M,A,B]=[m,a,b].map(i=>PS_COLS[i]);
+    return {pal:[psTri(A[1]),psTri(M[1]),psTri(M[1]),psTri(B[1])],name:`${M[0]} · ${A[0]} · ${B[0]}`,cols:[M[1],A[1],B[1]],key};
+  }
+  return PS_TRIBE;
+}
 function snakePlay(stage,lvl,ctl){
   const N=17;
   const SPD={easy:{v0:5.6,vMax:9.5,dv:.11},mid:{v0:7.6,vMax:13,dv:.16},hard:{v0:10,vMax:17,dv:.22}}[lvl];   // cells per second
@@ -2752,7 +2774,7 @@ function snakePlay(stage,lvl,ctl){
     </div>`;
     stage.querySelectorAll('.ps-lv button').forEach(b=>b.onclick=()=>{if(b.dataset.l===lvl)return;sound('tick');store.set('lvl:snake',b.dataset.l);ctl.go(b.dataset.l)});
     const go=stage.querySelector('.ps-go');go.onclick=()=>{sound('tick');startGame()};go.focus({preventScroll:true});
-    const pv=stage.querySelector('.ps-preview');let pctx=null,pw=0,ph=0;
+    const pv=stage.querySelector('.ps-preview');let pctx=null,pw=0,ph=0,pvPal=PS_TRIBE,pvOld=PS_TRIBE,pvT=performance.now();
     const size=()=>{pw=pv.clientWidth;ph=pv.clientHeight;if(pw&&ph)pctx=hiDPI(pv,pw,ph)};
     size();on(window,'resize',size);
     const anim=now=>{
@@ -2761,7 +2783,9 @@ function snakePlay(stage,lvl,ctl){
       const w=Math.min(28,ph*.26),x0=pw*.2,pts=[];
       for(let i=0;i<=44;i++)pts.push([x0+i*(pw*.74/44),ph*.5+Math.sin(i*.3-now/520)*ph*.17]);
       drawLogoGlow(pctx,pw*.08,ph*.5+Math.sin(now/300)*3,w*1.3,now);
-      drawCord(pctx,pts,w);
+      if(now-pvT>1800){pvOld=pvPal;pvPal=psPalette(pvPal);pvT=now}
+      const wk=(now-pvT)*.06;
+      drawCord(pctx,pts,w,1,k=>(k<wk?pvPal:pvOld).pal[k%4]);
     };
     previewRaf=requestAnimationFrame(anim);
   }
@@ -2791,7 +2815,7 @@ function snakePlay(stage,lvl,ctl){
     const fit=()=>{const w=cv.clientWidth;if(!w)return;S=w;ctx=hiDPI(cv,S,S);cell=S/N};
     fit();on(window,'resize',fit);
 
-    let body,dir,queue,prevTail,logo,logoT,score,eaten,speed,acc,state,last,fx,texts,flashT,recBefore,recToast;
+    let body,dir,queue,prevTail,logo,logoT,score,eaten,speed,acc,state,last,fx,texts,flashT,recBefore,recToast,pal,palOld,palT,palName;
     const step=()=>1000/speed;
 
     function reset(){
@@ -2799,6 +2823,7 @@ function snakePlay(stage,lvl,ctl){
       const cy=Math.floor(N/2);
       body=[[8,cy],[7,cy],[6,cy],[5,cy]];dir=DIRS.right;queue=[];prevTail=[4,cy];
       score=0;eaten=0;speed=SPD.v0;fx=[];texts=[];flashT=0;recToast=false;
+      pal=palOld=PS_TRIBE;palT=-1e9;palName=null;
       recBefore=ctl.getBest()||0;elBest.textContent=fmt(recBefore);elScore.textContent='0';
       spawnLogo();
       over.classList.remove('in');over.hidden=true;btnPause.textContent='השהיה';
@@ -2836,8 +2861,9 @@ function snakePlay(stage,lvl,ctl){
       eaten++;score+=10;elScore.textContent=fmt(score);
       const st=elScore.parentElement;st.classList.remove('pop');void st.offsetWidth;st.classList.add('pop');
       speed=Math.min(SPD.vMax,SPD.v0+eaten*SPD.dv);sound('good');
+      palOld=pal;pal=psPalette(pal);palT=performance.now();palName={t:pal.name,life:1};
       const cx=(x+.5)*cell,cy=(y+.5)*cell,u=cell/22;
-      for(let i=0;i<22;i++){const a=Math.random()*Math.PI*2,v=(1.5+Math.random()*3.5)*u;fx.push({x:cx,y:cy,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:1,c:pick(['#ec2a3a','#47474c','#c3c3c6','#F3E03B','#fff']),r:cell*(.06+Math.random()*.08)})}
+      for(let i=0;i<22;i++){const a=Math.random()*Math.PI*2,v=(1.5+Math.random()*3.5)*u;fx.push({x:cx,y:cy,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:1,c:pick([...pal.cols,'#fff']),r:cell*(.06+Math.random()*.08)})}
       fx.push({ring:1,x:cx,y:cy,life:1});
       texts.push({x:cx,y:cy-cell*.2,life:1,t:'+10'});
       if(recBefore>0&&score>recBefore&&!recToast){recToast=true;toast('שברתם את השיא האישי!');sound('win')}
@@ -2938,6 +2964,7 @@ function snakePlay(stage,lvl,ctl){
       }
       fx=fx.filter(p=>p.life>0);
       for(const t of texts){t.y-=.7*u*k;t.life-=.022*k}
+      if(palName)palName.life-=.008*k;
       texts=texts.filter(t=>t.life>0);
     }
     /* the cord as a continuous polyline: the head slides into its new cell while the
@@ -2968,7 +2995,9 @@ function snakePlay(stage,lvl,ctl){
       const a=(state==='play'||state==='pause')?Math.min(1,acc/step()):1;
       let alpha=1;
       if(state==='dead'){const e=now-flashT;if(e<900)alpha=Math.floor(e/110)%2?.35:1}
-      drawCord(ctx,cordPoints(a),cell*.8,alpha);
+      // the new colours run down the cord from the head
+      const wk=Math.max(0,now-palT)*.09;
+      drawCord(ctx,cordPoints(a),cell*.8,alpha,k=>(k<wk?pal:palOld).pal[k%4]);
       for(const p of fx){
         if(p.ring){ctx.strokeStyle=`rgba(243,224,59,${Math.max(0,p.life)})`;ctx.lineWidth=cell*.08*p.life;ctx.beginPath();ctx.arc(p.x,p.y,cell*(1.6-p.life*1.1),0,Math.PI*2);ctx.stroke()}
         else if(p.conf){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.globalAlpha=Math.min(1,p.life*2);ctx.fillStyle=p.c;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore()}
@@ -2976,6 +3005,15 @@ function snakePlay(stage,lvl,ctl){
       }
       ctx.textAlign='center';ctx.font=`700 ${cell*.95}px Karantina, Impact, sans-serif`;
       for(const t of texts){ctx.globalAlpha=Math.max(0,t.life);ctx.fillStyle='#000';ctx.fillText(t.t,t.x+2,t.y+2);ctx.fillStyle='#F3E03B';ctx.fillText(t.t,t.x,t.y)}
+      if(palName&&palName.life>0){
+        // name of the new weave, top of the board, with a swatch of its three colours
+        const fs=Math.max(14,cell*.62),y=cell*.85;
+        ctx.globalAlpha=Math.min(1,palName.life*2.5);ctx.font=`700 ${fs}px Karantina, Impact, sans-serif`;
+        const tw=ctx.measureText(palName.t).width,sw=fs*.55,bw=tw+sw*3+fs*1.4,bx=(S-bw)/2;
+        ctx.fillStyle='rgba(0,0,0,.72)';ctx.fillRect(bx,y-fs*.75,bw,fs*1.3);
+        pal.cols.forEach((c,i)=>{ctx.fillStyle=c;ctx.fillRect(bx+fs*.4+i*sw,y-sw*.55,sw*.82,sw*1.1)});
+        ctx.fillStyle='#fff';ctx.textAlign='left';ctx.fillText(palName.t,bx+fs*.4+sw*3+fs*.4,y+fs*.28);ctx.textAlign='center';
+      }
       ctx.globalAlpha=1;
     }
     reset();
