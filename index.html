@@ -4024,10 +4024,10 @@ function partyPlay(stage,lvl,ctl){
     players:[...new Set((store.get('mp:players',[0,1])||[]).filter(i=>Number.isInteger(i)&&i>=0&&i<4))].sort(),
     target:[3,5,7].includes(store.get('mp:target',5))?store.get('mp:target',5):5,
     games:(()=>{const known=store.get('mp:known',null),saved=store.get('mp:games',null),g=(saved||IDS).filter(id=>IDS.includes(id));const old=known||['whistle','sumo','braid','tug','stack','slide'];if(saved)IDS.forEach(id=>{if(!old.includes(id)&&!g.includes(id))g.push(id)});return g})(),
-    table:!!store.get('mp:table',coarse)
+    table:!!store.get('mp:table2',!!(window.matchMedia&&matchMedia('(hover: none) and (pointer: coarse)').matches))
   };
   if(!S.games.length) S.games=IDS.slice();
-  const save=()=>{store.set('mp:players',S.players);store.set('mp:target',S.target);store.set('mp:games',S.games);store.set('mp:table',S.table);store.set('mp:known',IDS)};
+  const save=()=>{store.set('mp:players',S.players);store.set('mp:target',S.target);store.set('mp:games',S.games);store.set('mp:table2',S.table);store.set('mp:known',IDS)};
 
   stage.innerHTML=`<div class="pt${S.table?'':' flat'}">
     <canvas class="pt-cv" aria-hidden="true"></canvas>
@@ -4126,7 +4126,7 @@ function partyPlay(stage,lvl,ctl){
       <p class="note">כל שחקן לוחץ על הכפתור שלו כדי להצטרף, ולוחץ שוב כדי לצאת.</p>
       <div class="opt"><b>משחקים עד</b><div class="seg" role="group" aria-label="ניצחונות לגביע">${[3,5,7].map(n=>`<button data-n="${n}" aria-pressed="${n===S.target}">${n}</button>`).join('')}</div><b>ניצחונות</b></div>
       <div class="gms" role="group" aria-label="המיני־משחקים בטורניר">${MP_GAMES.map(g=>`<button data-g="${g.id}" aria-pressed="${S.games.includes(g.id)}">${g.title}</button>`).join('')}</div>
-      <div class="opt"><button class="tg" data-t="table" aria-pressed="${S.table}">מצב שולחן: הכפתורים למעלה הפוכים</button><button class="tg" data-t="snd" aria-pressed="${soundOn}">צליל: ${soundOn?'פועל':'כבוי'}</button></div>
+      <div class="opt"><button class="tg" data-t="table" aria-pressed="${S.table}">מצב שולחן: טלפון באמצע, השחקנים מסביב</button><button class="tg" data-t="snd" aria-pressed="${soundOn}">צליל: ${soundOn?'פועל':'כבוי'}</button></div>
       <button class="bigbtn start">יאללה, מתחילים</button>
       <button class="exit">חזרה לכל המשחקים</button>
     </div>`;
