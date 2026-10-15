@@ -2333,7 +2333,7 @@ function sheshPlay(stage,lvl,ctl){
     function startGrill(){
       const p=turn,n=st.bar[p],k=Math.min(3,n),flips=[];for(let j=0;j<k;j++)flips.push(p===1?n-1-j:j);
       grill={p,t0:performance.now(),flips,id:turnId};phase='grill';dice=[];used=[];sel=null;drag=null;
-      setMsg(`מנגל! ה${SB_NAME[p]} שרוף והבית של ה${SB_NAME[1-p]} סגור, אז אין לו איך להיכנס. התור עובר.`);hud();
+      setMsg(`מצב גל! ה${SB_NAME[p]} שרוף והבית של ה${SB_NAME[1-p]} סגור, אז אין לו איך להיכנס. התור עובר.`);hud();
       sbSfx('slam');later(()=>sbSfx('sizzle'),GR.fire);
       flips.forEach((_,j)=>{const t=GR.tongs+j*GR.flip;later(()=>sbSfx('clack'),t+GR.flip*.27);later(()=>sbSfx('sizzle'),t+GR.flip*.62)});
       const id=turnId;later(()=>finishGrill(id),grillDur(grill));
@@ -2606,9 +2606,10 @@ function sheshPlay(stage,lvl,ctl){
         ctx.save();ctx.globalAlpha=Math.max(0,A);ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(0,0,W,H);
         ctx.translate(W/2,ty);ctx.scale(sc,sc);ctx.direction='rtl';ctx.textAlign='center';ctx.textBaseline='middle';
         ctx.font=`700 ${fs}px Karantina, Impact, sans-serif`;
-        ctx.lineJoin='round';ctx.lineWidth=fs*.07;ctx.strokeStyle='#120202';ctx.strokeText('מנגל!',0,0);
+        const TT='מצב גל!',tw0=ctx.measureText(TT).width;if(tw0*sc>W*.92){const k=W*.92/(tw0*sc);ctx.scale(k,k)}
+        ctx.lineJoin='round';ctx.lineWidth=fs*.07;ctx.strokeStyle='#120202';ctx.strokeText(TT,0,0);
         const g=ctx.createLinearGradient(0,-fs*.4,0,fs*.4);g.addColorStop(0,'#fff6b0');g.addColorStop(.45,'#ffb020');g.addColorStop(1,'#e2261b');
-        ctx.shadowColor='#ff5a00';ctx.shadowBlur=fs*.22;ctx.fillStyle=g;ctx.fillText('מנגל!',0,0);ctx.shadowColor='transparent';
+        ctx.shadowColor='#ff5a00';ctx.shadowBlur=fs*.22;ctx.fillStyle=g;ctx.fillText(TT,0,0);ctx.shadowColor='transparent';
         ctx.globalCompositeOperation='lighter';
         for(let i=0;i<22;i++){const f=((el/1000)*(.6+.5*hs(i+70))+hs(i+71))%1,x=(hs(i+72)-.5)*fs*2.2,y=fs*.35-f*fs*1.1;
           ctx.fillStyle=`rgba(255,${140+Math.round(90*hs(i+73))},50,${(1-f)*.9})`;ctx.beginPath();ctx.arc(x,y,fs*.012,0,Math.PI*2);ctx.fill()}
