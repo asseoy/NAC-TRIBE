@@ -3567,10 +3567,11 @@ function pokerPlay(stage,lvl,ctl){
     }
     /* "יצאת טברון": someone lost a lot in this hand. The devil grows huge and laughs */
     async function tavron(){
-      let worst=-1,loss=0;
-      for(const i of H.order){const l=H.start[i]-P[i].stack;if(l>0&&l>=Math.max(H.bb*8,H.start[i]*.3)&&l>loss){loss=l;worst=i}}
-      if(worst<0)return;
-      const p=P[worst],sub=p.human?`הפסדתם ${money(loss)} אסימונים`:`${p.name} ${pkV(p,'הפסיד','הפסידה','')} ${money(loss)}`;
+      // only for you: you put all your chips in and lost
+      const me=H.st[0];if(!me||!(H.start[0]>0))return;
+      const wentAllIn=me.contrib>=H.start[0],loss=H.start[0]-P[0].stack;
+      if(!wentAllIn||loss<=0)return;
+      const sub=`הפסדתם ${money(loss)} אסימונים`;
       setMsg(`יצאת טברון! ${sub}.`);
       await giantDevil('יצאת טברון!',sub);
     }
