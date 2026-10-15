@@ -451,9 +451,16 @@ body.pt-open .mp{opacity:0;pointer-events:none}
 .pk-sl.tav{align-self:end;margin-bottom:14%}
 .pk-sl.tav b{font-size:clamp(2.4rem,9.5cqw,7rem)}
 .pk-o-dv img{height:64px;width:auto;filter:drop-shadow(0 0 10px rgba(255,40,20,.65));animation:pkbreath 3.2s ease-in-out infinite}
-.pk-o-dv>b{color:#ff4a52}@media (max-width:640px){
+.pk-o-dv>b{color:#ff4a52}/* crowded tables (4–7 opponents) */
+.pk-table.many .pk-tx>b{font-size:1.12em}
+.pk-table.vert .pk-seat:not(.me){flex-direction:column;justify-content:flex-start;height:auto;padding:.2em .2em .25em;gap:0;border-radius:.7em}
+.pk-table.vert .pk-seat:not(.me) .pk-av{margin:0;height:var(--ph);width:var(--ph);font-size:1.05em}
+.pk-table.vert .pk-seat:not(.me) .pk-tx{align-items:center;width:100%;text-align:center}
+.pk-table.vert .pk-seat:not(.me) .pk-tx>b{font-size:1.05em;max-width:100%}
+.pk-table.vert .pk-seat:not(.me) .pk-st{font-size:1.05em}@media (max-width:640px){
   .pk-game{--pkw:max(280px,min(1060px,calc(100vw - 1.2rem)))}
   .pk-table{aspect-ratio:4/5}
+  .pk-table.many{aspect-ratio:2/3}
   .pk-hud{font-size:1rem;gap:.55rem}.pk-hud b{font-size:1.25rem}.pk-up{display:none}
   .pk-acts{flex-direction:column-reverse;align-items:stretch;gap:.45rem}
   .pk-main{margin:0}.pk-main .pk-b{flex:1;padding:.05rem .4rem;font-size:1.45rem}
@@ -2970,9 +2977,13 @@ const PK_DEVIL_IMG=new Image();PK_DEVIL_IMG.src=PK_DEVIL;
 const PK_OPP=[
   {name:'ראש השבט',tag:'שועל ותיק',ini:'ר״ש',tone:'#c3202a',tight:.02,aggr:1.1,bluff:.1},
   {name:'המדריך',tag:'זהיר',ini:'מד',tone:'#4a4a52',tight:.07,aggr:.85,bluff:.05},
-  {name:'הרכזת',tag:'בלופרית',ini:'רכ',fem:1,tone:'#7a1018',tight:-.04,aggr:1.35,bluff:.2}];
+  {name:'הרכזת',tag:'בלופרית',ini:'רכ',fem:1,tone:'#7a1018',tight:-.04,aggr:1.35,bluff:.2},
+  {name:'מדריך בבית דני',tag:'מהשבט היריב',ini:'בד',tone:'#1f7a3a',tight:.01,aggr:1.15,bluff:.12},
+  {name:'אחראי מחסן',tag:'סופר כל אסימון',ini:'אמ',tone:'#6b4a2b',tight:.09,aggr:.8,bluff:.03},
+  {name:'מדריך בתחנה',tag:'מהמר',ini:'תח',tone:'#1e3a6b',tight:-.06,aggr:1.4,bluff:.22},
+  {name:'מדריך בשבט',tag:'פנאט',ini:'מש',tone:'#a8151f',tight:.03,aggr:1.05,bluff:.09}];
 const pkV=(p,m,f,h)=>p.human?h:p.fem?f:m;
-const PK_LINEUP={1:[0],2:[1,2],3:[1,0,2]};
+const PK_LINEUP={1:[0],2:[1,2],3:[1,0,2],4:[1,3,0,2],5:[1,3,0,4,2],6:[1,3,5,0,4,2],7:[1,3,5,0,6,4,2]};
 const PK_BL=[[10,20],[15,30],[25,50],[40,80],[60,120],[100,200],[150,300],[250,500],[400,800],[600,1200],[1000,2000],[1500,3000],[2500,5000]];
 const PK_START=1000,PK_EVERY=7;
 /* table layouts in % of the table: seat panels, hole cards, bets */
@@ -2980,11 +2991,19 @@ const PK_LAY={
   wide:{pw:15,board:43,pot:[50,56],hn:[50,62],dv:[50,15,26],
     1:{seat:[[38,86],[30,13]],cards:[[56,84],[15,13]],bet:[[50,69],[34,30]]},
     2:{seat:[[38,86],[22,14],[78,14]],cards:[[56,84],[36,14],[64,14]],bet:[[50,69],[30,31],[70,31]]},
-    3:{seat:[[38,86],[11,52],[23,12],[89,52]],cards:[[56,84],[11,33],[37,12],[89,33]],bet:[[50,69],[24,64],[30,29],[76,64]]}},
+    3:{seat:[[38,86],[11,52],[23,12],[89,52]],cards:[[56,84],[11,33],[37,12],[89,33]],bet:[[50,69],[24,64],[30,29],[76,64]]},
+    4:{many:1,pw:14,ph:.04,pf:.92,big:.85,seat:[[38,87],[8,47],[20,13],[80,13],[92,47]],cards:[[56,85],[19.5,47],[20,26],[80,26],[80.5,47]],bet:[[50,70],[27,57],[28,34],[72,34],[73,57]]},
+    5:{many:1,pw:14,ph:.04,pf:.92,big:.85,seat:[[38,87],[8,47],[20,13],[34,8],[80,13],[92,47]],cards:[[56,85],[19.5,47],[20,26],[34,21],[80,26],[80.5,47]],bet:[[50,70],[27,57],[28,34],[40,31],[72,34],[73,57]]},
+    6:{many:1,pw:14,ph:.04,pf:.92,big:.85,seat:[[38,87],[13,76],[8,47],[20,13],[80,13],[92,47],[87,76]],cards:[[56,85],[25,74],[19.5,47],[20,26],[80,26],[80.5,47],[75,74]],bet:[[50,70],[30,64],[27,57],[28,34],[72,34],[73,57],[70,64]]},
+    7:{many:1,pw:14,ph:.04,pf:.92,big:.85,seat:[[38,87],[13,76],[8,47],[20,13],[34,8],[80,13],[92,47],[87,76]],cards:[[56,85],[25,74],[19.5,47],[20,26],[34,21],[80,26],[80.5,47],[75,74]],bet:[[50,70],[30,64],[27,57],[28,34],[40,31],[72,34],[73,57],[70,64]]}},
   tall:{pw:31,board:51,pot:[50,39],hn:[50,63],dv:[17,76,19],
     1:{seat:[[30,91],[50,9]],cards:[[72,89],[50,21]],bet:[[50,72],[50,32]]},
     2:{seat:[[30,91],[25,9],[75,9]],cards:[[72,89],[25,21],[75,21]],bet:[[50,72],[25,32],[75,32]]},
-    3:{pw:28,seat:[[30,91],[16,9],[50,9],[84,9]],cards:[[72,89],[17,21],[50,21],[83,21]],bet:[[50,72],[17,32],[50,31],[83,32]]}}};
+    3:{pw:28,seat:[[30,91],[16,9],[50,9],[84,9]],cards:[[72,89],[17,21],[50,21],[83,21]],bet:[[50,72],[17,32],[50,31],[83,32]]},
+    4:{many:1,vert:1,pw:23,ph:.075,pf:.86,cw:.135,cs:.62,big:.8,board:54,pot:[50,66],hn:[50,71],dv:[15,82,14],seat:[[30,94],[12.5,7.5],[37.5,7.5],[62.5,7.5],[87.5,7.5]],cards:[[72,91],[7.0,15],[32.0,15],[57.0,15],[82.0,15]],cardsBig:[[72,91],[12.5,20],[37.5,20],[62.5,20],[87.5,20]],bet:[[50,77],[18.5,15.5],[43.5,15.5],[68.5,15.5],[93.5,15.5]],labUp:[0,0,0,0,0]},
+    5:{many:1,vert:1,pw:23,ph:.075,pf:.86,cw:.135,cs:.62,big:.8,board:54,pot:[50,66],hn:[50,71],dv:[15,82,14],seat:[[30,94],[22,33],[12.5,7.5],[37.5,7.5],[87.5,7.5],[78,33]],cards:[[72,91],[16.5,40.5],[7.0,15],[32.0,15],[82.0,15],[72.5,40.5]],cardsBig:[[72,91],[22,43],[12.5,20],[37.5,20],[87.5,20],[78,43]],bet:[[50,77],[28,41],[18.5,15.5],[43.5,15.5],[93.5,15.5],[84,41]],labUp:[0,1,0,0,0,1]},
+    6:{many:1,vert:1,pw:23,ph:.075,pf:.86,cw:.135,cs:.62,big:.8,board:54,pot:[50,66],hn:[50,71],dv:[15,82,14],seat:[[30,94],[22,33],[12.5,7.5],[37.5,7.5],[62.5,7.5],[87.5,7.5],[78,33]],cards:[[72,91],[16.5,40.5],[7.0,15],[32.0,15],[57.0,15],[82.0,15],[72.5,40.5]],cardsBig:[[72,91],[22,43],[12.5,20],[37.5,20],[62.5,20],[87.5,20],[78,43]],bet:[[50,77],[28,41],[18.5,15.5],[43.5,15.5],[68.5,15.5],[93.5,15.5],[84,41]],labUp:[0,1,0,0,0,0,1]},
+    7:{many:1,vert:1,pw:23,ph:.075,pf:.86,cw:.135,cs:.62,big:.8,board:54,pot:[50,66],hn:[50,71],dv:[15,82,14],seat:[[30,94],[22,33],[12.5,7.5],[37.5,7.5],[50,33],[62.5,7.5],[87.5,7.5],[78,33]],cards:[[72,91],[16.5,40.5],[7.0,15],[32.0,15],[44.5,40.5],[57.0,15],[82.0,15],[72.5,40.5]],cardsBig:[[72,91],[22,43],[12.5,20],[37.5,20],[50,43],[62.5,20],[87.5,20],[78,43]],bet:[[50,77],[28,41],[18.5,15.5],[43.5,15.5],[56,41],[68.5,15.5],[93.5,15.5],[84,41]],labUp:[0,1,0,0,1,0,0,1]}}};
 
 /* canvas card for the arcade art and the start screen */
 function pkPaintCard(ctx,x,y,w,c,up,rot){
@@ -3056,7 +3075,7 @@ function pokerPlay(stage,lvl,ctl){
   let raf=0,offs=[],timers=[],T={alive:false};
   const on=(el,ev,fn,opt)=>{el.addEventListener(ev,fn,opt);offs.push(()=>el.removeEventListener(ev,fn,opt))};
   const teardown=()=>{T.alive=false;cancelAnimationFrame(raf);raf=0;timers.forEach(clearTimeout);timers=[];offs.forEach(f=>f());offs=[]};
-  let nOpp=[1,2,3].includes(store.get('pk:opp',3))?store.get('pk:opp',3):3,fast=!!store.get('pk:fast',false);
+  let nOpp=[1,2,3,4,5,6,7].includes(store.get('pk:opp',3))?store.get('pk:opp',3):3,fast=!!store.get('pk:fast',false);
   const TEST=window.__PK_TEST__||null;
   const money=n=>Math.round(n).toLocaleString('en-US');
 
@@ -3073,7 +3092,7 @@ function pokerPlay(stage,lvl,ctl){
       ${okSave?`<button class="bigbtn sb-resume pk-resume">המשך את הטורניר השמור <small>(יד ${save.hand} · יש לכם ${money(save.stacks[0])} אסימונים)</small></button>`:''}
       <div class="pk-opps"><span class="pk-o pk-o-dv"><img alt="" src="${PK_DEVIL}"><b>שטן הנשיא</b><small>הדילר</small></span>${opps.map(o=>`<span class="pk-o"><i class="pk-av" style="--tone:${o.tone}"><b>${o.ini}</b></i><b>${o.name}</b><small>${o.tag}</small></span>`).join('')}</div>
       <div class="sb-opts">
-        <div class="sb-tg"><b>יריבים</b><div class="seg" role="group" aria-label="מספר יריבים">${[1,2,3].map(n=>`<button data-n="${n}" aria-pressed="${n===nOpp}">${n}</button>`).join('')}</div></div>
+        <div class="sb-tg"><b>יריבים</b><div class="seg" role="group" aria-label="מספר יריבים">${[1,2,3,4,5,6,7].map(n=>`<button data-n="${n}" aria-pressed="${n===nOpp}">${n}</button>`).join('')}</div></div>
         <div class="sb-tg"><b>רמה</b><div class="seg" role="group" aria-label="רמת המחשב">${['easy','mid','hard'].map(k=>`<button data-l="${k}" aria-pressed="${k===lvl}">${LV[k]}</button>`).join('')}</div></div>
         <div class="sb-tg"><b>קצב</b><div class="seg" role="group" aria-label="קצב המשחק"><button data-f="0" aria-pressed="${!fast}">רגיל</button><button data-f="1" aria-pressed="${fast}">מהיר</button></div></div>
       </div>
@@ -3108,13 +3127,14 @@ function pokerPlay(stage,lvl,ctl){
   function startMatch(saved){
     teardown();const tok=T={alive:true};
     const M=saved?{lvl:saved.lvl||lvl,nOpp:saved.nOpp,hand:saved.hand,dealer:saved.dealer}:{lvl,nOpp,hand:0,dealer:-1};
-    const N=M.nOpp+1,lay=()=>PK_LAY[wide?'wide':'tall'][M.nOpp];
+    const N=M.nOpp+1,lay=()=>{const G=PK_LAY[wide?'wide':'tall'];return Object.assign({},G,G[M.nOpp])};
     const P=[{name:'אתם',human:true,ini:'',tone:'#111'}].concat(PK_LINEUP[M.nOpp].map(k=>Object.assign({},PK_OPP[k])));
     P.forEach((p,i)=>{p.stack=saved?Math.max(0,saved.stacks[i]|0):PK_START;p.out=p.stack<=0});
     const SP=()=>(TEST&&TEST.speed?TEST.speed:(fast?.5:1))*(H&&H.humanOut?.6:1);
     const never=new Promise(()=>{});
     const sleep=ms=>tok.alive?new Promise(res=>{const t=setTimeout(()=>{if(tok.alive)res()},ms*SP());timers.push(t)}):never;
-    const done=a=>a.finished.then(()=>tok.alive?0:never,()=>tok.alive?0:never);
+    const done=a=>{let ms=700;try{const tm=a.effect.getComputedTiming();ms=(tm.endTime||0)+90}catch(e){}
+      return Promise.race([a.finished.catch(()=>0),new Promise(r=>{const id=setTimeout(r,ms);timers.push(id)})]).then(()=>tok.alive?0:never)};
     stage.innerHTML=`<div class="ps pk-game" style="--pk-logo:url('${LOGO_SRC}')">
       <div class="pk-hud"><span>בליינדים <b class="pk-bl"></b></span><span>יד <b class="pk-hno"></b></span><span class="pk-up"></span><span class="ps-sp"></span><span class="lvtag lv-${M.lvl}">${LV[M.lvl]}</span><button class="ps-ib pk-spd"></button></div>
       <div class="pk-table">
@@ -3167,10 +3187,10 @@ function pokerPlay(stage,lvl,ctl){
     const pct=([x,y])=>[x*W/100,y*Ht/100];
     function layout(){
       W=tbl.clientWidth;Ht=tbl.clientHeight;if(!W||!Ht)return;
-      wide=W/Ht>1.3;const L=lay(),G=PK_LAY[wide?'wide':'tall'];
-      cw=wide?W*.064:W*.145;
-      tbl.style.setProperty('--pw',(L.pw||G.pw)*W/100+'px');tbl.style.setProperty('--ph',(wide?W*.045:W*.105)+'px');
-      tbl.style.setProperty('--pf',(wide?Math.max(12,W*.0155):Math.max(11,W*.034))+'px');tbl.style.setProperty('--chip',Math.max(12,cw*.32)+'px');
+      wide=W/Ht>1.3;const L=lay(),G=L;tbl.classList.toggle('vert',!!L.vert);
+      cw=(L.cw||(wide?.064:.145))*W;
+      tbl.style.setProperty('--pw',(L.pw||G.pw)*W/100+'px');tbl.style.setProperty('--ph',(L.ph||(wide?.045:.105))*W+'px');
+      tbl.style.setProperty('--pf',(L.pf||1)*(wide?Math.max(12,W*.0155):Math.max(11,W*.034))+'px');tbl.style.setProperty('--chip',Math.max(12,cw*.32)+'px');
       seatEl.forEach((el,i)=>{const [x,y]=L.seat[i];el.style.left=x+'%';el.style.top=y+'%';el.classList.toggle('below',y<20)});
       betEl.forEach((el,i)=>{const [x,y]=L.bet[i];el.style.left=x+'%';el.style.top=y+'%'});
       {const [x,y,hp]=G.dv,h=hp*Ht/100;dvEl.style.left=x+'%';dvEl.style.top=y+'%';dvEl.style.height=h+'px';dvEl.style.width=h*430/440+'px';dvEl.style.setProperty('--dvf',Math.max(11,h*.11)+'px')}
@@ -3181,15 +3201,15 @@ function pokerPlay(stage,lvl,ctl){
       stage.querySelectorAll('.pk-card').forEach(el=>{if(el._place)place(el,el._place)});
     }
     function cardBox(pl){
-      const L=lay(),G=PK_LAY[wide?'wide':'tall'];
+      const L=lay(),G=L;
       if(pl.k==='board'){const w=cw;return {x:W/2+(pl.i-2)*w*1.12,y:G.board*Ht/100,w,r:0}}
-      const [cx,cy]=pct(L.cards[pl.s]),me=pl.s===0;
-      const w=me?cw*1.18:cw*(pl.big?.98:.72),sp=me?.56:(pl.big?.55:.32);
+      const [cx,cy]=pct((pl.big&&L.cardsBig?L.cardsBig:L.cards)[pl.s]),me=pl.s===0;
+      const w=me?cw*1.18:cw*(pl.big?(L.big||.98):.72*(L.cs||1)),sp=me?.56:(pl.big?.55:.32);
       return {x:cx+(pl.i?1:-1)*w*sp,y:cy,w,r:(pl.i?1:-1)*(me?4:pl.big?3:8)};
     }
-    function labPos(s){const L=lay(),[cx,cy]=pct(L.cards[s]),[,sy]=pct(L.seat[s]);const w=s===0?cw*1.18:cw*.98,h=w*1.4;return [cx,cy<sy-2?cy-h/2-Ht*.045:cy+h/2+Ht*.045]}
+    function labPos(s){const L=lay(),[cx,cy]=pct((L.cardsBig||L.cards)[s]),[,sy]=pct(L.seat[s]);const w=s===0?cw*1.18:cw*(L.big||.98),h=w*1.4,up=L.labUp?L.labUp[s]:cy<sy-2;return [cx,(up||(s===0&&cy<sy-2))?cy-h/2-Ht*.035:cy+h/2+Ht*.035]}
     function place(el,pl){el._place=pl;const b=cardBox(pl);el.style.left=b.x+'px';el.style.top=b.y+'px';el.style.width=b.w+'px';el.style.setProperty('--r',b.r+'deg');el.style.fontSize=b.w/5+'px';return b}
-    function placeDealer(s){const L=lay(),[x,y]=L.seat[s],G=PK_LAY[wide?'wide':'tall'];let dx,dy;
+    function placeDealer(s){const L=lay(),[x,y]=L.seat[s],G=L;let dx,dy;
       if(y>30&&y<70){dx=x;dy=y+(wide?11:8)}else if(y<20){dx=x+(x>60?-1:1)*(L.pw||G.pw)*.42;dy=y+(wide?10:7)}else{dx=x-G.pw/2-(wide?2.4:5);dy=y};
       dealerEl.hidden=false;dealerEl.style.left=dx+'%';dealerEl.style.top=dy+'%'}
     const dealerXY=()=>{const r=dealerEl.getBoundingClientRect(),t=tbl.getBoundingClientRect();return [r.left-t.left+r.width/2,r.top-t.top+r.height/2]};
@@ -3204,7 +3224,7 @@ function pokerPlay(stage,lvl,ctl){
       g.addColorStop(0,'#9a1520');g.addColorStop(.55,'#6a0b13');g.addColorStop(1,'#2c0307');c.fillStyle=g;c.fill();
       c.save();path(fi);c.clip();c.globalAlpha=.05;c.fillStyle='#000';for(let y=0;y<Ht;y+=3)c.fillRect(0,y,W,1);c.restore();
       c.strokeStyle='rgba(243,224,59,.18)';c.lineWidth=1.5;path(fi+(wide?W*.05:W*.07));c.stroke();
-      if(LOGO_IMG.complete&&LOGO_IMG.naturalWidth){const s=Math.min(W,Ht)*(wide?.42:.5);c.save();c.globalAlpha=.09;c.drawImage(LOGO_IMG,W/2-s/2,(PK_LAY[wide?'wide':'tall'].board)*Ht/100-s/2,s,s);c.restore()}
+      if(LOGO_IMG.complete&&LOGO_IMG.naturalWidth){const s=Math.min(W,Ht)*(wide?.42:.5);c.save();c.globalAlpha=.09;c.drawImage(LOGO_IMG,W/2-s/2,lay().board*Ht/100-s/2,s,s);c.restore()}
       // the braided cord around the felt
       const ins=fi*.5,pts=[],x0=rx+ins,y0=ry+ins,w0=rw-2*ins,h0=rh-2*ins,r0=Math.max(4,rad-ins),seg=[];
       const per=2*(w0-2*r0)+2*(h0-2*r0)+2*Math.PI*r0,n=Math.ceil(per/6);
@@ -3311,7 +3331,7 @@ function pokerPlay(stage,lvl,ctl){
       if(d.a==='check'&&toCall>0)d={a:'call'};
       s.acted=true;
       if(d.a==='fold'){s.folded=true;seatEl[i].classList.add('fold');say(i,'פולד','f');pkSfx('fold');if(p.human)H.humanOut=true;
-        const [cx,cy]=[W/2,PK_LAY[wide?'wide':'tall'].board*Ht/100];let a=null;
+        const [cx,cy]=[W/2,lay().board*Ht/100];let a=null;
         s.els.forEach((el,k)=>{const b=cardBox(el._place);a=el.animate([{transform:`translate(-50%,-50%) rotate(${b.r}deg)`,opacity:1},{transform:`translate(-50%,-50%) translate(${(cx-b.x)*.5}px,${(cy-b.y)*.5}px) rotate(${b.r+(k?40:-40)}deg) scale(.6)`,opacity:0}],{duration:380*SP(),easing:'ease-in',fill:'forwards'})});
         if(a)await done(a);s.els.forEach(el=>el.remove());s.els=[];setMsg(`${p.name} ${pkV(p,'מקפל','מקפלת','מקפלים')}.`);return}
       if(d.a==='check'){say(i,'צ׳ק');pkSfx('knock');setMsg(`${p.name}: צ׳ק.`);return}
@@ -3577,6 +3597,7 @@ function pokerPlay(stage,lvl,ctl){
     const ro=window.ResizeObserver?new ResizeObserver(()=>layout()):null;if(ro){ro.observe(tbl);offs.push(()=>ro.disconnect())}else on(window,'resize',layout);
     if(TEST)window.__pk={get:()=>({hand:M.hand,stacks:P.map(p=>p.stack),out:P.map(p=>p.out),pot:H?H.pot:0,bets:H?H.order.map(j=>H.st[j].bet):[],contrib:H?H.order.map(j=>H.st[j].contrib):[],board:H?H.board.slice():[],waiting:!!humanResolve,ended,
       toCall:H&&H.st[0]?Math.max(0,H.curBet-H.st[0].bet):0,canRaise:!bRaise.hidden&&!acts.hidden,next:!nextB.hidden,total:P.reduce((a,p)=>a+p.stack,0)+(H?H.pot+H.order.reduce((a,j)=>a+H.st[j].bet,0):0)})};
+    tbl.classList.toggle('many',M.nOpp>=4);
     layout();showStacks();hud();raf=requestAnimationFrame(fxFrame);
     run();
   }
