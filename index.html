@@ -476,8 +476,8 @@ body.pt-open .mp{opacity:0;pointer-events:none}
 .pk-online.hi{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(243,224,59,.25)}
 .pk-online h5{margin:0;font-family:var(--display);font-size:1.7rem;color:#fff;font-weight:700}
 .pk-name{display:flex;align-items:center;gap:.6rem;font-family:var(--display);font-size:1.2rem;color:#bdb6ae}
-.pk-online input{background:#0b0909;border:2px solid #444;color:#fff;font-size:1.15rem;padding:.3rem .6rem;min-width:0;font-family:inherit}
-.pk-online input:focus{outline:none;border-color:var(--yellow)}
+.pk-online input,.pk-joinscr input{background:#0b0909;border:2px solid #444;color:#fff;font-size:1.15rem;padding:.3rem .6rem;min-width:0;font-family:inherit}
+.pk-online input:focus,.pk-joinscr input:focus{outline:none;border-color:var(--yellow)}
 .pk-name input{flex:1}
 .pk-on-row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:stretch}
 .pk-on-row .bigbtn{font-size:1.5rem;padding:.1rem 1rem}
@@ -513,6 +513,11 @@ body.pt-open .mp{opacity:0;pointer-events:none}
   .pk-rz{max-width:none;min-width:0}
   .pk-b kbd{display:none}
 }
+
+.pk-joinscr .pk-name{width:100%;max-width:26rem}
+.pk-joinscr .pk-joinb{font-size:1.6rem}
+.pk-joinscr .pk-on-msg{text-align:center}
+.pk-joinscr .pk-solo{font-size:1.05rem;padding:.5rem 1rem}
 /* ===== ARENA ===== */
 .arena{position:fixed;inset:0;z-index:100;background:#050505;color:#fff;display:none;flex-direction:column}
 .arena.open{display:flex}
@@ -3137,6 +3142,7 @@ function pokerPlay(stage,lvl,ctl){
   /* ---------- start screen ---------- */
   function showStart(opts){
     teardown();netClose();const hashCode=(location.hash.match(/^#poker-(\d{4})$/)||[])[1]||'';
+    if(hashCode&&!(opts&&opts.full))return showJoin(hashCode,opts);
     const save=store.get('pk:save',null),okSave=!!(save&&Array.isArray(save.stacks)&&save.stacks[0]>0&&PK_LINEUP[save.nOpp]&&save.stacks.length===save.nOpp+1);
     const wins=['easy','mid','hard'].map(k=>{const b=best('poker:'+k);return `<span><i>${LV[k]}</i>${b==null?'—':b}</span>`}).join('');
     const opps=PK_LINEUP[nOpp].map(k=>PK_OPP[k]);
@@ -3859,6 +3865,23 @@ function pokerPlay(stage,lvl,ctl){
   }
 
   /* ---------- online screens ---------- */
+  const dropHash=()=>{try{history.replaceState(null,'',location.pathname+location.search)}catch(e){location.hash=''}};
+  function showJoin(code,opts){
+    stage.innerHTML=`<div class="ps ps-start panel pk-start pk-lobby pk-joinscr">
+      <h4 class="ps-title">הוזמנתם לפוקר הנשיא!</h4>
+      <div class="pk-code"><small>קוד השולחן</small><b dir="ltr">${code}</b></div>
+      <label class="pk-name"><span>השם שלכם</span><input maxlength="12" autocomplete="nickname" placeholder="למשל: נועם" value="${pkEsc(store.get('pk:name',''))}"></label>
+      <button class="bigbtn ps-go pk-joinb">הצטרפו לשולחן</button>
+      <p class="pk-on-msg" aria-live="polite">${opts&&opts.msg?pkEsc(opts.msg):'כתבו שם ולחצו הצטרפו. המשחק מתחיל כשהמארח לוחץ התחילו.'}</p>
+      <button class="bigbtn ghost pk-solo">לא עכשיו, שחקו מול המחשב</button>
+    </div>`;
+    const nm=stage.querySelector('.pk-name input'),msg=stage.querySelector('.pk-on-msg'),jb=stage.querySelector('.pk-joinb');
+    nm.oninput=()=>store.set('pk:name',pkCleanName(nm.value));
+    const join=()=>{const n=pkCleanName(nm.value);if(!n){msg.textContent='כתבו קודם את השם שלכם.';nm.focus();return}if(jb.disabled)return;jb.disabled=true;sound('tick');startOnline('join',n,code,msg).then(()=>{jb.disabled=false})};
+    jb.onclick=join;nm.onkeydown=e=>{if(e.key==='Enter')join()};
+    stage.querySelector('.pk-solo').onclick=()=>{sound('tick');dropHash();showStart()};
+    (pkCleanName(nm.value)?jb:nm).focus({preventScroll:true});
+  }
   const shareLink=c=>location.origin+location.pathname+'#poker-'+c;
   function showHostLobby(N){
     teardown();let lv=N.lvl||lvl;
@@ -3919,7 +3942,7 @@ function pokerPlay(stage,lvl,ctl){
     const say=t=>{if(msgEl)msgEl.textContent=t};
     try{
       if(kind==='host'){say('פותחים שולחן...');const N=await netHost(name,null);curNet=N;showHostLobby(N)}
-      else{say('מתחברים לשולחן '+code+'...');let N=null;N=await netJoin(code,name,m=>clientMsg(N,m));curNet=N;showClientLobby(N,null)}
+      else{say('מתחברים לשולחן '+code+'...');let N=null;N=await netJoin(code,name,m=>clientMsg(N,m));curNet=N;dropHash();showClientLobby(N,null)}
     }catch(e){say(errText(e))}
   }
 
