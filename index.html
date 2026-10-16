@@ -471,6 +471,38 @@ body.pt-open .mp{opacity:0;pointer-events:none}
 @keyframes pkhot{from{opacity:.4}to{opacity:1}}
 .pk-intro{font-family:var(--display);font-weight:700;color:#fff;font-size:clamp(2rem,7cqw,4.5rem);line-height:1;display:flex;align-items:baseline;gap:.25em;filter:drop-shadow(0 0 .25em rgba(255,40,40,.7)) drop-shadow(0 .05em 0 #000)}
 .pk-intro small{font-size:.5em;color:var(--yellow)}
+/* online */
+.pk-online{width:100%;max-width:460px;border:2px solid #3a1a1c;background:linear-gradient(#1a0d0f,#111);padding:.8rem 1rem 1rem;display:flex;flex-direction:column;gap:.55rem;align-items:stretch}
+.pk-online.hi{border-color:var(--yellow);box-shadow:0 0 0 3px rgba(243,224,59,.25)}
+.pk-online h5{margin:0;font-family:var(--display);font-size:1.7rem;color:#fff;font-weight:700}
+.pk-name{display:flex;align-items:center;gap:.6rem;font-family:var(--display);font-size:1.2rem;color:#bdb6ae}
+.pk-online input{background:#0b0909;border:2px solid #444;color:#fff;font-size:1.15rem;padding:.3rem .6rem;min-width:0;font-family:inherit}
+.pk-online input:focus{outline:none;border-color:var(--yellow)}
+.pk-name input{flex:1}
+.pk-on-row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:stretch}
+.pk-on-row .bigbtn{font-size:1.5rem;padding:.1rem 1rem}
+.pk-join{display:flex;gap:.4rem;flex:1;min-width:200px}
+.pk-join input{width:5.5em;text-align:center;letter-spacing:.2em;font-family:var(--display);font-size:1.5rem;direction:ltr}
+.pk-on-msg{margin:0;color:#bdb6ae;font-size:.95rem;min-height:1.4em}
+.pk-lobby .pk-code{display:flex;flex-direction:column;align-items:center;line-height:1}
+.pk-lobby .pk-code small{font-family:var(--display);font-size:1.2rem;color:#8d867e}
+.pk-lobby .pk-code b{font-family:var(--display);font-size:clamp(4rem,16vw,6.5rem);color:var(--yellow);letter-spacing:.12em;text-shadow:4px 4px 0 var(--red)}
+.pk-share{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
+.pk-share a{display:inline-flex;align-items:center;text-decoration:none}
+.pk-share .pk-wa{border-color:#25d366;color:#25d366}
+.pk-plist{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;max-width:520px}
+.pk-plist li{display:flex;align-items:center;gap:.45rem;background:#151213;border:1px solid #333;padding:.2rem .7rem .2rem .3rem;border-radius:999px}
+.pk-plist li.new{animation:pkjoin .4s cubic-bezier(.2,.9,.3,1.3)}
+.pk-plist .pk-av{width:34px;height:34px;font-size:.95rem;border-width:3px}
+.pk-plist b{font-family:var(--display);font-size:1.3rem;color:#fff;font-weight:700}
+.pk-plist small{color:var(--yellow);font-size:.8rem}
+@keyframes pkjoin{from{transform:scale(.4);opacity:0}}
+.pk-lobby .pk-begin:disabled{opacity:.55;cursor:default;font-size:1.6rem}
+.pk-lobby .pk-wait{animation:pkblink 1.6s ease-in-out infinite}
+@keyframes pkblink{50%{opacity:.5}}
+.pk-acts{position:relative}
+.pk-acts.timed::before{content:'';position:absolute;top:-8px;right:0;left:0;height:4px;background:var(--yellow);transform-origin:right;animation:pktimer 44s linear forwards}
+@keyframes pktimer{70%{background:var(--yellow)}to{transform:scaleX(0);background:var(--flag)}}
 @media (max-width:640px){
   .pk-game{--pkw:max(280px,min(1060px,calc(100vw - 1.2rem)))}
   .pk-table{aspect-ratio:4/5}
@@ -3001,6 +3033,11 @@ const PK_OPP=[
   {name:'מדריך בתחנה',tag:'מהמר',ini:'תח',tone:'#1e3a6b',tight:-.06,aggr:1.4,bluff:.22},
   {name:'מדריך בשבט',tag:'פנאט',ini:'מש',tone:'#a8151f',tight:.03,aggr:1.05,bluff:.09}];
 const pkV=(p,m,f,h)=>p.human?h:p.fem?f:m;
+const PK_PROTO=1,PK_TONES=['#2e6bd6','#d68a2e','#7a2ed6','#2ea36b','#d62e8a','#6b6b72','#2ec4d6','#c3202a'];
+const pkEsc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pkCleanName=s=>String(s||'').replace(/[<>&"'`\u0000-\u001f]/g,'').replace(/\s+/g,' ').trim().slice(0,12);
+/* a shared link (…#poker-1234) opens the poker table straight away */
+if(/^#poker-\d{4}$/.test(location.hash)){try{sessionStorage.setItem('introSeen','1')}catch(e){}window.addEventListener('load',()=>setTimeout(()=>{try{openGame('poker')}catch(e){}},350))}
 const PK_LINEUP={1:[0],2:[1,2],3:[1,0,2],4:[1,3,0,2],5:[1,3,0,4,2],6:[1,3,5,0,4,2],7:[1,3,5,0,6,4,2]};
 const PK_BL=[[10,20],[15,30],[25,50],[40,80],[60,120],[100,200],[150,300],[250,500],[400,800],[600,1200],[1000,2000],[1500,3000],[2500,5000]];
 const PK_START=1000,PK_EVERY=7;
@@ -3098,8 +3135,8 @@ function pokerPlay(stage,lvl,ctl){
   const money=n=>Math.round(n).toLocaleString('en-US');
 
   /* ---------- start screen ---------- */
-  function showStart(){
-    teardown();
+  function showStart(opts){
+    teardown();netClose();const hashCode=(location.hash.match(/^#poker-(\d{4})$/)||[])[1]||'';
     const save=store.get('pk:save',null),okSave=!!(save&&Array.isArray(save.stacks)&&save.stacks[0]>0&&PK_LINEUP[save.nOpp]&&save.stacks.length===save.nOpp+1);
     const wins=['easy','mid','hard'].map(k=>{const b=best('poker:'+k);return `<span><i>${LV[k]}</i>${b==null?'—':b}</span>`}).join('');
     const opps=PK_LINEUP[nOpp].map(k=>PK_OPP[k]);
@@ -3115,6 +3152,13 @@ function pokerPlay(stage,lvl,ctl){
         <div class="sb-tg"><b>קצב</b><div class="seg" role="group" aria-label="קצב המשחק"><button data-f="0" aria-pressed="${!fast}">רגיל</button><button data-f="1" aria-pressed="${fast}">מהיר</button></div></div>
       </div>
       <button class="bigbtn ps-go">${okSave?'טורניר חדש':'לשולחן'}</button>
+      <div class="pk-online${hashCode?' hi':''}">
+        <h5>אונליין מול חברים</h5>
+        <label class="pk-name"><span>השם שלכם</span><input maxlength="12" autocomplete="nickname" placeholder="למשל: נועם" value="${pkEsc(store.get('pk:name',''))}"></label>
+        <div class="pk-on-row"><button class="bigbtn pk-hostb">פתחו שולחן</button>
+          <span class="pk-join"><input inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="קוד" aria-label="קוד השולחן" value="${hashCode}"><button class="bigbtn ghost pk-joinb">הצטרפו</button></span></div>
+        <p class="pk-on-msg" aria-live="polite">${opts&&opts.msg?pkEsc(opts.msg):'עד 8 שחקנים. מי שפותח שולחן מקבל קוד וקישור לשלוח לחברים.'}</p>
+      </div>
       <details class="sb-rules"><summary>דירוג הידיים (מהחזקה לחלשה)</summary><ul>
         <li><b>רויאל פלאש</b>: A K Q J 10 באותה צורה.</li><li><b>סטרייט פלאש</b>: חמישה קלפים ברצף באותה צורה.</li>
         <li><b>רביעייה</b>: ארבעה קלפים זהים.</li><li><b>פול האוס</b>: שלישייה וזוג.</li><li><b>פלאש</b>: חמישה קלפים באותה צורה.</li>
@@ -3128,7 +3172,14 @@ function pokerPlay(stage,lvl,ctl){
     stage.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{fast=b.dataset.f==='1';store.set('pk:fast',fast);sound('tick');stage.querySelectorAll('[data-f]').forEach(x=>x.setAttribute('aria-pressed',x===b))});
     stage.querySelector('.ps-go').onclick=()=>{sound('tick');store.set('pk:save',null);startMatch(null)};
     const rs=stage.querySelector('.pk-resume');if(rs)rs.onclick=()=>{sound('tick');startMatch(save)};
-    (rs||stage.querySelector('.ps-go')).focus({preventScroll:true});
+    {const box=stage.querySelector('.pk-online'),nm=box.querySelector('.pk-name input'),cd=box.querySelector('.pk-join input'),msg=box.querySelector('.pk-on-msg');
+      nm.oninput=()=>store.set('pk:name',pkCleanName(nm.value));cd.oninput=()=>{cd.value=cd.value.replace(/\D/g,'').slice(0,4)};
+      const need=()=>{const n=pkCleanName(nm.value);if(!n){msg.textContent='כתבו קודם את השם שלכם.';nm.focus();return null}return n};
+      box.querySelector('.pk-hostb').onclick=()=>{const n=need();if(!n)return;sound('tick');startOnline('host',n,'',msg)};
+      const join=()=>{const n=need();if(!n)return;if(!/^\d{4}$/.test(cd.value)){msg.textContent='הקוד הוא 4 ספרות.';cd.focus();return}sound('tick');startOnline('join',n,cd.value,msg)};
+      box.querySelector('.pk-joinb').onclick=join;cd.onkeydown=e=>{if(e.key==='Enter')join()};
+      if(hashCode){(pkCleanName(nm.value)?box.querySelector('.pk-joinb'):nm).focus({preventScroll:true});box.scrollIntoView({block:'center'})}}
+    if(!hashCode)(rs||stage.querySelector('.ps-go')).focus({preventScroll:true});
     const pv=stage.querySelector('.ps-preview');let pctx=null,pw=0,ph=0;
     const size=()=>{pw=pv.clientWidth;ph=pv.clientHeight;if(pw&&ph)pctx=hiDPI(pv,pw,ph)};size();on(window,'resize',size);
     const royal=[12,11,10,9,8].map(r=>13+r);
@@ -3142,12 +3193,14 @@ function pokerPlay(stage,lvl,ctl){
   }
 
   /* ---------- a tournament ---------- */
-  function startMatch(saved){
-    teardown();const tok=T={alive:true};
-    const M=saved?{lvl:saved.lvl||lvl,nOpp:saved.nOpp,hand:saved.hand,dealer:saved.dealer}:{lvl,nOpp,hand:0,dealer:-1};
+  function startMatch(saved,net){
+    teardown();const tok=T={alive:true};const NET=net||null,ME=NET?NET.me:0;
+    const M=NET?{lvl:NET.lvl,nOpp:NET.seats.length-1,hand:0,dealer:-1}:saved?{lvl:saved.lvl||lvl,nOpp:saved.nOpp,hand:saved.hand,dealer:saved.dealer}:{lvl,nOpp,hand:0,dealer:-1};
     const N=M.nOpp+1,lay=()=>{const G=PK_LAY[wide?'wide':'tall'];return Object.assign({},G,G[M.nOpp])};
-    const P=[{name:'אתם',human:true,ini:'',tone:'#111'}].concat(PK_LINEUP[M.nOpp].map(k=>Object.assign({},PK_OPP[k])));
-    P.forEach((p,i)=>{p.stack=saved?Math.max(0,saved.stacks[i]|0):PK_START;p.out=p.stack<=0});
+    const P=NET?NET.seats.map((s,i)=>s.kind==='ai'?Object.assign({},PK_OPP[s.ai],{ai:1}):{name:i===ME?'אתם':pkEsc(s.name),ini:pkEsc(s.name.slice(0,2)),tone:PK_TONES[i%PK_TONES.length],remote:i!==ME,human:i===ME,tight:.03,aggr:1,bluff:.08})
+      :[{name:'אתם',human:true,ini:'',tone:'#111'}].concat(PK_LINEUP[M.nOpp].map(k=>Object.assign({},PK_OPP[k],{ai:1})));
+    const V=i=>(i-ME+N)%N;
+    P.forEach((p,i)=>{p.stack=saved&&!NET?Math.max(0,saved.stacks[i]|0):PK_START;p.out=p.stack<=0});
     const SP=()=>(TEST&&TEST.speed?TEST.speed:(fast?.5:1))*(H&&H.humanOut?.6:1);
     const never=new Promise(()=>{});
     const sleep=ms=>tok.alive?new Promise(res=>{const t=setTimeout(()=>{if(tok.alive)res()},ms*SP());timers.push(t)}):never;
@@ -3211,8 +3264,8 @@ function pokerPlay(stage,lvl,ctl){
       cw=(L.cw||(wide?.064:.145))*W;
       tbl.style.setProperty('--pw',(L.pw||G.pw)*W/100+'px');tbl.style.setProperty('--ph',(L.ph||(wide?.045:.105))*W+'px');
       tbl.style.setProperty('--pf',(L.pf||1)*(wide?Math.max(12,W*.0155):Math.max(11,W*.034))+'px');tbl.style.setProperty('--chip',Math.max(12,cw*.32)+'px');
-      seatEl.forEach((el,i)=>{const [x,y]=L.seat[i];el.style.left=x+'%';el.style.top=y+'%';el.classList.toggle('below',y<20)});
-      betEl.forEach((el,i)=>{const [x,y]=L.bet[i];el.style.left=x+'%';el.style.top=y+'%'});
+      seatEl.forEach((el,i)=>{const [x,y]=L.seat[V(i)];el.style.left=x+'%';el.style.top=y+'%';el.classList.toggle('below',y<20)});
+      betEl.forEach((el,i)=>{const [x,y]=L.bet[V(i)];el.style.left=x+'%';el.style.top=y+'%'});
       {const [x,y,hp]=G.dv,h=hp*Ht/100;dvEl.style.left=x+'%';dvEl.style.top=y+'%';dvEl.style.height=h+'px';dvEl.style.width=h*430/440+'px';dvEl.style.setProperty('--dvf',Math.max(11,h*.11)+'px')}
       labEl.forEach((el,i)=>{const [x,y]=labPos(i);el.style.left=x+'px';el.style.top=y+'px'});
       potBox.style.left=G.pot[0]+'%';potBox.style.top=G.pot[1]+'%';hnEl.style.left=G.hn[0]+'%';hnEl.style.top=G.hn[1]+'%';
@@ -3223,13 +3276,13 @@ function pokerPlay(stage,lvl,ctl){
     function cardBox(pl){
       const L=lay(),G=L;
       if(pl.k==='board'){const w=cw;return {x:W/2+(pl.i-2)*w*1.12,y:G.board*Ht/100,w,r:0}}
-      const [cx,cy]=pct((pl.big&&L.cardsBig?L.cardsBig:L.cards)[pl.s]),me=pl.s===0;
+      const vs=V(pl.s),[cx,cy]=pct((pl.big&&L.cardsBig?L.cardsBig:L.cards)[vs]),me=pl.s===ME;
       const w=me?cw*1.18:cw*(pl.big?(L.big||.98):.72*(L.cs||1)),sp=me?.56:(pl.big?.55:.32);
       return {x:cx+(pl.i?1:-1)*w*sp,y:cy,w,r:(pl.i?1:-1)*(me?4:pl.big?3:8)};
     }
-    function labPos(s){const L=lay(),[cx,cy]=pct((L.cardsBig||L.cards)[s]),[,sy]=pct(L.seat[s]);const w=s===0?cw*1.18:cw*(L.big||.98),h=w*1.4,up=L.labUp?L.labUp[s]:cy<sy-2;return [cx,(up||(s===0&&cy<sy-2))?cy-h/2-Ht*.035:cy+h/2+Ht*.035]}
+    function labPos(s0){const s=V(s0),L=lay(),[cx,cy]=pct((L.cardsBig||L.cards)[s]),[,sy]=pct(L.seat[s]);const w=s===0?cw*1.18:cw*(L.big||.98),h=w*1.4,up=L.labUp?L.labUp[s]:cy<sy-2;return [cx,(up||(s===0&&cy<sy-2))?cy-h/2-Ht*.035:cy+h/2+Ht*.035]}
     function place(el,pl){el._place=pl;const b=cardBox(pl);el.style.left=b.x+'px';el.style.top=b.y+'px';el.style.width=b.w+'px';el.style.setProperty('--r',b.r+'deg');el.style.fontSize=b.w/5+'px';return b}
-    function placeDealer(s,move){if(move&&!dealerEl.hidden)dealerEl.animate([{rotate:'0deg',scale:1},{rotate:'200deg',scale:1.35,offset:.5},{rotate:'360deg',scale:1}],{duration:650});const L=lay(),[x,y]=L.seat[s],G=L;let dx,dy;
+    function placeDealer(s,move){if(move&&!dealerEl.hidden)dealerEl.animate([{rotate:'0deg',scale:1},{rotate:'200deg',scale:1.35,offset:.5},{rotate:'360deg',scale:1}],{duration:650});const L=lay(),[x,y]=L.seat[V(s)],G=L;let dx,dy;
       if(y>30&&y<70){dx=x;dy=y+(wide?11:8)}else if(y<20){dx=x+(x>60?-1:1)*(L.pw||G.pw)*.42;dy=y+(wide?10:7)}else{dx=x-G.pw/2-(wide?2.4:5);dy=y};
       dealerEl.hidden=false;dealerEl.style.left=dx+'%';dealerEl.style.top=dy+'%'}
     const dealerXY=()=>{const r=dealerEl.getBoundingClientRect(),t=tbl.getBoundingClientRect();return [r.left-t.left+r.width/2,r.top-t.top+r.height/2]};
@@ -3314,9 +3367,12 @@ function pokerPlay(stage,lvl,ctl){
 
     /* ---------- cards ---------- */
     function cardEl(c){
-      const el=document.createElement('div'),red=PK.suit(c)===1||PK.suit(c)===2;el.className='pk-card';
-      el.innerHTML=`<div class="pk-lift"><div class="pk-in"><div class="pk-f${red?' red':''}" dir="ltr"><b>${PK.RN[PK.rank(c)]}</b><i>${PK.SU[PK.suit(c)]}</i><em>${PK.SU[PK.suit(c)]}</em></div><div class="pk-bk"></div></div></div>`;
-      el._c=c;return el;
+      const el=document.createElement('div');el.className='pk-card';
+      el.innerHTML=`<div class="pk-lift"><div class="pk-in"><div class="pk-f" dir="ltr"></div><div class="pk-bk"></div></div></div>`;
+      setFace(el,c);return el;
+    }
+    function setFace(el,c){el._c=c;const f=el.querySelector('.pk-f');if(!(c>=0)){f.className='pk-f';f.innerHTML='';return}
+      f.className='pk-f'+(PK.suit(c)===1||PK.suit(c)===2?' red':'');f.innerHTML=`<b>${PK.RN[PK.rank(c)]}</b><i>${PK.SU[PK.suit(c)]}</i><em>${PK.SU[PK.suit(c)]}</em>`;
     }
     async function dealTo(c,pl,from,ms){
       const el=cardEl(c),b=place(el,pl);tbl.insertBefore(el,fxCv);
@@ -3345,13 +3401,13 @@ function pokerPlay(stage,lvl,ctl){
     function hud(){const [sb,bb]=PK_BL[blIndex()];$$('.pk-bl').textContent=`${money(sb)}/${money(bb)}`;$$('.pk-hno').textContent=M.hand;
       const left=PK_EVERY-((M.hand-1)%PK_EVERY);$$('.pk-up').textContent=blIndex()<PK_BL.length-1?`עולים בעוד ${left} ${left===1?'יד':'ידיים'}`:''}
     const blIndex=()=>Math.min(PK_BL.length-1,Math.floor(Math.max(0,M.hand-1)/PK_EVERY));
-    function save(mid){if(ended)return;store.set('pk:save',{lvl:M.lvl,nOpp:M.nOpp,hand:mid?M.hand-1:M.hand,dealer:mid?prevDealer:M.dealer,stacks:P.map(p=>p.stack)})}
+    function save(mid){if(ended||NET)return;store.set('pk:save',{lvl:M.lvl,nOpp:M.nOpp,hand:mid?M.hand-1:M.hand,dealer:mid?prevDealer:M.dealer,stacks:P.map(p=>p.stack)})}
     let prevDealer=M.dealer;
 
     async function bet(i,amt){
       if(amt<=0)return;const s=H.st[i],p=P[i];amt=Math.min(amt,p.stack);
       p.stack-=amt;s.bet+=amt;s.contrib+=amt;showStacks();
-      await flyChips(elXY(seatEl[i]),pct(lay().bet[i]),amt,Math.min(5,1+Math.floor(amt/(H.bb*2))));
+      await flyChips(elXY(seatEl[i]),pct(lay().bet[V(i)]),amt,Math.min(5,1+Math.floor(amt/(H.bb*2))));
       showBet(i);if(p.stack===0)s.allin=true;
     }
     async function allinFx(i){seatEl[i].classList.add('allin');tbl.classList.add('hot');dvAnim('jump');dvEyes(2200);dvSay('אוווו!',1300);pkSfx('boom');shake(1.2);const [x,y]=elXY(seatEl[i]);spark(x,y,50,{v:6,life:900,cols:['#ff8a1a','#ffd23a','#c3202a']});await slam('אול אין!',P[i].name,'fire',1400)}
@@ -3400,12 +3456,12 @@ function pokerPlay(stage,lvl,ctl){
         setV(k==='min'?minTo:k==='all'?maxTo:H.curBet+(pt+toCall)*(k==='half'?.5:1))});
       const hn=H.board.length>=3?PK.handName(PK.evalHand(s.hole.concat(H.board))):(PK.rank(s.hole[0])===PK.rank(s.hole[1])?`זוג ${PK.RN[PK.rank(s.hole[0])]} ביד`:`${PK.RN[Math.max(PK.rank(s.hole[0]),PK.rank(s.hole[1]))]}-${PK.RN[Math.min(PK.rank(s.hole[0]),PK.rank(s.hole[1]))]}${PK.suit(s.hole[0])===PK.suit(s.hole[1])?' באותה צורה':''}`);
       setMsg(`תורכם. ${toCall?`צריך ${money(toCall)} כדי להמשיך.`:'אפשר צ׳ק.'} יש לכם: ${hn}.`);
-      acts.hidden=false;pkSfx('chip');
+      acts.hidden=false;pkSfx('chip');acts.classList.remove('timed');if(NET&&NET.role==='client'){void acts.offsetWidth;acts.classList.add('timed')}
       return new Promise(res=>{humanResolve=d=>{humanResolve=null;acts.hidden=true;seatEl[i].classList.remove('turn');res(d)};
         (canR?bRaise:bCall).focus({preventScroll:true})});
     }
     bFold.onclick=()=>{if(humanResolve){sound('tick');humanResolve({a:'fold'})}};
-    bCall.onclick=()=>{if(humanResolve){sound('tick');const s=H.st[0];humanResolve(H.curBet>s.bet?{a:'call'}:{a:'check'})}};
+    bCall.onclick=()=>{if(humanResolve){sound('tick');const s=H.st[ME];humanResolve(H.curBet>s.bet?{a:'call'}:{a:'check'})}};
     bRaise.onclick=()=>{if(humanResolve){sound('tick');humanResolve({a:'raise',to:+bRaise.dataset.v})}};
     on(document,'keydown',e=>{if(!humanResolve||!stage.contains(acts)||e.ctrlKey||e.metaKey||e.altKey)return;
       const k=(e.key||'').toLowerCase();
@@ -3429,7 +3485,7 @@ function pokerPlay(stage,lvl,ctl){
         if(fr.length===1&&H.st[fr[0]].bet>=H.curBet&&live().length>1&&(H.st[fr[0]].acted||live().every(j=>j===fr[0]||H.st[j].allin)))break;
         const need=j=>!H.st[j].folded&&!H.st[j].allin&&(!H.st[j].acted||H.st[j].bet<H.curBet);
         const j=need(i)?i:nextIn(i,need);if(j<0)break;
-        const d=P[j].human?await humanTurn(j):await aiTurn(j);
+        const d=await getAction(j);
         await apply(j,d);i=nextIn(j);
       }
     }
@@ -3438,15 +3494,16 @@ function pokerPlay(stage,lvl,ctl){
       const bets=H.order.map(j=>H.st[j].bet),mx=Math.max(0,...bets),who=H.order.filter(j=>H.st[j].bet===mx);
       if(mx>0&&who.length===1){const j=who[0],second=Math.max(0,...H.order.filter(k=>k!==j).map(k=>H.st[k].bet)),diff=mx-second;
         if(diff>0){const s=H.st[j];s.bet-=diff;s.contrib-=diff;P[j].stack+=diff;if(P[j].stack>0){s.allin=false;seatEl[j].classList.remove('allin')}
-          await flyChips(pct(lay().bet[j]),elXY(seatEl[j]),diff,2);showBet(j);showStacks()}}
+          await flyChips(pct(lay().bet[V(j)]),elXY(seatEl[j]),diff,2);showBet(j);showStacks()}}
       const has=H.order.filter(j=>H.st[j].bet>0);
       if(has.length){const potXY=pct(lay().pot);let last=null;
-        has.forEach(j=>{const from=pct(lay().bet[j]),amt=H.st[j].bet;H.pot+=amt;H.st[j].bet=0;betEl[j].hidden=true;last=flyChips(from,potXY,amt,3)});
+        has.forEach(j=>{const from=pct(lay().bet[V(j)]),amt=H.st[j].bet;H.pot+=amt;H.st[j].bet=0;betEl[j].hidden=true;last=flyChips(from,potXY,amt,3)});
         await last;showPot();potBox.animate([{transform:'translate(-50%,-50%) scale(1.25)'},{transform:'translate(-50%,-50%) scale(1)'}],{duration:260})}
       H.order.forEach(j=>{const s=H.st[j];s.acted=false;s.locked=false});H.curBet=0;H.lastRaise=H.bb;
     }
     async function revealAll(slow){
-      for(const j of live()){const s=H.st[j];if(j!==0){if(s.els.some(el=>!el.classList.contains('up'))){s.els.forEach((el,k)=>{el._place.big=true;place(el,el._place)});await sleep(160)}}
+      await syncReveal();
+      for(const j of live()){const s=H.st[j];if(j!==ME){if(s.els.some(el=>!el.classList.contains('up'))){s.els.forEach((el,k)=>{el._place.big=true;place(el,el._place)});await sleep(160)}}
         const fresh=s.els.some(el=>!el.classList.contains('up'));s.els.forEach(el=>flip(el,slow));
         if(fresh&&s.els[0]){const r=cardBox(s.els[0]._place);spark(r.x+r.w*.5,r.y,18,{v:2.6,life:520,r:1.8,cols:['#fff','#f3e03b']})}
         await sleep(fresh?(slow?460:300):60)}
@@ -3458,7 +3515,7 @@ function pokerPlay(stage,lvl,ctl){
     }
     async function dealBoard(n,dramatic){
       const from=devilHand(),start=H.board.length;dvSay(n===3?'פלופ!':start===3?'טרן!':dramatic?'ריבר...':'ריבר!',1100);if(dramatic)dvEyes(2600);
-      const cs=[];for(let k=0;k<n;k++)cs.push(H.deck[H.di++]);
+      const cs=[];if(NET&&NET.role==='client')cs.push(...(await NET.take('board')).cards);else{for(let k=0;k<n;k++)cs.push(H.deck[H.di++]);if(NET)NET.bcast({t:'board',cards:cs})}
       if(n===3){const made=[];for(let k=0;k<3;k++){dvAnim('flick');const r=await dealTo(cs[k],{k:'board',i:start},from,300);made.push(r);await sleep(70)}
         await done(made[2].a);made.forEach(r=>flip(r.el));await sleep(380);made.forEach((r,k)=>place(r.el,{k:'board',i:start+k}));await sleep(320);made.forEach(r=>H.boardEls.push(r.el))}
       else{dvAnim('flick');const r=await dealTo(cs[0],{k:'board',i:start},from,360);await done(r.a);
@@ -3468,12 +3525,13 @@ function pokerPlay(stage,lvl,ctl){
     }
 
     async function playHand(){
+      let HM=null;if(NET&&NET.role==='client'){HM=await NET.take('hand');M.hand=HM.n-1;if(!tok.alive)return}
       M.hand++;const blPrev=Math.min(PK_BL.length-1,Math.floor(Math.max(0,M.hand-2)/PK_EVERY));
       const [sb,bb]=PK_BL[blIndex()];hud();
       clearSay();hnEl.textContent='';hnEl.className='pk-hn';labEl.forEach(el=>{el.hidden=true;el.className='pk-lab'});
       seatEl.forEach(el=>el.classList.remove('fold','allin','win','turn','think','lose'));tbl.classList.remove('hot');
       await clearCards();
-      prevDealer=M.dealer;M.dealer=M.dealer<0?(()=>{const al=P.map((p,i)=>i).filter(i=>!P[i].out);return al[PK.randInt(al.length)]})():nextAlive(M.dealer);
+      prevDealer=M.dealer;M.dealer=HM?HM.dealer:M.dealer<0?(()=>{const al=P.map((p,i)=>i).filter(i=>!P[i].out);return al[PK.randInt(al.length)]})():nextAlive(M.dealer);
       const order=P.map((p,i)=>i).filter(i=>!P[i].out);
       H={order,st:{},deck:PK.deck(),di:0,board:[],boardEls:[],pot:0,curBet:0,lastRaise:bb,bb,sb,dealer:M.dealer,aggr:-1,humanOut:false};
       order.forEach(i=>{H.st[i]={hole:[],els:[],bet:0,contrib:0,folded:false,allin:false,acted:false,locked:false}});H.start={};order.forEach(i=>{H.start[i]=P[i].stack});
@@ -3481,6 +3539,10 @@ function pokerPlay(stage,lvl,ctl){
         const holes={};order.forEach(i=>{holes[i]=(r.hole&&r.hole[i])||[rest.pop(),rest.pop()]});const b=(r.board||[]).slice();while(b.length<5)b.push(rest.pop());
         const first=nextIn(M.dealer),seq=[];for(let k=0;k<order.length;k++){const s=order[(order.indexOf(first)+k)%order.length];seq[k]=s}
         H.deck=[].concat(seq.map(s=>holes[s][0]),seq.map(s=>holes[s][1]),b,rest)}
+      if(NET){const first=nextIn(M.dealer),seq=order.map((_,k)=>order[(order.indexOf(first)+k)%order.length]);
+        if(HM)H.deck=seq.map(s=>s===ME?HM.hole[0]:-1).concat(seq.map(s=>s===ME?HM.hole[1]:-1));
+        else seq.forEach((s,k)=>{if(s!==ME&&!P[s].ai)NET.sendTo(s,{t:'hand',n:M.hand,dealer:M.dealer,hole:[H.deck[k],H.deck[seq.length+k]]})});
+        if(NET.role==='host')P.forEach((p,s)=>{if(s!==ME&&!p.ai&&!order.includes(s))NET.sendTo(s,{t:'hand',n:M.hand,dealer:M.dealer,hole:null})})}
       showStacks();showPot();placeDealer(M.dealer,true);save(true);
       if(M.hand>1&&blIndex()>blPrev){pkSfx('rise');dvLaugh('חה! עכשיו זה נהיה חם');await slam('הבליינדים עולים!',`${money(sb)} / ${money(bb)}`,'gold',1500)}
       // blinds
@@ -3500,7 +3562,7 @@ function pokerPlay(stage,lvl,ctl){
       for(let r=0;r<2;r++)for(let k=0;k<order.length;k++){const s=order[(order.indexOf(first)+k)%order.length],c=H.deck[H.di++];H.st[s].hole.push(c);
         dvAnim('flick');const d=await dealTo(c,{k:'hole',s,i:r},from,300);H.st[s].els.push(d.el);last=d;await sleep(110)}
       await done(last.a);pile.remove();
-      H.st[0]&&H.st[0].els.forEach(el=>flip(el));
+      H.st[ME]&&H.st[ME].els.forEach(el=>flip(el));
       await sleep(350);
       // streets
       const streets=[[0,heads?sbS:nextIn(bbS)],[3],[1],[1]];
@@ -3553,7 +3615,7 @@ function pokerPlay(stage,lvl,ctl){
         const label=ws.length>1?`חלוקה · ${PK.handName(h)}`:`${names} ${P[ws[0]].human?'זוכים':'זוכה'} · ${PK.handName(h)}`;
         hnEl.textContent=(res.detail.length>1?(q===0?'קופה ראשית · ':'קופה צדדית · '):'')+label;hnEl.className='pk-hn on'+(h.cat>=4?' big':'');
         hnEl.animate([{transform:'translate(-50%,-50%) scale(.3)',opacity:0},{transform:'translate(-50%,-50%) scale(1.15)',opacity:1,offset:.6},{transform:'translate(-50%,-50%) scale(1)'}],{duration:420});
-        const humanWins=ws.includes(0);
+        const humanWins=ws.includes(ME);
         await celebrate(h,humanWins,dq.amount,ws);
         let last=null;ws.forEach((j,k)=>{const a=elXY(potBox),b=elXY(seatEl[j]);comet(a,b);last=flyChips(a,b,dq.share[k],8)});
         const tR=setTimeout(()=>{if(tok.alive)ws.forEach(j=>ring(...elXY(seatEl[j])))},460*SP());timers.push(tR);
@@ -3568,8 +3630,8 @@ function pokerPlay(stage,lvl,ctl){
     /* "יצאת טברון": someone lost a lot in this hand. The devil grows huge and laughs */
     async function tavron(){
       // only for you: you put all your chips in and lost
-      const me=H.st[0];if(!me||!(H.start[0]>0))return;
-      const wentAllIn=me.contrib>=H.start[0],loss=H.start[0]-P[0].stack;
+      const me=H.st[ME];if(!me||!(H.start[ME]>0))return;
+      const wentAllIn=me.contrib>=H.start[ME],loss=H.start[ME]-P[ME].stack;
       if(!wentAllIn||loss<=0)return;
       const sub=`הפסדתם ${money(loss)} אסימונים`;
       setMsg(`יצאת טברון! ${sub}.`);
@@ -3590,19 +3652,79 @@ function pokerPlay(stage,lvl,ctl){
     async function celebrate(h,humanWins,amount,ws){
       const total=P.reduce((a,p)=>a+p.stack,0)+H.pot,big=amount>=total*.35;
       if(humanWins){
-        const [x,y]=elXY(seatEl[0]);spark(x,y,40,{v:5});pkSfx('chips');
+        const [x,y]=elXY(seatEl[ME]);spark(x,y,40,{v:5});pkSfx('chips');
         if(PK.isRoyal(h)||h.cat>=7){pkSfx('fanfare');sweep();shake(1.6);confetti(220);logos(14);for(let k=0;k<6;k++)setTimeout(()=>{if(tok.alive)firework(W*(.15+Math.random()*.7),Ht*(.15+Math.random()*.4))},k*260*SP());
           dvAnim('jump');dvEyes(2600);dvSay('לא יאמן!',2200);await slam(PK.isRoyal(h)?'רויאל פלאש!':PK.handName(h)+'!','מחנאות מעל שפיות!','mega',2600)}
         else if(h.cat>=4||big){pkSfx('fanfare');sweep();confetti(h.cat>=6?160:100);if(h.cat>=6)logos(8);firework(W*.3,Ht*.3);firework(W*.7,Ht*.3);
           await slam(h.cat>=4?PK.handName(h)+'!':'קופה ענקית!',`+${money(amount)}`,'gold',1800)}
         else await sleep(200);
-      }else if(H.st[0]&&!H.st[0].folded&&live().includes(0)){
+      }else if(H.st[ME]&&!H.st[ME].folded&&live().includes(ME)){
         await sleep(200);
       }else if(h.cat>=6){spark(...elXY(seatEl[ws[0]]),30,{v:4});await sleep(300)}
       else await sleep(150);
     }
 
+    /* ---------- online: whose decision is it ---------- */
+    async function getAction(j){
+      if(!NET)return j===ME?humanTurn(j):aiTurn(j);
+      if(NET.role==='host'){
+        const d=j===ME?await humanTurn(j):P[j].ai?await aiTurn(j):await remoteTurn(j);
+        NET.bcast({t:'act',seat:j,d});return d;
+      }
+      // a client: my own choice goes to the host; everything else comes from the host
+      const srv=NET.take('act');let m;
+      if(j===ME){const mine=humanTurn(j);const r=await Promise.race([mine.then(d=>({d})),srv.then(x=>({x}))]);
+        if(r.x){if(humanResolve)humanResolve(null);m=r.x}else{NET.send({t:'act',d:r.d});m=await srv}}
+      else{seatEl[j].classList.add('turn','think');m=await srv;seatEl[j].classList.remove('turn','think')}
+      if(m.seat!==j)throw new Error('poker sync: expected seat '+j+' got '+m.seat);
+      return m.d;
+    }
+    /* the host waits for a friend's move (45 seconds, then check or fold) */
+    async function remoteTurn(j){
+      seatEl[j].classList.add('turn','think');
+      const toCall=Math.max(0,H.curBet-H.st[j].bet);
+      let d=await NET.actFrom(j,45000);
+      seatEl[j].classList.remove('turn','think');
+      if(d==='bot'){d=await aiTurn(j)}
+      else if(!d||typeof d!=='object'||!['fold','check','call','raise'].includes(d.a)){d=toCall?{a:'fold'}:{a:'check'};say(j,'נגמר הזמן','f')}
+      return {a:d.a,to:d.a==='raise'?Math.round(+d.to||0):undefined};
+    }
+    /* everybody learns the hidden cards at the same moment (showdown / all-in) */
+    async function syncReveal(){
+      if(!NET||H.revealed)return;H.revealed=true;
+      if(NET.role==='host'){const holes={};live().forEach(j=>{holes[j]=H.st[j].hole});NET.bcast({t:'reveal',holes})}
+      else{const m=await NET.take('reveal');for(const j of Object.keys(m.holes)){const s=H.st[j];if(!s)continue;s.hole=m.holes[j].slice();s.els.forEach((el,k)=>setFace(el,s.hole[k]))}}
+    }
+    if(NET){
+      const base=p=>p.name.replace(/ \((בוט|לא מגיב)\)$/,'');
+      NET.onDrop=seat=>{const p=P[seat];if(!p||p.dropped||seat===ME)return;p.dropped=1;p.ai=1;p.remote=false;p.name=base(p)+' (בוט)';seatEl[seat].querySelector('.pk-tx>b').textContent=p.name;setMsg(`${base(p)} התנתק. המחשב ממשיך במקומו.`)};
+      NET.onAway=(seat,on)=>{const p=P[seat];if(!p||p.dropped)return;if(seat===ME){setMsg(on?'החיבור שלכם נחלש. המחשב משחק במקומכם עד שתחזרו.':'חזרתם! התור הבא שלכם.');return}
+        p.ai=on?1:0;p.name=base(p)+(on?' (לא מגיב)':'');seatEl[seat].querySelector('.pk-tx>b').textContent=p.name;seatEl[seat].classList.toggle('away',on);if(on)setMsg(`${base(p)} לא מגיב. המחשב משחק במקומו בינתיים.`)};
+      NET.onHostGone=()=>{if(!tok.alive||ended)return;ended=true;over.innerHTML=`<div class="ps-card" role="dialog"><div class="ps-k">אונליין</div><h4>המארח עזב את השולחן</h4><p>המשחק נגמר.</p><div class="row"><button class="bigbtn" data-a="menu">מסך הפתיחה</button></div></div>`;over.hidden=false;requestAnimationFrame(()=>over.classList.add('in'))};
+    }
+    async function afterHandNet(){
+      for(let i=0;i<N;i++)if(!P[i].out&&P[i].stack<=0){P[i].out=true;showStacks();const st=seatEl[i].querySelector('.pk-stamp');
+        pkSfx('boom');st.animate([{transform:'translate(-50%,-50%) scale(3) rotate(-25deg)',opacity:0},{transform:'translate(-50%,-50%) scale(.9) rotate(-12deg)',opacity:1,offset:.6},{transform:'translate(-50%,-50%) scale(1) rotate(-12deg)',opacity:1}],{duration:500});
+        if(i===ME){setMsg('הודחתם מהטורניר. אפשר להמשיך לצפות בשולחן.');await slam('הודחתם','ממשיכים לצפות','cold',1600)}
+        else{setMsg(`${P[i].name} ${pkV(P[i],'הודח','הודחה','')} מהטורניר!`);await sleep(1100)}}
+      const alive=P.map((p,i)=>i).filter(i=>!P[i].out);
+      if(alive.length<=1){endNet(alive[0]);return true}
+      if(NET.role==='host'){nextB.hidden=false;nextB.focus({preventScroll:true});
+        await new Promise(res=>{let t=null;const go=()=>{clearTimeout(t);nextB.hidden=true;nextB.onclick=null;res()};nextB.onclick=()=>{sound('tick');go()};t=setTimeout(()=>{if(tok.alive)go()},5000);timers.push(t)})}
+      return false;
+    }
+    function endNet(w){
+      ended=true;const me=w===ME,p=P[w];
+      if(me){pkSfx('fanfare');confetti(260);logos(18);shake(1.5);for(let k2=0;k2<9;k2++)setTimeout(()=>{if(tok.alive)firework(W*(.1+Math.random()*.8),Ht*(.1+Math.random()*.5))},k2*300)}else pkSfx('sad');
+      setTimeout(()=>{if(!tok.alive)return;
+        over.innerHTML=`<div class="ps-card" role="dialog" aria-label="סוף הטורניר"><div class="ps-k">טורניר אונליין · ${M.hand} ידיים</div>
+          <h4>${me?'ניצחתם את כולם!':(p?p.name:'')+' לקח את הטורניר'}</h4><div class="ps-num">🏆</div>
+          <p>${p?p.name:''} ${me?'':'ניצח '}עם כל ${money(PK_START*N)} האסימונים.</p>
+          <div class="row">${NET.role==='host'?'<button class="bigbtn" data-a="lobby">עוד טורניר עם אותם חברים</button>':''}<button class="bigbtn ghost" data-a="menu">מסך הפתיחה</button></div></div>`;
+        over.hidden=false;requestAnimationFrame(()=>over.classList.add('in'))},me?1800:900);
+    }
     async function afterHand(){
+      if(NET)return afterHandNet();
       // eliminations
       for(let i=1;i<N;i++)if(!P[i].out&&P[i].stack<=0){P[i].out=true;showStacks();const st=seatEl[i].querySelector('.pk-stamp');
         pkSfx('boom');st.animate([{transform:'translate(-50%,-50%) scale(3) rotate(-25deg)',opacity:0},{transform:'translate(-50%,-50%) scale(.9) rotate(-12deg)',opacity:1,offset:.6},{transform:'translate(-50%,-50%) scale(1) rotate(-12deg)',opacity:1}],{duration:500});
@@ -3631,23 +3753,178 @@ function pokerPlay(stage,lvl,ctl){
         over.hidden=false;requestAnimationFrame(()=>over.classList.add('in'));over.querySelector('.bigbtn').focus({preventScroll:true})},won?1800:900);
       return true;
     }
-    on(over,'click',e=>{const b=e.target.closest('[data-a]');if(!b)return;sound('tick');if(b.dataset.a==='new')startMatch(null);else showStart()});
+    on(over,'click',e=>{const b=e.target.closest('[data-a]');if(!b)return;sound('tick');if(b.dataset.a==='new')startMatch(null);else if(b.dataset.a==='lobby'&&NET&&NET.toLobby)NET.toLobby();else{if(NET)netClose();showStart()}});
 
     async function run(){
       try{
         while(tok.alive){await playHand();if(!tok.alive)return;if(await afterHand())return}
-      }catch(e){setTimeout(()=>{throw e})}
+      }catch(e){if(NET)setMsg('שגיאת סנכרון. נסו להתחיל טורניר חדש.');setTimeout(()=>{throw e})}
     }
     const ro=window.ResizeObserver?new ResizeObserver(()=>layout()):null;if(ro){ro.observe(tbl);offs.push(()=>ro.disconnect())}else on(window,'resize',layout);
     if(TEST)window.__pk={get:()=>({hand:M.hand,stacks:P.map(p=>p.stack),out:P.map(p=>p.out),pot:H?H.pot:0,bets:H?H.order.map(j=>H.st[j].bet):[],contrib:H?H.order.map(j=>H.st[j].contrib):[],board:H?H.board.slice():[],waiting:!!humanResolve,ended,
-      toCall:H&&H.st[0]?Math.max(0,H.curBet-H.st[0].bet):0,canRaise:!bRaise.hidden&&!acts.hidden,next:!nextB.hidden,total:P.reduce((a,p)=>a+p.stack,0)+(H?H.pot+H.order.reduce((a,j)=>a+H.st[j].bet,0):0)})};
+      toCall:H&&H.st[ME]?Math.max(0,H.curBet-H.st[ME].bet):0,me:ME,revealed:!!(H&&H.revealed),canRaise:!bRaise.hidden&&!acts.hidden,next:!nextB.hidden,total:P.reduce((a,p)=>a+p.stack,0)+(H?H.pot+H.order.reduce((a,j)=>a+H.st[j].bet,0):0)})};
     tbl.classList.toggle('many',M.nOpp>=4);
     layout();showStacks();hud();raf=requestAnimationFrame(fxFrame);
     run();
   }
 
+
+  /* ---------- online play: PeerJS (WebRTC). The host's browser runs the table; friends get only their own cards ---------- */
+  let curNet=null;
+  function netClose(){if(curNet){const n=curNet;curNet=null;try{n.close()}catch(e){}}}
+  const PEER_SRC=['https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js','https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'];
+  function loadPeer(){
+    if(window.Peer)return Promise.resolve();
+    return PEER_SRC.reduce((p,src)=>p.catch(()=>new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.async=true;s.onload=()=>window.Peer?res():rej(new Error('peer'));s.onerror=()=>rej(new Error('peer'));document.head.appendChild(s)})),Promise.reject(new Error('start')));
+  }
+  const PID=c=>'nachanasi-poker-'+c;
+  const errText=e=>{const t=e&&(e.type||e.message)||'';return t==='peer-unavailable'?'לא נמצא שולחן עם הקוד הזה. בדקו את הקוד, ושהמארח עדיין בדף.':t==='network'||t==='server-error'||t==='socket-error'?'אין חיבור לשרת. בדקו את האינטרנט ונסו שוב.':t==='timeout'?'החיבור לא הצליח. נסו שוב, או התחברו לרשת אחרת.':t==='peer'?'לא הצלחנו לטעון את רכיב האונליין. בדקו את האינטרנט.':'משהו השתבש בחיבור. נסו שוב.'};
+  const withTimeout=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
+
+  async function netHost(name,onLobby){
+    await loadPeer();
+    let peer=null,code='';
+    for(let k=0;k<5&&!peer;k++){
+      code=String(1000+PK.randInt(9000));const p=new Peer(PID(code),{debug:0});
+      const r=await withTimeout(new Promise(res=>{p.on('open',()=>res('ok'));p.on('error',e=>res(e&&e.type||'error'))}),15000).catch(()=>'timeout');
+      if(r==='ok')peer=p;else{try{p.destroy()}catch(e){}if(r!=='unavailable-id')throw {type:r}}
+    }
+    if(!peer)throw {type:'error'};
+    const N={role:'host',me:0,code,peer,players:[{name,conn:null,open:true,seat:0}],started:false,bots:0,k:0,actQ:{},waiters:{},onDrop:null,onLobby,
+      close(){N.closed=true;N.players.forEach(p=>{if(p.conn){try{p.conn.send({t:'bye'})}catch(e){}setTimeout(()=>{try{p.conn.close()}catch(e){}},150)}});setTimeout(()=>{try{peer.destroy()}catch(e){}},250)},
+      bcast(m){if(m.t==='act')N.k++;N.players.forEach(p=>{if(p.conn&&p.open&&p.seat!=null)try{p.conn.send(m)}catch(e){}})},
+      sendTo(seat,m){const p=N.players.find(x=>x.seat===seat);if(p&&p.conn&&p.open)try{p.conn.send(m)}catch(e){}},
+      actFrom(seat,ms){
+        const pl=N.players.find(x=>x.seat===seat);if(!pl||!pl.open||pl.away)return Promise.resolve('bot');
+        const q=(N.actQ[seat]||[]).filter(m=>m.k===N.k);N.actQ[seat]=[];if(q.length)return Promise.resolve(q[0].d);
+        return new Promise(res=>{const t=setTimeout(()=>{delete N.waiters[seat];res(null)},ms);N.waiters[seat]=v=>{clearTimeout(t);delete N.waiters[seat];res(v)}});
+      },
+      pushLobby(){const m={t:'lobby',code,players:N.players.map(p=>p.name),bots:N.bots};N.players.forEach(p=>{if(p.conn&&p.open)try{p.conn.send(m)}catch(e){}});if(N.onLobby)N.onLobby()},
+      begin(bots,lv){
+        N.started=true;N.k=0;N.actQ={};N.waiters={};
+        const seats=[];N.players=N.players.filter(p=>p.open);N.players.forEach(p=>{p.seat=seats.length;seats.push({name:p.name,kind:'h'})});
+        PK_LINEUP[7].slice(0,Math.max(0,Math.min(bots,8-seats.length))).forEach(a=>seats.push({kind:'ai',ai:a}));
+        N.seats=seats;N.lvl=lv;
+        N.players.forEach(p=>{if(p.conn&&p.open)try{p.conn.send({t:'start',seats,lvl:lv,you:p.seat})}catch(e){}});
+      },
+      toLobby(){N.started=false;N.players=N.players.filter(p=>p.open);N.players.forEach(p=>{p.seat=null});N.players[0].seat=0;N.actQ={};N.waiters={};showHostLobby(N);N.pushLobby()}
+    };
+    const hb=setInterval(()=>{if(N.closed){clearInterval(hb);return}const now=Date.now();
+      N.players.forEach(p=>{if(!p.conn||!p.open)return;try{p.conn.send({t:'ping'})}catch(e){}
+        if(!p.away&&now-p.seen>15000){p.away=true;if(!N.started){p.open=false;N.players=N.players.filter(x=>x!==p);N.pushLobby();try{p.conn.close()}catch(e){}return}
+          if(p.seat!=null){const w=N.waiters[p.seat];if(w)w('bot');N.bcast({t:'away',seat:p.seat,on:true});if(N.onAway)N.onAway(p.seat,true)}}})},2500);
+    peer.on('connection',conn=>{
+      const pl={name:'',conn,open:false,seat:null,seen:Date.now(),away:false};
+      conn.on('data',m=>{
+        if(!m||typeof m!=='object')return;
+        pl.seen=Date.now();if(pl.away&&pl.open&&N.started&&pl.seat!=null){pl.away=false;N.bcast({t:'away',seat:pl.seat,on:false});if(N.onAway)N.onAway(pl.seat,false)}
+        if(m.t==='pong')return;
+        if(m.t==='hello'&&!pl.open){
+          const deny=why=>{try{conn.send({t:'deny',why})}catch(e){}setTimeout(()=>{try{conn.close()}catch(e){}},400)};
+          if(m.v!==PK_PROTO)return deny('version');if(N.started)return deny('started');if(N.players.length>=8)return deny('full');
+          pl.name=pkCleanName(m.name)||'שחקן';pl.open=true;N.players.push(pl);N.pushLobby();return}
+        if(m.t==='act'&&pl.open&&pl.seat!=null&&N.started){
+          const w=N.waiters[pl.seat];if(w&&m.k===N.k)w(m.d);else(N.actQ[pl.seat]||(N.actQ[pl.seat]=[])).push(m)}
+      });
+      conn.on('close',()=>{if(N.closed||!pl.open)return;pl.open=false;
+        if(!N.started){N.players=N.players.filter(p=>p!==pl);N.pushLobby()}
+        else if(pl.seat!=null){const w=N.waiters[pl.seat];if(w)w('bot');N.bcast({t:'drop',seat:pl.seat});if(N.onDrop)N.onDrop(pl.seat)}});
+      conn.on('error',()=>{});
+    });
+    peer.on('disconnected',()=>{if(!N.closed)try{peer.reconnect()}catch(e){}});
+    peer.on('error',()=>{});
+    return N;
+  }
+
+  async function netJoin(code,name,h){
+    await loadPeer();
+    const peer=new Peer({debug:0});
+    await withTimeout(new Promise((res,rej)=>{peer.on('open',res);peer.on('error',rej)}),15000);
+    const conn=peer.connect(PID(code),{reliable:true,serialization:'json'});
+    await withTimeout(new Promise((res,rej)=>{conn.on('open',res);peer.on('error',rej)}),15000);
+    const N={role:'client',peer,conn,code,q:[],waiter:null,k:0,me:-1,
+      send(m){if(m.t==='act')m.k=N.k;try{conn.send(m)}catch(e){}},
+      take(type){return new Promise((res,rej)=>{N.waiter={type,res,rej};N.pump()})},
+      pump(){if(!N.waiter||!N.q.length)return;const m=N.q.shift(),w=N.waiter;N.waiter=null;
+        if(m.t!==w.type){w.rej(new Error('poker sync: expected '+w.type+' got '+m.t));return}if(m.t==='act')N.k++;w.res(m)},
+      close(){N.closed=true;try{conn.close()}catch(e){}setTimeout(()=>{try{peer.destroy()}catch(e){}},150)}};
+    conn.on('data',m=>{if(!m||typeof m!=='object')return;
+      N.seen=Date.now();if(m.t==='ping'){try{conn.send({t:'pong'})}catch(e){}return}
+      if(m.t==='hand'||m.t==='act'||m.t==='board'||m.t==='reveal'){N.q.push(m);N.pump();return}
+      h(m)});
+    conn.on('close',()=>{if(!N.closed)h({t:'bye'})});
+    peer.on('disconnected',()=>{if(!N.closed)try{peer.reconnect()}catch(e){}});
+    conn.send({t:'hello',name,v:PK_PROTO});
+    return N;
+  }
+
+  /* ---------- online screens ---------- */
+  const shareLink=c=>location.origin+location.pathname+'#poker-'+c;
+  function showHostLobby(N){
+    teardown();let lv=N.lvl||lvl;
+    stage.innerHTML=`<div class="ps ps-start panel pk-start pk-lobby">
+      <h4 class="ps-title">השולחן שלכם</h4>
+      <div class="pk-code"><small>קוד השולחן</small><b dir="ltr">${N.code}</b></div>
+      <div class="pk-share"><button class="ps-ib pk-copy">העתיקו קישור</button><a class="ps-ib pk-wa" target="_blank" rel="noopener">שלחו בוואטסאפ</a></div>
+      <p class="ps-lvd">שלחו לחברים את הקישור או את הקוד. מי שמצטרף מופיע כאן.</p>
+      <ul class="pk-plist" aria-live="polite"></ul>
+      <div class="sb-opts">
+        <div class="sb-tg"><b>בוטים</b><div class="seg pk-bots" role="group" aria-label="כמה בוטים להוסיף"></div></div>
+        <div class="sb-tg"><b>רמה</b><div class="seg" role="group" aria-label="רמת הבוטים">${['easy','mid','hard'].map(k=>`<button data-lv="${k}" aria-pressed="${k===lv}">${LV[k]}</button>`).join('')}</div></div>
+      </div>
+      <button class="bigbtn ps-go pk-begin">התחילו את הטורניר</button>
+      <button class="bigbtn ghost pk-leave">סגרו את השולחן</button>
+      <p class="pk-on-msg">המארח צריך להישאר בדף עד סוף המשחק.</p>
+    </div>`;
+    const link=shareLink(N.code),wa=stage.querySelector('.pk-wa');
+    wa.href='https://wa.me/?text='+encodeURIComponent(`בואו לשחק פוקר הנשיא! קוד השולחן: ${N.code}\n${link}`);
+    stage.querySelector('.pk-copy').onclick=async e=>{sound('tick');try{await navigator.clipboard.writeText(link);e.target.textContent='הקישור הועתק'}catch(_){prompt('העתיקו את הקישור:',link)}};
+    stage.querySelectorAll('[data-lv]').forEach(b=>b.onclick=()=>{lv=b.dataset.lv;sound('tick');stage.querySelectorAll('[data-lv]').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+    const render=()=>{
+      const ul=stage.querySelector('.pk-plist');if(!ul)return;
+      const known=N._known||(N._known=new Set());ul.innerHTML=N.players.map((p,i)=>`<li class="${known.has(p)?'':'new'}"><i class="pk-av" style="--tone:${PK_TONES[i%PK_TONES.length]}"><b>${pkEsc(p.name.slice(0,2))}</b></i><b>${pkEsc(p.name)}</b>${i===0?'<small>מארח</small>':''}</li>`).join('');
+      N.players.forEach(p=>known.add(p));const max=8-N.players.length;if(N.bots>max)N.bots=max;
+      stage.querySelector('.pk-bots').innerHTML=Array.from({length:max+1},(_,n)=>`<button data-b="${n}" aria-pressed="${n===N.bots}">${n}</button>`).join('');
+      stage.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{N.bots=+b.dataset.b;sound('tick');render()});
+      const go=stage.querySelector('.pk-begin');go.disabled=N.players.length+N.bots<2;
+      go.textContent=N.players.length+N.bots<2?'מחכים לחברים (או הוסיפו בוטים)':`התחילו את הטורניר (${N.players.length+N.bots} שחקנים)`;
+    };
+    N.onLobby=render;render();
+    stage.querySelector('.pk-begin').onclick=()=>{if(N.players.length+N.bots<2)return;sound('tick');N.begin(N.bots,lv);startMatch(null,N)};
+    stage.querySelector('.pk-leave').onclick=()=>{sound('tick');netClose();showStart()};
+  }
+  function showClientLobby(N,m){
+    teardown();const seen=N._seen||(N._seen=new Set());
+    stage.innerHTML=`<div class="ps ps-start panel pk-start pk-lobby">
+      <h4 class="ps-title">מחוברים!</h4>
+      <div class="pk-code"><small>שולחן</small><b dir="ltr">${N.code}</b></div>
+      <ul class="pk-plist" aria-live="polite">${(m&&m.players||[]).map((n,i)=>`<li class="${seen.has(i+':'+n)?'':'new'}"><i class="pk-av" style="--tone:${PK_TONES[i%PK_TONES.length]}"><b>${pkEsc(String(n).slice(0,2))}</b></i><b>${pkEsc(n)}</b>${i===0?'<small>מארח</small>':''}</li>`).join('')}</ul>
+      <p class="ps-lvd pk-wait">${m&&m.players?`ממתינים ש${pkEsc(m.players[0])} יתחיל את הטורניר...`:'מתחברים לשולחן...'}${m&&m.bots?` (יהיו גם ${m.bots} בוטים)`:''}</p>
+      <button class="bigbtn ghost pk-leave">יציאה</button>
+    </div>`;
+    (m&&m.players||[]).forEach((n,i)=>seen.add(i+':'+n));
+    stage.querySelector('.pk-leave').onclick=()=>{sound('tick');netClose();showStart()};
+  }
+  function clientMsg(N,m){
+    if(curNet!==N)return;
+    if(m.t==='lobby'){if(T.alive&&N.inGame){N.inGame=false}showClientLobby(N,m);return}
+    if(m.t==='start'){N.me=m.you;N.seats=m.seats;N.lvl=m.lvl;N.q=[];N.k=0;N.inGame=true;startMatch(null,N);return}
+    if(m.t==='drop'){if(N.onDrop)N.onDrop(m.seat);return}
+    if(m.t==='away'){if(N.onAway)N.onAway(m.seat,m.on);return}
+    if(m.t==='deny'){netClose();showStart({msg:m.why==='started'?'הטורניר בשולחן הזה כבר התחיל.':m.why==='full'?'השולחן מלא (8 שחקנים).':'הגרסה שלכם ישנה. רעננו את הדף.'});return}
+    if(m.t==='bye'){if(N.inGame&&N.onHostGone){N.onHostGone();netClose();return}netClose();showStart({msg:'המארח סגר את השולחן.'})}
+  }
+  async function startOnline(kind,name,code,msgEl){
+    store.set('pk:name',name);netClose();
+    const say=t=>{if(msgEl)msgEl.textContent=t};
+    try{
+      if(kind==='host'){say('פותחים שולחן...');const N=await netHost(name,null);curNet=N;showHostLobby(N)}
+      else{say('מתחברים לשולחן '+code+'...');let N=null;N=await netJoin(code,name,m=>clientMsg(N,m));curNet=N;showClientLobby(N,null)}
+    }catch(e){say(errText(e))}
+  }
+
   showStart();
-  return teardown;
+  return ()=>{teardown();netClose()};
 }
 /* ================= ARCADE SHELL ================= */
 const GAMES=[
