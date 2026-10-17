@@ -430,7 +430,15 @@ body.pt-open .mp{opacity:0;pointer-events:none}
 .pk-pre{display:flex;gap:.3rem}
 .pk-pre button{flex:1;background:#151213;border:1px solid #444;color:#ddd;font-family:var(--display);font-size:1.15rem;cursor:pointer;padding:.05rem .3rem;touch-action:manipulation}
 .pk-pre button:hover{border-color:var(--yellow);color:var(--yellow)}
-.pk-sl{width:100%;accent-color:var(--flag);height:26px;margin:0}
+.pk-row{display:flex;gap:.4rem;align-items:center}
+.pk-range{flex:1;min-width:0;accent-color:var(--flag);height:26px;margin:0}
+.pk-amt{display:flex;align-items:stretch;border:2px solid var(--flag);background:#151213;box-shadow:3px 3px 0 #000}
+.pk-amt button{background:#2a2426;color:#fff;border:0;font:700 1.3rem/1 var(--display);width:2.1rem;cursor:pointer;touch-action:manipulation}
+.pk-amt button:hover{background:var(--flag)}
+.pk-num{width:5.2rem;background:transparent;color:#fff;border:0;text-align:center;font:700 1.25rem var(--display);padding:.2rem 0;-moz-appearance:textfield;appearance:textfield}
+.pk-num::-webkit-inner-spin-button,.pk-num::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.pk-num:focus{outline:none;background:#000}.pk-amt:focus-within{border-color:var(--yellow)}
+.pk-num.bad{color:#ff8a8a}
 .pk-next{align-self:center;font-size:1.7rem;box-shadow:4px 4px 0 #000}
 /* the dealer: שטן הנשיא */
 .pk-devil{position:absolute;z-index:3;transform:translate(-50%,-50%);pointer-events:none}
@@ -3270,7 +3278,7 @@ function pokerPlay(stage,lvl,ctl){
         <p class="pk-msg" aria-live="polite"></p>
         <div class="pk-acts" hidden>
           <div class="pk-rz"><div class="pk-pre"><button data-p="min">מינימום</button><button data-p="half">½ קופה</button><button data-p="pot">קופה</button><button data-p="all">אול אין</button></div>
-            <input class="pk-sl" type="range" aria-label="גובה ההעלאה"></div>
+            <div class="pk-row"><input class="pk-range" type="range" aria-label="גובה ההעלאה"><div class="pk-amt"><button type="button" data-d="-1" aria-label="פחות">−</button><input class="pk-num" type="number" inputmode="numeric" min="0" aria-label="סכום מותאם להעלאה" title="כתבו כמה להעלות"><button type="button" data-d="1" aria-label="יותר">+</button></div></div></div>
           <div class="pk-main"><button class="pk-b pk-fold">פולד</button><button class="pk-b pk-call">צ׳ק</button><button class="pk-b pk-raise">רייז</button></div>
         </div>
         <button class="bigbtn pk-next" hidden>יד הבאה</button>
@@ -3279,7 +3287,7 @@ function pokerPlay(stage,lvl,ctl){
     const $$=s=>stage.querySelector(s),tbl=$$('.pk-table'),bgCv=$$('.pk-bg'),fxCv=$$('.pk-fx'),slamEl=$$('.pk-slam'),over=$$('.ps-over');
     const seatEl=[...stage.querySelectorAll('.pk-seat')],betEl=[...stage.querySelectorAll('.pk-bet')],labEl=[...stage.querySelectorAll('.pk-lab')];
     const potBox=$$('.pk-potbox'),potNum=$$('.pk-pot'),potStk=potBox.querySelector('.pk-stk'),hnEl=$$('.pk-hn'),dealerEl=$$('.pk-dealer'),msgEl=$$('.pk-msg');
-    const acts=$$('.pk-acts'),bFold=$$('.pk-fold'),bCall=$$('.pk-call'),bRaise=$$('.pk-raise'),slider=$$('.pk-sl'),nextB=$$('.pk-next'),spdB=$$('.pk-spd');
+    const acts=$$('.pk-acts'),bFold=$$('.pk-fold'),bCall=$$('.pk-call'),bRaise=$$('.pk-raise'),slider=$$('.pk-range'),numIn=$$('.pk-num'),nextB=$$('.pk-next'),spdB=$$('.pk-spd');
     const setMsg=t=>{msgEl.textContent=t};
     /* ---------- the dealer: שטן הנשיא ---------- */
     const dvEl=$$('.pk-devil'),dvM=dvEl.querySelector('.pk-dv-m'),dvSayEl=dvEl.querySelector('.pk-dv-say');let dvT1=0,dvT2=0;
@@ -3495,9 +3503,15 @@ function pokerPlay(stage,lvl,ctl){
       const rz=acts.querySelector('.pk-rz');rz.hidden=!canR;bRaise.hidden=!canR;
       const step=Math.max(1,Math.min(H.sb,5));
       const lbl=v=>v>=maxTo?`אול אין ${money(maxTo)}`:(H.curBet===0?'בט ':'רייז ל־')+money(v);
-      const setV=v=>{v=Math.max(minTo,Math.min(maxTo,Math.round(v/step)*step));if(maxTo-v<step)v=maxTo;slider.value=v;bRaise.textContent=lbl(v);bRaise.dataset.v=v};
+      const clamp=v=>Math.max(minTo,Math.min(maxTo,Math.round(v)));
+      const setV=(v,snap=true,typing=false)=>{v=snap?Math.round(v/step)*step:v;v=clamp(v);if(snap&&maxTo-v<step)v=maxTo;slider.value=v;if(!typing){numIn.value=v;numIn.classList.remove('bad')}bRaise.textContent=lbl(v);bRaise.dataset.v=v};
       if(canR){slider.min=minTo;slider.max=maxTo;slider.step=1;setV(Math.min(maxTo,H.curBet===0?Math.max(minTo,Math.round(pt*.5)):minTo))}
       slider.oninput=()=>setV(+slider.value);
+      numIn.oninput=()=>{const t=Math.round(+numIn.value);if(!numIn.value||!isFinite(t))return;numIn.classList.toggle('bad',t<minTo||t>maxTo);setV(t,false,true)};
+      numIn.onchange=numIn.onblur=()=>setV(+bRaise.dataset.v,false);
+      numIn.onfocus=()=>numIn.select();
+      numIn.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();numIn.oninput();setV(+bRaise.dataset.v,false);bRaise.click()}};
+      acts.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{sound('tick');const d=+b.dataset.d,c=+bRaise.dataset.v,bs=H.bb;setV(d>0?Math.floor(c/bs)*bs+bs:Math.ceil(c/bs)*bs-bs,false)});
       acts.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{sound('tick');const k=b.dataset.p;
         setV(k==='min'?minTo:k==='all'?maxTo:H.curBet+(pt+toCall)*(k==='half'?.5:1))});
       const hn=H.board.length>=3?PK.handName(PK.evalHand(s.hole.concat(H.board))):(PK.rank(s.hole[0])===PK.rank(s.hole[1])?`זוג ${PK.RN[PK.rank(s.hole[0])]} ביד`:`${PK.RN[Math.max(PK.rank(s.hole[0]),PK.rank(s.hole[1]))]}-${PK.RN[Math.min(PK.rank(s.hole[0]),PK.rank(s.hole[1]))]}${PK.suit(s.hole[0])===PK.suit(s.hole[1])?' באותה צורה':''}`);
@@ -3509,7 +3523,7 @@ function pokerPlay(stage,lvl,ctl){
     bFold.onclick=()=>{if(humanResolve){sound('tick');humanResolve({a:'fold'})}};
     bCall.onclick=()=>{if(humanResolve){sound('tick');const s=H.st[ME];humanResolve(H.curBet>s.bet?{a:'call'}:{a:'check'})}};
     bRaise.onclick=()=>{if(humanResolve){sound('tick');humanResolve({a:'raise',to:+bRaise.dataset.v})}};
-    on(document,'keydown',e=>{if(!humanResolve||!stage.contains(acts)||e.ctrlKey||e.metaKey||e.altKey)return;
+    on(document,'keydown',e=>{if(!humanResolve||!stage.contains(acts)||e.ctrlKey||e.metaKey||e.altKey||e.target===numIn)return;
       const k=(e.key||'').toLowerCase();
       if(k==='f'||k==='כ'){if(!bFold.hidden){e.preventDefault();bFold.click()}}else if(k==='c'||k==='ב'){e.preventDefault();bCall.click()}else if(k==='r'||k==='ר'){if(!bRaise.hidden){e.preventDefault();bRaise.click()}}});
 
