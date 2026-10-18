@@ -303,6 +303,27 @@ body.pt-open .mp{opacity:0;pointer-events:none}
 .sb-board{position:relative;width:var(--sbw);max-width:100%;aspect-ratio:1.45/1;min-height:0;overflow:hidden;border:3px solid #000;box-shadow:0 0 0 2px #2a2a2a,10px 10px 0 var(--red);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .sb-board canvas{position:absolute;inset:0;display:block;width:100%;height:100%;touch-action:none;outline:none}
 .sb-board .ps-over[hidden]{display:none}
+.sb-x{display:none}
+@media (orientation:landscape) and (max-height:520px){
+  .arena:has(.sb-game) .arena-bar{display:none}
+  .arena:has(.sb-game) .arena-body{padding:0;overflow:hidden}
+  .arena:has(.sb-game) .stage{max-width:none;width:100%;height:100%;margin:0}
+  .sb-game{display:grid;grid-template-columns:minmax(140px,1fr) auto;grid-template-rows:auto 1fr;grid-template-areas:"top board" "bar board";gap:.35rem .5rem;width:100%;height:100dvh;padding:.3rem .45rem;box-sizing:border-box;align-items:stretch;justify-items:stretch}
+  .sb-board{grid-area:board;width:auto;height:calc(100dvh - .6rem);max-width:calc(100vw - 150px);aspect-ratio:1.45/1;align-self:center;box-shadow:0 0 0 2px #2a2a2a,5px 5px 0 var(--red)}
+  .sb-top{grid-area:top;width:auto;flex-direction:column;gap:.3rem;padding-top:1.9rem}
+  .sb-pl{font-size:.95rem;padding:.15rem .45rem;gap:.3rem;flex:none}
+  .sb-pl b{font-size:1.05rem}.sb-pl .sb-pip{display:none}.sb-pl .sb-sc{font-size:1.5rem}
+  .sb-mid{display:none}
+  .sb-bar{grid-area:bar;width:auto;flex-direction:column;align-items:stretch;justify-content:flex-end;gap:.35rem;min-height:0;overflow:hidden}
+  .sb-msg{font-size:.82rem;line-height:1.3;overflow:auto;min-height:0}
+  .sb-btns{flex-direction:column;align-items:stretch}
+  .sb-btns .bigbtn{font-size:1.25rem;padding:.1rem .6rem;width:100%}
+  .sb-btns .ps-ib{width:100%}
+  .arena-open:has(.sb-game) .mp{left:auto!important;right:.45rem;top:2.3rem}
+  .music-on .sb-game .sb-top{padding-top:4.9rem}
+  .sb-x{display:block;position:fixed;top:.3rem;right:.45rem;z-index:5;background:#fff;color:#000;border:0;font-family:var(--display);font-size:1rem;padding:.1rem .6rem;cursor:pointer}
+}
+
 .sb-bar{width:var(--sbw);max-width:100%;display:flex;align-items:center;gap:.8rem;min-height:52px}
 .sb-msg{flex:1;margin:0;color:#ddd6ce;font-size:1rem;line-height:1.4}
 .sb-btns{display:flex;gap:.5rem;align-items:center}
@@ -2874,6 +2895,7 @@ function sheshPlay(stage,lvl,ctl){
     const M=saved?{mode:saved.mode,ai:saved.ai||lvl,target:saved.target,score:saved.score.slice(),games:saved.games||0}:{mode,ai:lvl,target,score:[0,0],games:0};
     const vsAI=M.mode==='ai',AIP=1,online=M.mode==='online'&&!!NET,ME=online?NET.me:-1,remote=p=>(vsAI&&p===AIP)||(online&&p!==ME);
     stage.innerHTML=`<div class="ps sb-game">
+      <button class="sb-x" aria-label="יציאה מהמשחק">חזרה לאתר</button>
       <div class="sb-top">
         <div class="sb-pl" data-p="0"><span class="sb-dot w"></span><b>${SB_NAME[0]}${vsAI||(online&&ME===0)?' (אתם)':online?' (החבר)':''}</b><span class="sb-pip"></span><span class="sb-sc"></span></div>
         <div class="sb-mid"><span class="sb-target">עד ${M.target}</span></div>
@@ -2888,6 +2910,14 @@ function sheshPlay(stage,lvl,ctl){
     const cv=stage.querySelector('canvas'),over=stage.querySelector('.ps-over'),msgEl=stage.querySelector('.sb-msg'),act=stage.querySelector('#sbAct'),undoB=stage.querySelector('#sbUndo');
     const plEls=[...stage.querySelectorAll('.sb-pl')];
     let ctx=null,W=0,H=0,G=null;
+    /* phone turned sideways: the board fills the screen; first tap also asks for real full screen (Android) */
+    const landPhone=()=>matchMedia('(orientation:landscape) and (max-height:520px)').matches;
+    const goFull=()=>{const d=document,el=d.documentElement;if(!landPhone()||d.fullscreenElement||d.webkitFullscreenElement)return;
+      const f=el.requestFullscreen||el.webkitRequestFullscreen;if(f)try{const r=f.call(el,{navigationUI:'hide'});if(r&&r.catch)r.catch(()=>{})}catch(e){}};
+    on(stage,'pointerdown',goFull,{capture:true});
+    const mqL=matchMedia('(orientation:portrait)'),onRot=()=>{if(mqL.matches&&document.fullscreenElement)try{document.exitFullscreen()}catch(e){}};
+    if(mqL.addEventListener){mqL.addEventListener('change',onRot);offs.push(()=>mqL.removeEventListener('change',onRot))}
+    stage.querySelector('.sb-x').onclick=()=>{try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}const x=document.querySelector('#arena .arena-bar .x');if(x)x.click()};
     function layout(){
       W=cv.clientWidth;H=cv.clientHeight;if(!W||!H)return;ctx=hiDPI(cv,W,H);
       const m=W*.022,tw=W*.075,bw=W*.06,playW=W-2*m-tw-m*.6,pw=(playW-bw)/12,ih=H-2*m;
@@ -3323,7 +3353,7 @@ function sheshPlay(stage,lvl,ctl){
   }
 
   showStart();
-  return ()=>{teardown();netClose()};
+  return ()=>{teardown();netClose();try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}};
 }
 
 /* ================= POKER ENGINE (Texas Hold'em, no limit) =================
