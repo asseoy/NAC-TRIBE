@@ -1394,6 +1394,24 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
 <main>
 <section id="games">
   <div class="wrap">
+    <a class="nacf-ban" href="fighters/" aria-label="NAC FIGHTERS – משחק מכות">
+      <img class="nacf-l" src="fighters/assets/warrior.webp" alt="" loading="lazy">
+      <div class="nacf-mid"><span class="nacf-new">חדש!</span><b>NAC FIGHTERS</b><i>BATTLE FOR HANASI</i><small>משחק מכות בסגנון STREET FIGHTER · 5 לוחמים · מכות על · שני שחקנים או מול המחשב</small><span class="nacf-go">FIGHT! ←</span></div>
+      <img class="nacf-r" src="fighters/assets/devil.webp" alt="" loading="lazy">
+    </a>
+    <style>
+    .nacf-ban{position:relative;display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin:0 0 34px;min-height:230px;padding:0 10px;border-radius:18px;overflow:hidden;text-decoration:none;color:#fff;background:radial-gradient(ellipse at 50% 120%,#ff3a1a 0,#a3080f 35%,#1a0204 75%),#0b0102;box-shadow:0 0 0 3px #000,0 0 0 5px #c8141c,0 14px 40px rgba(200,20,28,.45);transition:transform .2s,box-shadow .2s}
+    .nacf-ban:hover{transform:translateY(-3px) scale(1.01);box-shadow:0 0 0 3px #000,0 0 0 5px #ff3a1a,0 20px 60px rgba(255,40,20,.6)}
+    .nacf-ban img{height:240px;width:auto;flex:none;filter:drop-shadow(6px 6px 0 #000);transition:transform .25s}
+    .nacf-ban:hover .nacf-l{transform:translateX(8px) rotate(-2deg)}.nacf-ban:hover .nacf-r{transform:translateX(-8px) rotate(2deg)}
+    .nacf-mid{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:22px 0;align-self:center;min-width:0}
+    .nacf-mid b{font:900 clamp(38px,7vw,78px)/.95 Impact,'Bebas Neue','Arial Black',sans-serif;letter-spacing:2px;direction:ltr;background:linear-gradient(#fff6d0,#ffb030 45%,#ff2a1a);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:2px #000;filter:drop-shadow(4px 4px 0 #000)}
+    .nacf-mid i{font:italic 800 clamp(13px,1.8vw,20px)/1.4 Impact,'Arial Black',sans-serif;letter-spacing:5px;direction:ltr;background:#c8141c;padding:2px 14px;transform:skewX(-10deg);box-shadow:3px 3px 0 #000;margin-top:4px}
+    .nacf-mid small{margin-top:10px;font-size:14px;opacity:.9}
+    .nacf-go{margin-top:12px;direction:ltr;font:900 22px Impact,'Arial Black',sans-serif;letter-spacing:2px;background:#ffcf40;color:#200;padding:6px 26px;transform:skewX(-10deg);box-shadow:4px 4px 0 #000}
+    .nacf-new{position:absolute;top:14px;right:16px;background:#ffcf40;color:#200;font-weight:900;padding:2px 12px;border-radius:99px;transform:rotate(6deg);box-shadow:2px 2px 0 #000}
+    @media (max-width:640px){.nacf-ban img{height:150px;position:absolute;bottom:0;opacity:.45}.nacf-l{left:-20px}.nacf-r{right:-20px}.nacf-mid{position:relative;padding-top:30px}.nacf-new{top:8px;right:10px;font-size:12px}}
+    </style>
     <div class="arcade-head">
       <div>
         <h2>משחקי השבט</h2>
