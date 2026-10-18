@@ -2387,6 +2387,101 @@ const SB={
       }
     }
     return v;
+  }  ,
+  /* ---------- hard level: strong evaluation + one ply of look-ahead ---------- */
+  /* r = distance from p's own 1-point (0 = 1-point, 23 = opponent's 1-point) */
+  HP:{racePip:1.2,raceOff:1.5,raceStack:.4,pip:.9,mover:4,bar:7,barHome:2.6,close:22,W:[1,1.6,2.3,3.1,4.2,3.6,3.1,2.1,1.3,1.2,1.1,1.1,.8,.8,.8,.8,.8,.8,1.6,2.4,3,3.2,2,1.5],stack:.55,prime:.9,prime6:12,back:.6,blot:6,blotProg:.42,blotHome:1.4},
+  rIdx:(p,i)=>p?23-i:i,
+  homeMade(s,p){let n=0;for(let r=0;r<6;r++){const i=p?23-r:r;if((p?-s.b[i]:s.b[i])>=2)n++}return n},
+  /* exact number of the 36 rolls on which side q hits the checker of p sitting on point `at` */
+  hitRolls(s,p,at){
+    const q=1-p,sgq=q?-1:1,blocked=i=>i>=0&&i<=23&&(p?-s.b[i]:s.b[i])>=2;
+    const srcs=[];
+    if(s.bar[q])srcs.push(q?-1:24);
+    for(let j=0;j<24;j++)if(s.b[j]*sgq>0)srcs.push(j);
+    const dist=j=>q?at-j:j-at;  // q=1 moves up, q=0 moves down
+    const ds=srcs.map(dist).filter(d=>d>0&&d<=24);
+    if(!ds.length)return 0;
+    const step=(j,d)=>q?j+d:j-d;
+    let n=0;
+    for(let a=1;a<=6;a++)for(let b=1;b<=6;b++){
+      let hit=false;
+      for(const j of srcs){const d=dist(j);if(d<=0||d>24)continue;
+        if(a===b){for(let k=1;k<=4&&!hit;k++){if(d===a*k){let ok=true;for(let m=1;m<k;m++)if(blocked(step(j,a*m)))ok=false;if(ok)hit=true}}}
+        else if(d===a||d===b)hit=true;
+        else if(d===a+b&&(!blocked(step(j,a))||!blocked(step(j,b))))hit=true;
+        if(hit)break}
+      if(hit)n++;
+    }
+    return n;
+  },
+  /* judged from p's side; `mover` = whose turn it is in this position */
+  evalHard(s,p,mover){
+    const q=1-p;
+    if(s.off[p]===15)return 1e5;if(s.off[q]===15)return -1e5;
+    const my=i=>p?-s.b[i]:s.b[i],op=i=>p?s.b[i]:-s.b[i];
+    let wMax=-1,bMin=24;
+    for(let i=0;i<24;i++){if(s.b[i]>0)wMax=Math.max(wMax,i);if(s.b[i]<0)bMin=Math.min(bMin,i)}
+    const contact=s.bar[0]||s.bar[1]||wMax>bMin;
+    const pd=SB.pips(s,q)-SB.pips(s,p);
+    if(!contact){
+      // pure race: pips (+ the roll in hand is worth ~8 pips) and bear-off progress
+      const H=SB.HP;let v=pd*H.racePip+(mover===p?8:-8)+(s.off[p]-s.off[q])*H.raceOff;
+      for(let r=0;r<6;r++){const i=p?23-r:r;if(my(i)>3)v-=(my(i)-3)*H.raceStack}
+      return v;
+    }
+    const H=SB.HP;let v=pd*H.pip+(mover===p?H.mover:-H.mover);
+    const hmP=SB.homeMade(s,p),hmQ=SB.homeMade(s,q);
+    v+=s.bar[q]*(H.bar+hmP*H.barHome)-s.bar[p]*(H.bar+hmQ*H.barHome);
+    if(hmP===6&&s.bar[q])v+=H.close;if(hmQ===6&&s.bar[p])v-=H.close;
+    const W=H.W;
+    const side=(who,sgn)=>{
+      const mine=who===p?my:op,other=who===p?op:my;
+      // opponent's back-most checker (in who's r-coordinates)
+      let backR=-1;for(let r=0;r<24;r++){const i=who?23-r:r;if(other(i)>0)backR=Math.max(backR,r)}
+      if((who===p?s.bar[q]:s.bar[p])>0)backR=24;
+      let t=0,run=0,best=0;
+      for(let r=0;r<24;r++){
+        const i=who?23-r:r,n=mine(i);
+        if(n>=2){t+=W[r];if(n>3)t-=(n-3)*H.stack;if(r<backR){run++;best=Math.max(best,run)}}else run=0;
+      }
+      if(best>=3)t+=best*best*H.prime;if(best===6)t+=H.prime6;
+      // checkers still back in the opponent's home behind a strong prime
+      let back=0;for(let r=18;r<24;r++){const i=who?23-r:r;back+=mine(i)}
+      return sgn*t-sgn*back*H.back;
+    };
+    v+=side(p,1)+side(q,-1);
+    // blots of the side NOT to move can be hit right now
+    const victim=mover===p?q:p,sgv=victim===p?-1:1;
+    const vm=victim===p?my:op,hmA=victim===p?hmQ:hmP;
+    for(let i=0;i<24;i++)if(vm(i)===1){
+      const r=SB.rIdx(victim,i),pr=SB.hitRolls(s,victim,i)/36;
+      if(pr>0)v+=sgv*pr*(H.blot+(23-r)*H.blotProg+hmA*H.blotHome);
+    }
+    return v;
+  },
+  /* candidates: [{o,v}] from aiPlay; returns the chosen option */
+  pickHard(s,p,cands){
+    const q=1-p,t0=Date.now();
+    const scored=cands.map(c=>({o:c.o,s0:SB.evalHard(c.o.end,p,q)})).sort((a,b)=>b.s0-a.s0);
+    let wMax=-1,bMin=24;const e=scored[0].o.end;
+    for(let i=0;i<24;i++){if(e.b[i]>0)wMax=Math.max(wMax,i);if(e.b[i]<0)bMin=Math.min(bMin,i)}
+    if(!(e.bar[0]||e.bar[1]||wMax>bMin))return scored[0].o;   // race: static is exact enough
+    const top=scored.slice(0,7);
+    let best=null,bestV=-Infinity;
+    for(const c of top){
+      if(Date.now()-t0>2500)break;
+      let tot=0;
+      for(let a=1;a<=6;a++)for(let b=a;b<=6;b++){
+        const dice=a===b?[a,a,a,a]:[a,b],w=a===b?1:2;
+        const ends=new Map();for(const r of SB.sequences(c.o.end,q,dice)){const k=SB.key(r.end);if(!ends.has(k))ends.set(k,r.end)}
+        let worst=Infinity;for(const en of ends.values()){const x=SB.evalHard(en,p,p);if(x<worst)worst=x}
+        tot+=w*worst;
+      }
+      const val=tot/36;
+      if(val>bestV){bestV=val;best=c.o}
+    }
+    return best||scored[0].o;
   }
 };
 
@@ -2707,6 +2802,7 @@ function sheshPlay(stage,lvl,ctl){
       let opts=[...seen.values()].map(o=>({o,v:SB.evaluate(o.end,AIP,M.ai==='hard')+(M.ai==='mid'?Math.random()*1.5:0)}));
       opts.sort((a,b)=>b.v-a.v);
       let pickO=opts[0].o;
+      if(M.ai==='hard')pickO=SB.pickHard(st,AIP,opts);
       if(M.ai==='easy'){const top=opts.slice(0,Math.max(1,Math.ceil(opts.length*.5)));pickO=top[Math.floor(Math.random()*top.length)].o}
       const seq=pickO.seq.slice();let k=0;
       const id=turnId,step=()=>{if(phase!=='move'||turn!==AIP||id!==turnId)return;if(k>=seq.length){later(()=>endTurn(id),500);return}playPath([seq[k]],false);k++;if(phase==='move')later(step,520)};
