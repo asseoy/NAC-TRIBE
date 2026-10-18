@@ -304,13 +304,14 @@ body.pt-open .mp{opacity:0;pointer-events:none}
 .sb-board canvas{position:absolute;inset:0;display:block;width:100%;height:100%;touch-action:none;outline:none}
 .sb-board .ps-over[hidden]{display:none}
 .sb-x{display:none}
-@media (orientation:landscape) and (max-height:520px){
-  .arena:has(.sb-game) .arena-bar{display:none}
-  .arena:has(.sb-game) .arena-body{padding:0;overflow:hidden}
-  .arena:has(.sb-game) .stage{max-width:none;width:100%;height:100%;margin:0}
-  .sb-game{display:grid;grid-template-columns:minmax(140px,1fr) auto;grid-template-rows:auto 1fr;grid-template-areas:"top board" "bar board";gap:.35rem .5rem;width:100%;height:100dvh;padding:.3rem .45rem;box-sizing:border-box;align-items:stretch;justify-items:stretch}
+@media (orientation:landscape) and (max-height:600px){.sb-start .ps-preview,.sb-start .ps-lead,.sb-start .sb-rules{display:none}.sb-start .ps-title{font-size:2.2rem;margin:.2rem 0}.sb-start{gap:.45rem}}
+@media (orientation:landscape) and (max-height:600px){
+  body.sb-on .arena .arena-bar{display:none}
+  body.sb-on .arena .arena-body{padding:0;overflow:hidden}
+  body.sb-on .arena .stage{max-width:none;width:100%;height:100%;margin:0}
+  .sb-game{display:grid;grid-template-columns:minmax(140px,1fr) auto;grid-template-rows:auto auto 1fr;grid-template-areas:"x board" "top board" "bar board";gap:.35rem .5rem;width:100%;height:100dvh;padding:.3rem .45rem;box-sizing:border-box;align-items:stretch;justify-items:stretch}
   .sb-board{grid-area:board;width:auto;height:calc(100dvh - .6rem);max-width:calc(100vw - 150px);aspect-ratio:1.45/1;align-self:center;box-shadow:0 0 0 2px #2a2a2a,5px 5px 0 var(--red)}
-  .sb-top{grid-area:top;width:auto;flex-direction:column;gap:.3rem;padding-top:1.9rem}
+  .sb-top{grid-area:top;width:auto;flex-direction:column;gap:.3rem}
   .sb-pl{font-size:.95rem;padding:.15rem .45rem;gap:.3rem;flex:none}
   .sb-pl b{font-size:1.05rem}.sb-pl .sb-pip{display:none}.sb-pl .sb-sc{font-size:1.5rem}
   .sb-mid{display:none}
@@ -319,9 +320,9 @@ body.pt-open .mp{opacity:0;pointer-events:none}
   .sb-btns{flex-direction:column;align-items:stretch}
   .sb-btns .bigbtn{font-size:1.25rem;padding:.1rem .6rem;width:100%}
   .sb-btns .ps-ib{width:100%}
-  .arena-open:has(.sb-game) .mp{left:auto!important;right:.45rem;top:2.3rem}
-  .music-on .sb-game .sb-top{padding-top:4.9rem}
-  .sb-x{display:block;position:fixed;top:.3rem;right:.45rem;z-index:5;background:#fff;color:#000;border:0;font-family:var(--display);font-size:1rem;padding:.1rem .6rem;cursor:pointer}
+  body.sb-on .mp{left:auto!important;right:.45rem!important;top:2.6rem!important;bottom:auto!important;max-width:calc(100vw - 590px)}
+  .music-on .sb-game .sb-top{padding-top:3.4rem}
+  .sb-x{grid-area:x;justify-self:start;display:block;position:relative;z-index:5;background:#fff;color:#000;border:0;font-family:var(--display);font-size:1rem;padding:.1rem .6rem;cursor:pointer}
 }
 
 .sb-bar{width:var(--sbw);max-width:100%;display:flex;align-items:center;gap:.8rem;min-height:52px}
@@ -2796,49 +2797,122 @@ function sheshPlay(stage,lvl,ctl){
   const dropHash=()=>{try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}};
   const shareLink=c=>location.origin+location.pathname+'#shesh-'+c;
   const PIDS=c=>'nachanasi-shesh-'+c;
+  /* Two transports. 1) WebRTC through PeerJS (direct, fastest).  2) When a direct link can't open (phones on mobile data,
+     strict NATs, and the free TURN relays are down), messages go through public MQTT brokers over plain WebSockets.
+     We connect to all of them at once and send every message on each; the first copy wins (dedupe by id). */
+  const MQTT_SRC=['https://unpkg.com/mqtt@5.3.5/dist/mqtt.min.js','https://cdn.jsdelivr.net/npm/mqtt@5.3.5/dist/mqtt.min.js'];
+  const BROKERS=['wss://broker.emqx.io:8084/mqtt','wss://broker.hivemq.com:8884/mqtt','wss://test.mosquitto.org:8081/mqtt'];
+  const TOPIC=c=>'nachanasi/shesh/'+c;
+  function loadMqtt(){
+    if(window.mqtt)return Promise.resolve();
+    return MQTT_SRC.reduce((p,src)=>p.catch(()=>new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.async=true;sc.onload=()=>window.mqtt?res():rej({type:'peer'});sc.onerror=()=>rej({type:'peer'});document.head.appendChild(sc)})),Promise.reject(new Error('start')));
+  }
+  async function relayOpen(inbox){
+    await loadMqtt();
+    const R={cs:[],seen:new Set(),onData:null,closed:false};
+    await new Promise(res=>{
+      let done=false;const fin=()=>{if(!done){done=true;res()}};
+      BROKERS.forEach(u=>{let c;try{c=mqtt.connect(u,{clean:true,connectTimeout:8000,reconnectPeriod:3000,keepalive:30})}catch(e){return}
+        R.cs.push(c);
+        c.on('connect',()=>{c.subscribe(inbox,{qos:1});R.up=true;setTimeout(fin,500)});
+        c.on('message',(t,buf)=>{let m;try{m=JSON.parse(String(buf))}catch(e){return}if(!m||!m._i||R.seen.has(m._i))return;R.seen.add(m._i);if(!R.closed&&R.onData)R.onData(m)});
+        c.on('error',()=>{});
+      });
+      setTimeout(fin,9000);
+    });
+    if(!R.up){R.cs.forEach(c=>{try{c.end(true)}catch(e){}});throw {type:'network'}}
+    R.send=(topic,m)=>{const o=Object.assign({},m,{_i:Math.random().toString(36).slice(2)+Date.now().toString(36)}),txt=JSON.stringify(o);R.cs.forEach(c=>{try{if(c.connected)c.publish(topic,txt,{qos:1})}catch(e){}})};
+    R.close=()=>{R.closed=true;R.cs.forEach(c=>{try{c.end(true)}catch(e){}})};
+    return R;
+  }
+  const peerT=conn=>{const T={kind:'p2p',send:m=>{try{if(conn.open)conn.send(m)}catch(e){}},close:()=>{try{conn.close()}catch(e){}}};
+    conn.on('data',m=>T.onData&&T.onData(m));conn.on('close',()=>T.onClose&&T.onClose());return T};
+  const relayT=(R,topic)=>({kind:'relay',send:m=>R.send(topic,m),close:()=>{}});
   function netClose(){
     if(!NET)return;const N=NET;NET=null;clearInterval(N.hb);
-    try{if(N.conn&&N.conn.open)N.conn.send({t:'bye'})}catch(e){}
-    setTimeout(()=>{try{N.conn&&N.conn.close()}catch(e){}try{N.peer&&N.peer.destroy()}catch(e){}},250);
+    try{N.T&&N.T.send({t:'bye',gid:N.gid})}catch(e){}
+    setTimeout(()=>{try{N.T&&N.T.close()}catch(e){}try{N.R&&N.R.close()}catch(e){}try{N.peer&&N.peer.destroy()}catch(e){}},300);
   }
+  addEventListener('pagehide',()=>{if(NET)netClose()});   // closing the tab tells the friend right away (relay has no 'close' event)
+  if(window.__SB_TEST__)window.__sbNet=()=>NET&&NET.T&&NET.T.kind;
   function mkNet(role,peer,code){
-    const N={role,me:role==='host'?0:1,peer,code,conn:null,last:Date.now(),
-      send(m){try{if(N.conn&&N.conn.open)N.conn.send(m)}catch(e){}}};
+    const N={role,me:role==='host'?0:1,peer,code,T:null,R:null,last:Date.now(),
+      send(m){if(N.T)N.T.send(Object.assign({gid:N.gid},m))}};
     return N;
   }
-  function wire(N,conn){
-    N.conn=conn;N.last=Date.now();
-    conn.on('data',m=>{if(NET!==N||!m||typeof m!=='object')return;N.last=Date.now();
+  function wire(N,T){
+    N.T=T;N.last=Date.now();
+    T.onData=m=>{if(NET!==N||!m||typeof m!=='object')return;N.last=Date.now();
       if(N.quiet){N.quiet=false;N.onQuiet&&N.onQuiet(false)}
-      if(m.t==='ping')return;if(m.t==='bye'){N.gone=true;N.onGone&&N.onGone();return}N.onMsg&&N.onMsg(m)});
-    conn.on('close',()=>{if(NET===N&&!N.gone){N.gone=true;N.onGone&&N.onGone()}});
-    N.hb=setInterval(()=>{if(NET!==N)return;N.send({t:'ping'});const q=Date.now()-N.last>15000;if(q&&!N.quiet){N.quiet=true;N.onQuiet&&N.onQuiet(true)}},2500);
+      if(m.t==='ping'||m.t==='join'||m.t==='hello')return;if(m.t==='bye'){N.gone=true;N.onGone&&N.onGone();return}N.onMsg&&N.onMsg(m)};
+    T.onClose=()=>{if(NET===N&&!N.gone&&N.T===T){N.gone=true;N.onGone&&N.onGone()}};
+    clearInterval(N.hb);
+    N.hb=setInterval(()=>{if(NET!==N)return;N.send({t:'ping'});const q=Date.now()-N.last>15000;if(q&&!N.quiet){N.quiet=true;N.onQuiet&&N.onQuiet(true)}
+      if(T.kind==='relay'&&Date.now()-N.last>90000&&!N.gone){N.gone=true;N.onGone&&N.onGone()}},T.kind==='relay'?4000:2500);
   }
   async function hostGame(){
-    await loadPeer();let peer=null,code='';
-    for(let k=0;k<5&&!peer;k++){
-      code=String(1000+Math.floor(Math.random()*9000));const p=new Peer(PIDS(code),{debug:0});
-      const r=await withTO(new Promise(res=>{p.on('open',()=>res('ok'));p.on('error',e=>res(e&&e.type||'error'))}),15000).catch(()=>'timeout');
-      if(r==='ok')peer=p;else{try{p.destroy()}catch(e){}if(r!=='unavailable-id')throw {type:r}}
+    let peer=null,code='';
+    try{
+      await loadPeer();
+      for(let k=0;k<5&&!peer;k++){
+        code=String(1000+Math.floor(Math.random()*9000));const p=new Peer(PIDS(code),{debug:0});
+        const r=await withTO(new Promise(res=>{p.on('open',()=>res('ok'));p.on('error',e=>res(e&&e.type||'error'))}),12000).catch(()=>'timeout');
+        if(r==='ok')peer=p;else{try{p.destroy()}catch(e){}if(r!=='unavailable-id')break}
+      }
+    }catch(e){}
+    if(!peer)code=String(1000+Math.floor(Math.random()*9000));   // PeerJS server unreachable: relay only
+    const N=mkNet('host',peer,code);N.gid='h';NET=N;
+    const accept=T=>{if(NET!==N||N.T)return false;wire(N,T);N.send({t:'hello',target});N.onJoin&&N.onJoin();return true};
+    if(peer){
+      peer.on('connection',conn=>{conn.on('open',()=>{if(NET!==N)return;if(N.T){try{conn.send({t:'deny'})}catch(e){}setTimeout(()=>{try{conn.close()}catch(e){}},300);return}accept(peerT(conn))})});
+      peer.on('disconnected',()=>{try{if(NET===N)peer.reconnect()}catch(e){}});
     }
-    if(!peer)throw {type:'error'};
-    const N=mkNet('host',peer,code);NET=N;
-    peer.on('connection',conn=>{
-      if(N.conn){conn.on('open',()=>{try{conn.send({t:'deny'})}catch(e){}setTimeout(()=>{try{conn.close()}catch(e){}},300)});return}
-      conn.on('open',()=>{if(NET!==N||N.conn)return;wire(N,conn);N.send({t:'hello',target});N.onJoin&&N.onJoin()});
+    const relay=relayOpen(TOPIC(code)+'/h').then(R=>{
+      if(NET!==N){R.close();return}
+      N.R=R;
+      R.onData=m=>{
+        if(NET!==N||!m)return;
+        if(m.t==='join'&&m.gid){
+          if(N.T&&N.T.kind==='relay'&&N.T.gid!==m.gid){R.send(TOPIC(code)+'/g/'+m.gid,{t:'deny'});return}
+          if(N.T&&N.T.kind==='relay'&&N.T.gid===m.gid){N.send({t:'hello',target});return}
+          const T=relayT(R,TOPIC(code)+'/g/'+m.gid);T.gid=m.gid;
+          if(N.T){wire(N,T);N.send({t:'hello',target});return}   // the friend gave up on the direct link: switch to the relay
+          accept(T);return;
+        }
+        if(N.T&&N.T.kind==='relay'&&N.T.gid===m.gid&&N.T.onData)N.T.onData(m);
+      };
     });
-    peer.on('disconnected',()=>{try{if(NET===N)peer.reconnect()}catch(e){}});
+    if(!peer)await relay;else relay.catch(()=>{});
     return N;
   }
   async function joinGame(code){
-    await loadPeer();
-    const peer=new Peer({debug:0});
-    await withTO(new Promise((res,rej)=>{peer.on('open',res);peer.on('error',rej)}),15000);
-    const N=mkNet('guest',peer,code);NET=N;
-    const conn=peer.connect(PIDS(code),{reliable:true});
-    await withTO(new Promise((res,rej)=>{conn.on('open',res);conn.on('error',rej);peer.on('error',rej)}),15000);
-    if(NET!==N)throw {type:'error'};
-    wire(N,conn);return N;
+    const gid=Math.random().toString(36).slice(2,10);
+    // 1) direct WebRTC, a few seconds
+    try{
+      if(window.__SB_FORCE_RELAY)throw 0;
+      await loadPeer();
+      const peer=new Peer({debug:0});
+      await withTO(new Promise((res,rej)=>{peer.on('open',res);peer.on('error',rej)}),9000);
+      const conn=peer.connect(PIDS(code),{reliable:true});
+      const T=peerT(conn);
+      const hello=await withTO(new Promise((res,rej)=>{T.onData=m=>{if(m&&(m.t==='hello'||m.t==='deny'))res(m)};conn.on('error',rej);peer.on('error',rej)}),7000)
+        .catch(e=>{try{peer.destroy()}catch(_){}throw e});
+      if(hello.t==='deny'){try{peer.destroy()}catch(_){}throw {type:'full'}}
+      const N=mkNet('guest',peer,code);N.gid=gid;N.target=hello.target;NET=N;wire(N,T);return N;
+    }catch(e){if(e&&e.type==='full')throw e}
+    // 2) relay through the MQTT brokers
+    const R=await relayOpen(TOPIC(code)+'/g/'+gid);
+    const hello=await new Promise(res=>{
+      R.onData=m=>{if(m&&(m.t==='hello'||m.t==='deny'))res(m)};
+      const ask=()=>R.send(TOPIC(code)+'/h',{t:'join',gid});ask();
+      const iv=setInterval(ask,2500);setTimeout(()=>{clearInterval(iv);res(null)},12000);
+      const stop=res;R._stop=()=>{clearInterval(iv)};
+    });
+    R._stop&&R._stop();
+    if(!hello){R.close();throw {type:'peer-unavailable'}}
+    if(hello.t==='deny'){R.close();throw {type:'full'}}
+    const N=mkNet('guest',null,code);N.gid=gid;N.R=R;N.target=hello.target;NET=N;
+    const T=relayT(R,TOPIC(code)+'/h');R.onData=m=>{if(T.onData)T.onData(m)};wire(N,T);return N;
   }
   function showOnline(code){
     teardown();netClose();mode='online';
@@ -2863,12 +2937,11 @@ function sheshPlay(stage,lvl,ctl){
     const join=async()=>{
       const c=code||(ci&&ci.value.replace(/\D/g,''))||'';
       if(!/^\d{4}$/.test(c)){say('הקוד הוא 4 ספרות.');ci&&ci.focus();return}
-      if(jb.disabled)return;jb.disabled=true;sound('tick');say('מתחברים למשחק '+c+'...');
+      if(jb.disabled)return;jb.disabled=true;sound('tick');say('מתחברים למשחק '+c+'... (זה יכול לקחת עד 15 שניות)');
       try{
         const N=await joinGame(c);say('מחוברים! מתחילים...');
-        N.onMsg=m=>{if(m.t==='hello'){if([1,3,5,7].includes(m.target))target=m.target;startMatch(null)}else if(m.t==='deny'){netClose();say('במשחק הזה כבר יש שני שחקנים.');jb.disabled=false}};
-        N.onGone=()=>{netClose();say('החבר סגר את המשחק.');jb.disabled=false};
-      }catch(e){netClose();jb.disabled=false;say(netErr(e))}
+        if([1,3,5,7].includes(N.target))target=N.target;startMatch(null);
+      }catch(e){netClose();jb.disabled=false;say(e&&e.type==='full'?'במשחק הזה כבר יש שני שחקנים.':netErr(e))}
     };
     jb.onclick=join;if(ci)ci.onkeydown=e=>{if(e.key==='Enter')join()};
     (code?jb:hb).focus({preventScroll:true});
@@ -2911,7 +2984,8 @@ function sheshPlay(stage,lvl,ctl){
     const plEls=[...stage.querySelectorAll('.sb-pl')];
     let ctx=null,W=0,H=0,G=null;
     /* phone turned sideways: the board fills the screen; first tap also asks for real full screen (Android) */
-    const landPhone=()=>matchMedia('(orientation:landscape) and (max-height:520px)').matches;
+    const landPhone=()=>matchMedia('(orientation:landscape) and (max-height:600px)').matches;
+    document.body.classList.add('sb-on');offs.push(()=>document.body.classList.remove('sb-on'));
     const goFull=()=>{const d=document,el=d.documentElement;if(!landPhone()||d.fullscreenElement||d.webkitFullscreenElement)return;
       const f=el.requestFullscreen||el.webkitRequestFullscreen;if(f)try{const r=f.call(el,{navigationUI:'hide'});if(r&&r.catch)r.catch(()=>{})}catch(e){}};
     on(stage,'pointerdown',goFull,{capture:true});
