@@ -496,7 +496,7 @@ body.pt-open .mp{opacity:0;pointer-events:none}
 .pk-join{display:flex;gap:.4rem;flex:1;min-width:200px}
 .pk-join input{width:5.5em;text-align:center;letter-spacing:.2em;font-family:var(--display);font-size:1.5rem;direction:ltr}
 .pk-on-msg{margin:0;color:#bdb6ae;font-size:.95rem;min-height:1.4em}
-.pk-lobby .pk-code{display:flex;flex-direction:column;align-items:center;line-height:1}
+.sb-joinrow{display:flex;gap:.5rem;justify-content:center;align-items:center} .sb-joinrow input{width:7.5rem;font-family:var(--display);font-size:2rem;text-align:center;letter-spacing:.15em;padding:.15rem .4rem;border-radius:12px;border:2px solid #4a4a50;background:#111;color:#fff} .sb-joinrow input:focus{outline:none;border-color:var(--yellow)} .sb-online .sb-tg{justify-content:center} .pk-lobby .pk-code{display:flex;flex-direction:column;align-items:center;line-height:1}
 .pk-lobby .pk-code small{font-family:var(--display);font-size:1.2rem;color:#8d867e}
 .pk-lobby .pk-code b{font-family:var(--display);font-size:clamp(4rem,16vw,6.5rem);color:var(--yellow);letter-spacing:.12em;text-shadow:4px 4px 0 var(--red)}
 .pk-share{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}
@@ -2718,11 +2718,12 @@ function sheshPlay(stage,lvl,ctl){
   const on=(el,ev,fn,opt)=>{el.addEventListener(ev,fn,opt);offs.push(()=>el.removeEventListener(ev,fn,opt))};
   const later=(fn,ms)=>{const t=setTimeout(fn,ms);timers.push(t);return t};
   const teardown=()=>{cancelAnimationFrame(raf);raf=0;timers.forEach(clearTimeout);timers=[];offs.forEach(f=>f());offs=[]};
-  let mode=store.get('sb:mode','duo')==='ai'?'ai':'duo',target=[1,3,5,7].includes(store.get('sb:target',3))?store.get('sb:target',3):3;
+  let mode=['ai','online'].includes(store.get('sb:mode','duo'))?store.get('sb:mode','duo'):'duo',target=[1,3,5,7].includes(store.get('sb:target',3))?store.get('sb:target',3):3;
 
   /* ---------- start screen ---------- */
   function showStart(){
-    teardown();
+    teardown();netClose();
+    const hc=(location.hash.match(/^#shesh-(\d{4})$/)||[])[1];if(hc){dropHash();return showOnline(hc)}
     const save=store.get('sb:save',null),okSave=save&&save.st&&save.st.b&&save.st.b.length===24;
     const wins=['easy','mid','hard'].map(k=>{const b=best('shesh:'+k);return `<span><i>${LV[k]}</i>${b==null?'—':b}</span>`}).join('');
     stage.innerHTML=`<div class="ps ps-start panel sb-start">
@@ -2731,12 +2732,12 @@ function sheshPlay(stage,lvl,ctl){
       <p class="ps-lead">לוח אדום־שחור, 15 אבנים לכל צד וכל החוקים: אכילה, בר, חובה לשחק את מקסימום הקוביות, הוצאה ומארס. שני שחקנים על אותו מסך, או נגד המחשב.</p>
       ${okSave?`<button class="bigbtn sb-resume">המשך את המשחק השמור <small>(${SB_NAME[0]} ${save.score[0]} : ${save.score[1]} ${SB_NAME[1]}${save.mode==='ai'?' · נגד המחשב':''})</small></button>`:''}
       <div class="sb-opts">
-        <div class="seg" role="group" aria-label="מצב משחק"><button data-m="duo" aria-pressed="${mode==='duo'}">שני שחקנים</button><button data-m="ai" aria-pressed="${mode==='ai'}">נגד המחשב</button></div>
+        <div class="seg" role="group" aria-label="מצב משחק"><button data-m="duo" aria-pressed="${mode==='duo'}">שני שחקנים</button><button data-m="ai" aria-pressed="${mode==='ai'}">נגד המחשב</button><button data-m="online" aria-pressed="${mode==='online'}">מול חבר אונליין</button></div>
         <div class="seg sb-ai" role="group" aria-label="רמת המחשב" ${mode==='ai'?'':'hidden'}>${['easy','mid','hard'].map(k=>`<button data-l="${k}" aria-pressed="${k===lvl}">${LV[k]}</button>`).join('')}</div>
         <div class="sb-tg"><b>משחקים עד</b><div class="seg" role="group" aria-label="נקודות לניצחון">${[1,3,5,7].map(n=>`<button data-t="${n}" aria-pressed="${n===target}">${n}</button>`).join('')}</div><b>נקודות</b></div>
       </div>
-      <p class="ps-lvd">${mode==='ai'?'אתם לבן ומתחילים בגלגול פתיחה. ':'שני השחקנים משחקים על אותו מסך, כל אחד בתורו. '}ניצחון רגיל שווה נקודה, מארס שתיים, ומארס כפול שלוש.</p>
-      <button class="bigbtn ps-go">${okSave?'משחק חדש':'התחל משחק'}</button>
+      <p class="ps-lvd">${mode==='ai'?'אתם לבן ומתחילים בגלגול פתיחה. ':mode==='online'?'פותחים משחק ושולחים לחבר קישור, או מצטרפים עם הקוד שקיבלתם. כל אחד משחק מהטלפון או מהמחשב שלו. ':'שני השחקנים משחקים על אותו מסך, כל אחד בתורו. '}ניצחון רגיל שווה נקודה, מארס שתיים, ומארס כפול שלוש.</p>
+      <button class="bigbtn ps-go">${mode==='online'?'שחקו מול חבר':okSave?'משחק חדש':'התחל משחק'}</button>
       <details class="sb-rules"><summary>החוקים בקצרה</summary><ul>
         <li>לבן נע מהפינה השמאלית העליונה סביב הלוח אל הבית בצד ימין למטה, ושחור בכיוון ההפוך אל הבית בצד ימין למעלה.</li>
         <li>אפשר לנחות על נקודה ריקה, על נקודה שלכם, או על אבן בודדת של היריב. אז היא נאכלת ועולה לבר.</li>
@@ -2750,7 +2751,7 @@ function sheshPlay(stage,lvl,ctl){
     stage.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{mode=b.dataset.m;store.set('sb:mode',mode);sound('tick');showStart()});
     stage.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{if(b.dataset.l===lvl)return;sound('tick');store.set('lvl:shesh',b.dataset.l);ctl.go(b.dataset.l)});
     stage.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{target=+b.dataset.t;store.set('sb:target',target);sound('tick');stage.querySelectorAll('[data-t]').forEach(x=>x.setAttribute('aria-pressed',x===b))});
-    stage.querySelector('.ps-go').onclick=()=>{sound('tick');store.set('sb:save',null);startMatch(null)};
+    stage.querySelector('.ps-go').onclick=()=>{sound('tick');if(mode==='online'){showOnline('');return}store.set('sb:save',null);startMatch(null)};
     const rs=stage.querySelector('.sb-resume');if(rs)rs.onclick=()=>{sound('tick');startMatch(save)};
     (rs||stage.querySelector('.ps-go')).focus({preventScroll:true});
     const pv=stage.querySelector('.ps-preview');let pctx=null,pw=0,ph=0;
@@ -2762,16 +2763,121 @@ function sheshPlay(stage,lvl,ctl){
     raf=requestAnimationFrame(anim);
   }
 
+  /* ---------- online vs a friend: PeerJS (WebRTC), no server. The host's browser rolls the dice ---------- */
+  let NET=null;
+  const PEER_SRC=['https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js','https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'];
+  function loadPeer(){
+    if(window.Peer)return Promise.resolve();
+    return PEER_SRC.reduce((p,src)=>p.catch(()=>new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.async=true;sc.onload=()=>window.Peer?res():rej({type:'peer'});sc.onerror=()=>rej({type:'peer'});document.head.appendChild(sc)})),Promise.reject(new Error('start')));
+  }
+  const withTO=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej({type:'timeout'}),ms))]);
+  const netErr=e=>{const t=e&&(e.type||e.message)||'';return t==='peer-unavailable'?'לא נמצא משחק עם הקוד הזה. בדקו את הקוד, ושהחבר עדיין בדף.':t==='network'||t==='server-error'||t==='socket-error'?'אין חיבור לשרת. בדקו את האינטרנט ונסו שוב.':t==='timeout'?'החיבור לא הצליח. נסו שוב, או התחברו לרשת אחרת.':t==='peer'?'לא הצלחנו לטעון את רכיב האונליין. בדקו את האינטרנט.':'משהו השתבש בחיבור. נסו שוב.'};
+  const dropHash=()=>{try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}};
+  const shareLink=c=>location.origin+location.pathname+'#shesh-'+c;
+  const PIDS=c=>'nachanasi-shesh-'+c;
+  function netClose(){
+    if(!NET)return;const N=NET;NET=null;clearInterval(N.hb);
+    try{if(N.conn&&N.conn.open)N.conn.send({t:'bye'})}catch(e){}
+    setTimeout(()=>{try{N.conn&&N.conn.close()}catch(e){}try{N.peer&&N.peer.destroy()}catch(e){}},250);
+  }
+  function mkNet(role,peer,code){
+    const N={role,me:role==='host'?0:1,peer,code,conn:null,last:Date.now(),
+      send(m){try{if(N.conn&&N.conn.open)N.conn.send(m)}catch(e){}}};
+    return N;
+  }
+  function wire(N,conn){
+    N.conn=conn;N.last=Date.now();
+    conn.on('data',m=>{if(NET!==N||!m||typeof m!=='object')return;N.last=Date.now();
+      if(N.quiet){N.quiet=false;N.onQuiet&&N.onQuiet(false)}
+      if(m.t==='ping')return;if(m.t==='bye'){N.gone=true;N.onGone&&N.onGone();return}N.onMsg&&N.onMsg(m)});
+    conn.on('close',()=>{if(NET===N&&!N.gone){N.gone=true;N.onGone&&N.onGone()}});
+    N.hb=setInterval(()=>{if(NET!==N)return;N.send({t:'ping'});const q=Date.now()-N.last>15000;if(q&&!N.quiet){N.quiet=true;N.onQuiet&&N.onQuiet(true)}},2500);
+  }
+  async function hostGame(){
+    await loadPeer();let peer=null,code='';
+    for(let k=0;k<5&&!peer;k++){
+      code=String(1000+Math.floor(Math.random()*9000));const p=new Peer(PIDS(code),{debug:0});
+      const r=await withTO(new Promise(res=>{p.on('open',()=>res('ok'));p.on('error',e=>res(e&&e.type||'error'))}),15000).catch(()=>'timeout');
+      if(r==='ok')peer=p;else{try{p.destroy()}catch(e){}if(r!=='unavailable-id')throw {type:r}}
+    }
+    if(!peer)throw {type:'error'};
+    const N=mkNet('host',peer,code);NET=N;
+    peer.on('connection',conn=>{
+      if(N.conn){conn.on('open',()=>{try{conn.send({t:'deny'})}catch(e){}setTimeout(()=>{try{conn.close()}catch(e){}},300)});return}
+      conn.on('open',()=>{if(NET!==N||N.conn)return;wire(N,conn);N.send({t:'hello',target});N.onJoin&&N.onJoin()});
+    });
+    peer.on('disconnected',()=>{try{if(NET===N)peer.reconnect()}catch(e){}});
+    return N;
+  }
+  async function joinGame(code){
+    await loadPeer();
+    const peer=new Peer({debug:0});
+    await withTO(new Promise((res,rej)=>{peer.on('open',res);peer.on('error',rej)}),15000);
+    const N=mkNet('guest',peer,code);NET=N;
+    const conn=peer.connect(PIDS(code),{reliable:true});
+    await withTO(new Promise((res,rej)=>{conn.on('open',res);conn.on('error',rej);peer.on('error',rej)}),15000);
+    if(NET!==N)throw {type:'error'};
+    wire(N,conn);return N;
+  }
+  function showOnline(code){
+    teardown();netClose();mode='online';
+    stage.innerHTML=`<div class="ps ps-start panel pk-lobby sb-online">
+      <h4 class="ps-title">${code?'הוזמנתם לשש בש!':'שש בש מול חבר'}</h4>
+      ${code?`<div class="pk-code"><small>קוד המשחק</small><b dir="ltr">${code}</b></div>
+      <button class="bigbtn ps-go sb-join">הצטרפו למשחק</button>`:`
+      <button class="bigbtn ps-go sb-host">פתחו משחק חדש</button>
+      <div class="sb-tg"><b>משחקים עד</b><div class="seg" role="group" aria-label="נקודות לניצחון">${[1,3,5,7].map(n=>`<button data-t="${n}" aria-pressed="${n===target}">${n}</button>`).join('')}</div><b>נקודות</b></div>
+      <p class="ps-lvd">קיבלתם קוד מחבר? כתבו אותו כאן:</p>
+      <div class="sb-joinrow"><input class="sb-code" inputmode="numeric" maxlength="4" placeholder="1234" dir="ltr" aria-label="קוד המשחק"><button class="bigbtn ghost sb-join">הצטרפו</button></div>`}
+      <p class="pk-on-msg" aria-live="polite"></p>
+      <button class="bigbtn ghost sb-back">${code?'לא עכשיו, חזרה':'חזרה'}</button>
+    </div>`;
+    const msg=stage.querySelector('.pk-on-msg'),say=t=>{msg.textContent=t};
+    stage.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{target=+b.dataset.t;store.set('sb:target',target);sound('tick');stage.querySelectorAll('[data-t]').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+    stage.querySelector('.sb-back').onclick=()=>{sound('tick');netClose();showStart()};
+    const hb=stage.querySelector('.sb-host');
+    if(hb)hb.onclick=async()=>{if(hb.disabled)return;hb.disabled=true;sound('tick');say('פותחים משחק...');
+      try{const N=await hostGame();showHostWait(N)}catch(e){hb.disabled=false;say(netErr(e))}};
+    const jb=stage.querySelector('.sb-join'),ci=stage.querySelector('.sb-code');
+    const join=async()=>{
+      const c=code||(ci&&ci.value.replace(/\D/g,''))||'';
+      if(!/^\d{4}$/.test(c)){say('הקוד הוא 4 ספרות.');ci&&ci.focus();return}
+      if(jb.disabled)return;jb.disabled=true;sound('tick');say('מתחברים למשחק '+c+'...');
+      try{
+        const N=await joinGame(c);say('מחוברים! מתחילים...');
+        N.onMsg=m=>{if(m.t==='hello'){if([1,3,5,7].includes(m.target))target=m.target;startMatch(null)}else if(m.t==='deny'){netClose();say('במשחק הזה כבר יש שני שחקנים.');jb.disabled=false}};
+        N.onGone=()=>{netClose();say('החבר סגר את המשחק.');jb.disabled=false};
+      }catch(e){netClose();jb.disabled=false;say(netErr(e))}
+    };
+    jb.onclick=join;if(ci)ci.onkeydown=e=>{if(e.key==='Enter')join()};
+    (code?jb:hb).focus({preventScroll:true});
+  }
+  function showHostWait(N){
+    const link=shareLink(N.code);
+    stage.innerHTML=`<div class="ps ps-start panel pk-lobby sb-online">
+      <h4 class="ps-title">המשחק שלכם פתוח</h4>
+      <div class="pk-code"><small>קוד המשחק</small><b dir="ltr">${N.code}</b></div>
+      <div class="pk-share"><button class="ps-ib pk-copy">העתיקו קישור</button><a class="ps-ib pk-wa" target="_blank" rel="noopener">שלחו בוואטסאפ</a></div>
+      <p class="ps-lvd pk-wait">מחכים שהחבר יצטרף... (משחקים עד ${target})</p>
+      <button class="bigbtn ghost sb-back">סגרו את המשחק</button>
+      <p class="pk-on-msg">אתם לבן, החבר שחור. השאירו את הדף פתוח.</p>
+    </div>`;
+    stage.querySelector('.pk-wa').href='https://wa.me/?text='+encodeURIComponent(`בוא לשחק איתי שש בש באתר של שבט הנשיא! קוד המשחק: ${N.code}\n${link}`);
+    stage.querySelector('.pk-copy').onclick=async e=>{sound('tick');try{await navigator.clipboard.writeText(link);e.target.textContent='הקישור הועתק'}catch(_){prompt('העתיקו את הקישור:',link)}};
+    stage.querySelector('.sb-back').onclick=()=>{sound('tick');netClose();showOnline('')};
+    N.onJoin=()=>{sound('good');startMatch(null)};
+  }
+
   /* ---------- a match ---------- */
   function startMatch(saved){
     teardown();
     const M=saved?{mode:saved.mode,ai:saved.ai||lvl,target:saved.target,score:saved.score.slice(),games:saved.games||0}:{mode,ai:lvl,target,score:[0,0],games:0};
-    const vsAI=M.mode==='ai',AIP=1;
+    const vsAI=M.mode==='ai',AIP=1,online=M.mode==='online'&&!!NET,ME=online?NET.me:-1,remote=p=>(vsAI&&p===AIP)||(online&&p!==ME);
     stage.innerHTML=`<div class="ps sb-game">
       <div class="sb-top">
-        <div class="sb-pl" data-p="0"><span class="sb-dot w"></span><b>${SB_NAME[0]}${vsAI?' (אתם)':''}</b><span class="sb-pip"></span><span class="sb-sc"></span></div>
+        <div class="sb-pl" data-p="0"><span class="sb-dot w"></span><b>${SB_NAME[0]}${vsAI||(online&&ME===0)?' (אתם)':online?' (החבר)':''}</b><span class="sb-pip"></span><span class="sb-sc"></span></div>
         <div class="sb-mid"><span class="sb-target">עד ${M.target}</span></div>
-        <div class="sb-pl" data-p="1"><span class="sb-dot b"></span><b>${SB_NAME[1]}${vsAI?' (המחשב · '+LV[M.ai]+')':''}</b><span class="sb-pip"></span><span class="sb-sc"></span></div>
+        <div class="sb-pl" data-p="1"><span class="sb-dot b"></span><b>${SB_NAME[1]}${vsAI?' (המחשב · '+LV[M.ai]+')':online?(ME===1?' (אתם)':' (החבר)'):''}</b><span class="sb-pip"></span><span class="sb-sc"></span></div>
       </div>
       <div class="sb-board"><canvas tabindex="0" aria-label="לוח שש בש"></canvas><div class="ps-over" hidden></div></div>
       <div class="sb-bar">
@@ -2851,38 +2957,42 @@ function sheshPlay(stage,lvl,ctl){
     function setMsg(t){msgEl.textContent=t}
     function hud(){
       for(const p of [0,1]){const el=plEls[p];el.classList.toggle('on',phase!=='over'&&turn===p);el.querySelector('.sb-pip').textContent=`${SB.pips(st,p)} צעדים`;el.querySelector('.sb-sc').textContent=M.score[p]}
-      const human=!vsAI||turn!==AIP;
+      const human=!remote(turn);
       undoB.hidden=!(phase==='move'&&done.length>0&&human);
       if(phase==='roll'&&human){act.hidden=false;act.textContent='הטל קוביות';act.disabled=false}
       else if(phase==='move'&&human&&!movesLeft()&&!noMoves){act.hidden=false;act.textContent='סיום תור';act.disabled=false}
-      else if(phase==='opening'){act.hidden=false;act.textContent='גלגול פתיחה';act.disabled=!!openRoll}
+      else if(phase==='opening'&&!(online&&ME!==0)){act.hidden=false;act.textContent='גלגול פתיחה';act.disabled=!!openRoll}
       else act.hidden=true;
     }
     function save(){
-      if(phase==='over')return;
+      if(phase==='over'||online)return;
       store.set('sb:save',{mode:M.mode,ai:M.ai,target:M.target,score:M.score,games:M.games,st,turn});
     }
     function newGame(fromSave){
       st=fromSave?SB.clone(fromSave.st):SB.init();anims=[];drag=null;sel=null;dice=[];used=[];legal=[];done=[];rollAnim=null;openRoll=null;
       grill=null;
-      if(fromSave){turn=fromSave.turn;phase='roll';if(grillCheck())return;setMsg(`תור ה${SB_NAME[turn]}. ${!vsAI||turn!==AIP?'הטילו קוביות.':''}`);hud();if(vsAI&&turn===AIP)later(aiTurn,700);return}
+      if(fromSave){turn=fromSave.turn;phase='roll';if(grillCheck())return;setMsg(`תור ה${SB_NAME[turn]}. ${!remote(turn)?'הטילו קוביות.':''}`);hud();if(vsAI&&turn===AIP)later(aiTurn,700);return}
       phase='opening';turn=0;setMsg('גלגול פתיחה: כל צד מטיל קובייה אחת, והגבוה מתחיל עם שתיהן.');hud();
       if(vsAI)later(openingRoll,500);
+      if(online)setMsg(ME===0?'גלגול פתיחה: לחצו "גלגול פתיחה". הגבוה מתחיל.':'ממתינים שהמארח יגלגל את גלגול הפתיחה...');
     }
-    function openingRoll(){
+    function openingRoll(given){
       if(phase!=='opening'||openRoll)return;
-      let a,b;do{a=1+Math.floor(Math.random()*6);b=1+Math.floor(Math.random()*6)}while(false);
+      let a,b;if(Array.isArray(given)){[a,b]=given}else{if(online&&ME!==0)return;a=1+Math.floor(Math.random()*6);b=1+Math.floor(Math.random()*6);if(online)NET.send({t:'open',a,b})}
       openRoll={a,b,t:performance.now()};sound('drop');hud();
       later(()=>{
-        if(a===b){openRoll=null;setMsg(`שניהם ${a}. מגלגלים שוב.`);hud();if(vsAI)later(openingRoll,700);return}
+        if(a===b){openRoll=null;setMsg(`שניהם ${a}. מגלגלים שוב.`);hud();if(vsAI||(online&&ME===0))later(openingRoll,700);return}
         turn=a>b?0:1;dice=[a,b];openRoll=null;
         setMsg(`${SB_NAME[turn]} פותח עם ${Math.max(a,b)}–${Math.min(a,b)}.`);
         beginMoves();
       },900);
     }
-    function roll(){
+    function roll(given){
       if(phase!=='roll')return;
-      const a=1+Math.floor(Math.random()*6),b=1+Math.floor(Math.random()*6);
+      let a,b;
+      if(Array.isArray(given)){[a,b]=given}
+      else if(online&&ME!==0){if(remote(turn))return;NET.send({t:'roll'});act.disabled=true;setMsg('מגלגלים...');return}
+      else{a=1+Math.floor(Math.random()*6);b=1+Math.floor(Math.random()*6);if(online)NET.send({t:'dice',a,b})}
       dice=a===b?[a,a,a,a]:[a,b];rollAnim={t:performance.now()};phase='rolling';sound('drop');hud();
       later(()=>{rollAnim=null;beginMoves()},620);
     }
@@ -2890,11 +3000,11 @@ function sheshPlay(stage,lvl,ctl){
       phase='move';used=dice.map(()=>false);turnStart=SB.clone(st);done=[];noMoves=false;
       legal=SB.sequences(st,turn,dice.length===2&&dice[0]===dice[1]?[dice[0],dice[0],dice[0],dice[0]]:dice);
       if(dice.length===2&&dice[0]===dice[1]){dice=[dice[0],dice[0],dice[0],dice[0]];used=[false,false,false,false]}
-      const human=!vsAI||turn!==AIP;
+      const human=!remote(turn);
       if(!legal.some(o=>o.seq.length)){noMoves=true;const id=turnId;setMsg(`ל${SB_NAME[turn]} אין מהלך אפשרי עם ${dice.slice(0,2).join('–')}. התור עובר.`);hud();later(()=>endTurn(id),1700);return}
-      setMsg(human?`תור ה${SB_NAME[turn]}: ${dice.length===4?'דאבל '+dice[0]+'! ארבעה מהלכים':dice.join('–')}. גררו אבן או לחצו עליה.`:`המחשב חושב...`);
+      setMsg(human?`תור ה${SB_NAME[turn]}: ${dice.length===4?'דאבל '+dice[0]+'! ארבעה מהלכים':dice.join('–')}. גררו אבן או לחצו עליה.`:(online?'החבר משחק...':'המחשב חושב...'));
       hud();
-      if(!human)later(aiPlay,650);
+      if(!human&&vsAI)later(aiPlay,650);
     }
     function markUsed(d){const k=dice.findIndex((v,j)=>v===d&&!used[j]);if(k>=0)used[k]=true}
     /* play a path of single-die moves, animating each step */
@@ -2922,6 +3032,7 @@ function sheshPlay(stage,lvl,ctl){
       st=SB.clone(turnStart);done=[];used=dice.map(()=>false);anims=[];sel=null;sound('tick');
       setMsg(`תור ה${SB_NAME[turn]}: ${dice.length===4?'דאבל '+dice[0]:dice.join('–')}. המהלכים בוטלו.`);hud();
     }
+    function localUndo(){if(remote(turn)||phase!=='move'||!done.length)return;undo();if(online)NET.send({t:'undo'})}
     /* ends the current turn once; a stale timer (id of an older turn) does nothing */
     function endTurn(id){
       if(phase==='over'||phase==='opening'||phase==='rolling'||phase==='grill')return;if(id!=null&&id!==turnId)return;
@@ -2929,9 +3040,9 @@ function sheshPlay(stage,lvl,ctl){
       turnId++;noMoves=false;
       turn=1-turn;phase='roll';dice=[];used=[];legal=[];done=[];sel=null;save();
       if(grillCheck())return;
-      const human=!vsAI||turn!==AIP;
-      setMsg(human?`תור ה${SB_NAME[turn]}. הטילו קוביות.`:'תור המחשב.');hud();
-      if(!human)later(aiTurn,550);
+      const human=!remote(turn);
+      setMsg(human?`תור ה${SB_NAME[turn]}. הטילו קוביות.`:online?'תור החבר.':'תור המחשב.');hud();
+      if(!human&&vsAI)later(aiTurn,550);
     }
     /* ---------- the computer ---------- */
     function aiTurn(){if(phase==='roll'&&turn===AIP&&vsAI)roll()}
@@ -2951,34 +3062,65 @@ function sheshPlay(stage,lvl,ctl){
       phase='over';const v=SB.winValue(st,w);M.score[w]+=v;M.games++;sound('win');
       setMsg(`ה${SB_NAME[w]} הוציא את כל האבנים.`);
       const champ=M.score[w]>=M.target;
-      if(champ)store.set('sb:save',null);else{/* next game keeps the match */}
+      if(champ&&!online)store.set('sb:save',null);else{/* next game keeps the match */}
       if(vsAI&&champ&&w===0){const k='shesh:'+M.ai;best(k,(best(k)||0)+1);ctl.xp(60*(M.ai==='hard'?2:M.ai==='mid'?1.3:1))}
       else if(!vsAI&&champ)ctl.xp(30);
       hud();
       const kind=v===3?'מארס כפול!':v===2?'מארס!':'ניצחון';
       later(()=>{
+        if(phase!=='over')return;
         over.innerHTML=`<div class="ps-card" role="dialog" aria-label="סוף משחק">
           <div class="ps-k">${kind} · ${v===1?'נקודה אחת':v+' נקודות'}</div>
-          <h4>${champ?(vsAI?(w===0?'ניצחתם במשחק!':'המחשב ניצח'):'ה'+SB_NAME[w]+' ניצח במשחק!'):(vsAI?(w===0?'ניצחתם!':'המחשב ניצח הפעם'):'ה'+SB_NAME[w]+' ניצח!')}</h4>
+          <h4>${online?(w===ME?(champ?'ניצחתם במשחק!':'ניצחתם!'):(champ?'החבר ניצח במשחק':'החבר ניצח הפעם')):champ?(vsAI?(w===0?'ניצחתם במשחק!':'המחשב ניצח'):'ה'+SB_NAME[w]+' ניצח במשחק!'):(vsAI?(w===0?'ניצחתם!':'המחשב ניצח הפעם'):'ה'+SB_NAME[w]+' ניצח!')}</h4>
           <div class="ps-num">${M.score[0]} : ${M.score[1]}</div>
           <p>${SB_NAME[0]} ${M.score[0]} · ${SB_NAME[1]} ${M.score[1]} · משחקים עד ${M.target}</p>
           <div class="row">${champ?'<button class="bigbtn" data-a="new">משחק חדש</button>':'<button class="bigbtn" data-a="next">המשחק הבא</button>'}<button class="bigbtn ghost" data-a="menu">מסך הפתיחה</button></div></div>`;
         over.hidden=false;requestAnimationFrame(()=>over.classList.add('in'));
-        if(!champ)store.set('sb:save',{mode:M.mode,ai:M.ai,target:M.target,score:M.score,games:M.games,st:SB.init(),turn:0});
+        if(!champ&&!online)store.set('sb:save',{mode:M.mode,ai:M.ai,target:M.target,score:M.score,games:M.games,st:SB.init(),turn:0});
         over.querySelector('.bigbtn').focus({preventScroll:true});
       },700);
     }
-    on(over,'click',e=>{const b=e.target.closest('[data-a]');if(!b)return;sound('tick');const a=b.dataset.a;
+    function overAct(a){
       over.classList.remove('in');over.hidden=true;
-      if(a==='next')newGame(null);else if(a==='new'){M.score=[0,0];M.games=0;newGame(null)}else if(a==='menu')showStart()});
+      if(a==='next')newGame(null);else if(a==='new'){M.score=[0,0];M.games=0;newGame(null)}else if(a==='menu')showStart();
+    }
+    on(over,'click',e=>{const b=e.target.closest('[data-a]');if(!b)return;sound('tick');const a=b.dataset.a;
+      if(a==='left'){overAct('menu');return}
+      if(online&&(a==='next'||a==='new'))NET.send({t:a});overAct(a)});
+    /* ---------- the friend's messages ---------- */
+    function showGone(){
+      phase='over';sel=null;drag=null;hud();setMsg('החבר יצא מהמשחק.');
+      over.innerHTML=`<div class="ps-card" role="dialog" aria-label="החבר יצא"><div class="ps-k">${M.score[0]} : ${M.score[1]}</div><h4>החבר יצא מהמשחק</h4><p>אפשר לפתוח משחק חדש ולשלוח לו שוב קישור.</p><div class="row"><button class="bigbtn" data-a="left">מסך הפתיחה</button></div></div>`;
+      over.hidden=false;requestAnimationFrame(()=>over.classList.add('in'));
+    }
+    if(online){
+      const N=NET;
+      N.onMsg=m=>{
+        if(NET!==N)return;
+        if((m.t==='path'||m.t==='undo'||m.t==='end'||m.t==='dice')&&phase==='rolling'){later(()=>N.onMsg(m),200);return}
+        if(m.t==='open'&&phase==='opening'&&ME!==0)openingRoll([m.a,m.b]);
+        else if(m.t==='roll'&&ME===0&&phase==='roll'&&remote(turn))roll();
+        else if(m.t==='dice'&&ME!==0&&phase==='roll')roll([m.a,m.b]);
+        else if(m.t==='path'&&phase==='move'&&remote(turn)&&Array.isArray(m.path)&&m.path.length){
+          const ok=remaining().some(o=>m.path.every((x,k)=>o.seq[done.length+k]&&sameMove(o.seq[done.length+k],x)));
+          if(ok)playPath(m.path);
+        }
+        else if(m.t==='undo'&&phase==='move'&&remote(turn))undo();
+        else if(m.t==='end'&&phase==='move'&&remote(turn))endTurn(turnId);
+        else if((m.t==='next'||m.t==='new')&&phase==='over')overAct(m.t);
+      };
+      N.onGone=()=>{if(NET===N)showGone()};
+      N.onQuiet=q=>{if(phase!=='over')setMsg(q?'החבר לא מגיב... מחכים שיחזור.':'החבר חזר.')};
+    }
 
     /* ---------- input ---------- */
     const toLocal=e=>{const r=cv.getBoundingClientRect();return [(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*H/r.height]};
-    const humanMove=()=>phase==='move'&&(!vsAI||turn!==AIP)&&!anims.length;
+    const humanMove=()=>phase==='move'&&!remote(turn)&&!anims.length;
     function tryMove(src,dest){
       const d=destsFrom(src),path=d.get(dest);
       if(!path){sound('bad');return false}
       playPath(path,path.length>1);
+      if(online)NET.send({t:'path',path});
       if(phase==='move'&&!movesLeft())setMsg('סיימתם את המהלכים. לחצו "סיום תור", או "ביטול מהלך" כדי לשחק אחרת.');
       return true;
     }
@@ -3010,14 +3152,14 @@ function sheshPlay(stage,lvl,ctl){
     };
     on(cv,'pointerup',e=>endDrag(e,false));on(cv,'pointercancel',e=>endDrag(e,true));on(cv,'lostpointercapture',e=>endDrag(e,true));
     on(cv,'touchmove',e=>{if(drag)e.preventDefault()},{passive:false});
-    act.onclick=()=>{sound('tick');if(phase==='opening')openingRoll();else if(phase==='roll')roll();else if(phase==='move'&&!movesLeft()&&!noMoves)endTurn(turnId)};
-    undoB.onclick=undo;
+    act.onclick=()=>{sound('tick');if(phase==='opening')openingRoll();else if(phase==='roll')roll();else if(phase==='move'&&!movesLeft()&&!noMoves){if(online)NET.send({t:'end'});endTurn(turnId)}};
+    undoB.onclick=localUndo;
     on(document,'keydown',e=>{
       if(!stage.contains(cv)||!over.hidden)return;if(e.target.closest&&e.target.closest('button,summary'))return;
       if((e.key===' '||e.key==='Enter')&&phase==='grill'&&grill&&performance.now()-grill.t0>900){e.preventDefault();finishGrill(turnId)}
       else if(e.key===' '||e.key==='Enter'){if(!act.hidden&&!act.disabled){e.preventDefault();act.click()}}
-      else if((e.key==='z'||e.key==='Z'||e.key==='ז')&&(e.ctrlKey||e.metaKey)){e.preventDefault();undo()}
-      else if(e.key==='Backspace'){e.preventDefault();undo()}
+      else if((e.key==='z'||e.key==='Z'||e.key==='ז')&&(e.ctrlKey||e.metaKey)){e.preventDefault();localUndo()}
+      else if(e.key==='Backspace'){e.preventDefault();localUndo()}
     });
     const ro=window.ResizeObserver?new ResizeObserver(layout):null;if(ro){ro.observe(cv);offs.push(()=>ro.disconnect())}else on(window,'resize',layout);
 
@@ -3168,12 +3310,12 @@ function sheshPlay(stage,lvl,ctl){
         sbDie(ctx,dx,dy,ds,rv?1+Math.floor(Math.random()*6):openRoll.b,1,rv?(Math.random()-.5)*1.2:0)}
       else if(rollAnim){const e=(now-rollAnim.t)/600;for(let k=0;k<2;k++)sbDie(ctx,dx+(k-.5)*ds*1.35+(1-e)*Math.sin(now/30+k)*ds*.3,dy-(1-e)*Math.abs(Math.sin(now/90+k))*ds*.6,ds,1+Math.floor(Math.random()*6),turn,(1-e)*(Math.random()-.5)*2)}
       else if(dice.length&&phase!=='over'){const n=dice.length;for(let k=0;k<n;k++){const s=n===4?ds*.78:ds,x=dx+(k-(n-1)/2)*s*1.25;sbDie(ctx,x,dy,s,dice[k],turn,0,used[k]?.28:1)}}
-      if(phase==='roll'&&(!vsAI||turn!==AIP)){ctx.fillStyle=`rgba(243,224,59,${.6+.3*Math.sin(now/220)})`;ctx.font=`700 ${Math.max(12,pw*.5)}px Karantina, Impact, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('לחצו "הטל קוביות"',dx,dy)}
+      if(phase==='roll'&&!remote(turn)){ctx.fillStyle=`rgba(243,224,59,${.6+.3*Math.sin(now/220)})`;ctx.font=`700 ${Math.max(12,pw*.5)}px Karantina, Impact, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('לחצו "הטל קוביות"',dx,dy)}
       if(gs)grillOver(gs,now);
       ctx.restore();
       ctx.textBaseline='alphabetic';
     }
-    on(cv,'click',()=>{if(phase==='roll'&&(!vsAI||turn!==AIP))roll();else if(phase==='grill'&&grill&&performance.now()-grill.t0>900)finishGrill(turnId)});
+    on(cv,'click',()=>{if(phase==='roll'&&!remote(turn))roll();else if(phase==='grill'&&grill&&performance.now()-grill.t0>900)finishGrill(turnId)});
     // read-only hooks for the automated tests (only when a test sets window.__SB_TEST__ before loading)
     if(window.__SB_TEST__)window.__sb={get:()=>({st:SB.clone(st),turn,phase,dice:dice.slice(),used:used.slice(),done:done.length,moves:phase==='move'&&movesLeft(),anims:anims.length,score:M.score.slice()}),
       sources:()=>[...sources()],dests:src=>[...destsFrom(src).keys()],top:(where,p)=>stackTop(st,p,where),drop:where=>where==='off'?offXY(turn,0):where==='bar'?barXY(turn,0,1):slotXY(where,0,1),size:()=>[W,H]};
@@ -3181,7 +3323,7 @@ function sheshPlay(stage,lvl,ctl){
   }
 
   showStart();
-  return teardown;
+  return ()=>{teardown();netClose()};
 }
 
 /* ================= POKER ENGINE (Texas Hold'em, no limit) =================
@@ -3324,6 +3466,8 @@ const pkV=(p,m,f,h)=>p.human?h:p.fem?f:m;
 const PK_PROTO=1,PK_TONES=['#2e6bd6','#d68a2e','#7a2ed6','#2ea36b','#d62e8a','#6b6b72','#2ec4d6','#c3202a'];
 const pkEsc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pkCleanName=s=>String(s||'').replace(/[<>&"'`\u0000-\u001f]/g,'').replace(/\s+/g,' ').trim().slice(0,12);
+/* a shared link (…#shesh-1234) opens shesh besh straight into the join screen */
+if(/^#shesh-\d{4}$/.test(location.hash)){try{sessionStorage.setItem('introSeen','1')}catch(e){}window.addEventListener('load',()=>setTimeout(()=>{try{openGame('shesh')}catch(e){}},350))}
 /* a shared link (…#poker-1234) opens the poker table straight away */
 if(/^#poker-\d{4}$/.test(location.hash)){try{sessionStorage.setItem('introSeen','1')}catch(e){}window.addEventListener('load',()=>setTimeout(()=>{try{openGame('poker')}catch(e){}},350))}
 const PK_LINEUP={1:[0],2:[1,2],3:[1,0,2],4:[1,3,0,2],5:[1,3,0,4,2],6:[1,3,5,0,4,2],7:[1,3,5,0,6,4,2]};
