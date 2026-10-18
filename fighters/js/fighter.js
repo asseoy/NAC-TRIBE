@@ -262,7 +262,7 @@ NF.Fighter = class Fighter {
     g.translate(w / 2, h - 30);
     const fr = this.frozen, op = this.pose; this.frozen = true; this.pose = pose;
     const J = NF.rig.solve(d.sk, pose); if (d.calcWpn) d.calcWpn(this, J);
-    try { d.draw(g, this, J); } finally { this.pose = op; this.frozen = fr; }
+    try { this.drawBody(g, J); } finally { this.pose = op; this.frozen = fr; }
     if (tint) { g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-atop'; g.fillStyle = tint; g.fillRect(0, 0, w, h); g.globalCompositeOperation = 'source-over'; }
     cv._ox = w / 2; cv._oy = h - 30;
     return cv;
@@ -270,6 +270,10 @@ NF.Fighter = class Fighter {
   static pool() { return NF._spPool || (NF._spPool = []); }
 
   /* ---------------- drawing ---------------- */
+  drawBody(ctx, J) {
+    const S = NF.spr[this.def.id];
+    if (S && NF.useSprites !== false) NF.sprites.draw(ctx, this, S); else this.def.draw(ctx, this, J);
+  }
   draw(ctx, M) {
     const d = this.def;
     // shadow
@@ -286,7 +290,7 @@ NF.Fighter = class Fighter {
     ctx.globalAlpha = this.alpha * (this.inv > 0 && this.state === 'rise' && this.t % 4 < 2 ? .55 : 1);
     ctx.translate(this.x, this.y); ctx.scale(this.face, 1);
     if (this.spinA && this.state === 'attack' && this.move && this.move.type === 'spin') { ctx.translate(0, -110 * this.sc); ctx.scale(Math.cos(this.spinA * 1.6), 1); ctx.translate(0, 110 * this.sc); }
-    d.draw(ctx, this, this.J);
+    this.drawBody(ctx, this.J);
     ctx.restore();
     if (this.hitFlash > 0 && NF.glow) {   // hit flash: one additive glow sprite (no re-render of the body)
       const c = this.wj('chest'), g = NF.glow.soft || NF.glow.hot, r = 150 * this.sc;

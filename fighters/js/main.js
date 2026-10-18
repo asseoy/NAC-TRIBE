@@ -84,7 +84,7 @@
 
   /* ---------- boot ---------- */
   NF.input.setupTouch();
-  NF.loadImages([...NF.chars.LIST.map(c => [c.img, `assets/${c.img}.webp`]), ['logo', '../assets/nac.webp']]).then(() => {
+  Promise.all([NF.loadImages([...NF.chars.LIST.map(c => [c.img, `assets/${c.img}.webp`]), ['logo', '../assets/nac.webp']]), NF.sprites.load(NF.chars.LIST.map(c => c.id))]).then(() => {
     NF.ui.mainMenu();
     requestAnimationFrame(t => { last = t; frame(t); });
   });
