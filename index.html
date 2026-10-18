@@ -309,20 +309,21 @@ body.pt-open .mp{opacity:0;pointer-events:none}
   body.sb-on .arena .arena-bar{display:none}
   body.sb-on .arena .arena-body{padding:0;overflow:hidden}
   body.sb-on .arena .stage{max-width:none;width:100%;height:100%;margin:0}
-  .sb-game{display:grid;grid-template-columns:minmax(140px,1fr) auto;grid-template-rows:auto auto 1fr;grid-template-areas:"x board" "top board" "bar board";gap:.35rem .5rem;width:100%;height:100dvh;padding:.3rem .45rem;box-sizing:border-box;align-items:stretch;justify-items:stretch}
-  .sb-board{grid-area:board;width:min(calc((100dvh - .6rem) * 1.45),calc(100vw - 160px));height:auto;max-width:none;aspect-ratio:1.45/1;align-self:center;box-shadow:0 0 0 2px #2a2a2a,5px 5px 0 var(--red)}
-  .sb-top{grid-area:top;width:auto;flex-direction:column;gap:.3rem}
-  .sb-pl{font-size:.95rem;padding:.15rem .45rem;gap:.3rem;flex:none}
-  .sb-pl b{font-size:1.05rem}.sb-pl .sb-pip{display:none}.sb-pl .sb-sc{font-size:1.5rem}
-  .sb-mid{display:none}
-  .sb-bar{grid-area:bar;width:auto;flex-direction:column;align-items:stretch;justify-content:flex-end;gap:.35rem;min-height:0;overflow:hidden}
-  .sb-msg{font-size:.82rem;line-height:1.3;overflow:auto;min-height:0}
-  .sb-btns{flex-direction:column;align-items:stretch}
-  .sb-btns .bigbtn{font-size:1.25rem;padding:.1rem .6rem;width:100%}
-  .sb-btns .ps-ib{width:100%}
-  body.sb-on .mp{left:auto!important;right:.45rem!important;top:2.6rem!important;bottom:auto!important;max-width:calc(100vw - 590px)}
-  .music-on .sb-game .sb-top{padding-top:3.4rem}
-  .sb-x{grid-area:x;justify-self:start;display:block;position:relative;z-index:5;background:#fff;color:#000;border:0;font-family:var(--display);font-size:1rem;padding:.1rem .6rem;cursor:pointer}
+  /* the board spans the whole screen; everything else is one thin strip at the bottom */
+  body.sb-on .sb-game{display:grid;grid-template-columns:auto auto minmax(0,1fr);grid-template-rows:minmax(0,1fr) 44px;grid-template-areas:"board board board" "x top bar";gap:0 .35rem;width:100%;height:100%;max-width:none;padding:0 .3rem .15rem;box-sizing:border-box;align-items:stretch}
+  body.sb-on .sb-board{grid-area:board;width:100%;height:100%;max-width:none;aspect-ratio:auto;min-height:0;border:0;box-shadow:none;align-self:stretch;justify-self:stretch}
+  body.sb-on .sb-x{grid-area:x;align-self:center;display:block;background:#fff;color:#000;border:0;font-family:var(--display);font-size:.95rem;padding:.05rem .5rem;cursor:pointer;white-space:nowrap}
+  body.sb-on .sb-top{grid-area:top;width:auto;flex-direction:row;gap:.3rem;align-items:center;padding:0}
+  body.sb-on .sb-pl{flex:none;font-size:.85rem;padding:.05rem .4rem;gap:.3rem;border-width:2px}
+  body.sb-on .sb-pl b{font-size:.95rem}body.sb-on .sb-pl .sb-pip{display:none}body.sb-on .sb-pl .sb-sc{font-size:1.15rem}
+  body.sb-on .sb-mid{display:none}
+  body.sb-on .sb-bar{grid-area:bar;width:auto;flex-direction:row;align-items:center;gap:.4rem;min-height:0;min-width:0}
+  body.sb-on .sb-msg{flex:1;min-width:0;font-size:.78rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  body.sb-on .sb-btns{flex-direction:row;align-items:center;flex:none}
+  body.sb-on .sb-btns .bigbtn{font-size:1.05rem;padding:0 .7rem;width:auto;box-shadow:2px 2px 0 #000}
+  body.sb-on .sb-btns .ps-ib{width:auto;font-size:.8rem;padding:.1rem .4rem}
+  body.sb-on .mp{left:.3rem!important;right:auto!important;top:auto!important;bottom:.15rem!important;max-width:40vw;transform:scale(.8);transform-origin:left bottom}
+  .music-on .sb-game .sb-bar{padding-left:min(40vw,var(--mpw,175px))}
 }
 
 .sb-bar{width:var(--sbw);max-width:100%;display:flex;align-items:center;gap:.8rem;min-height:52px}
@@ -2995,8 +2996,8 @@ function sheshPlay(stage,lvl,ctl){
     function layout(){
       W=cv.clientWidth;H=cv.clientHeight;if(!W||!H)return;ctx=hiDPI(cv,W,H);
       const m=W*.022,tw=W*.075,bw=W*.06,playW=W-2*m-tw-m*.6,pw=(playW-bw)/12,ih=H-2*m;
-      const r=Math.min(pw*.46,ih*.5/5.6);
-      G={m,tw,bw,playW,pw,ih,r,ph:ih*.43,trayX:W-m-tw};
+      const r=Math.min(pw*.46,ih*.47/7.2);
+      G={m,tw,bw,playW,pw,ih,r,ph:ih*.47,trayX:W-m-tw};
       drag=null;
     }
     const colX=c=>G.m+c*G.pw+(c>=6?G.bw:0)+G.pw/2;
@@ -3004,7 +3005,7 @@ function sheshPlay(stage,lvl,ctl){
     const barX=()=>G.m+6*G.pw+G.bw/2;
     /* centre of the k-th checker of a stack of n on point i (stacks squeeze above 5) */
     function slotXY(i,k,n){
-      const x=colX(ptCol(i)),step=n>5?Math.min(G.r*2,(G.ph-G.r*2)/(n-1)):G.r*2;
+      const x=colX(ptCol(i)),step=n>1?Math.min(G.r*2,(G.ph-G.r*2)/(n-1)):G.r*2;
       const y=isTop(i)?G.m+G.r+k*step:H-G.m-G.r-k*step;return [x,y];
     }
     function barXY(p,k,n){const step=Math.min(G.r*2,(G.ih*.4-G.r)/Math.max(1,n-1));const y=p===0?H/2+G.r*1.6+k*step:H/2-G.r*1.6-k*step;return [barX(),y]}
