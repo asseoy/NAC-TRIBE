@@ -310,7 +310,7 @@ body.pt-open .mp{opacity:0;pointer-events:none}
   body.sb-on .arena .arena-body{padding:0;overflow:hidden}
   body.sb-on .arena .stage{max-width:none;width:100%;height:100%;margin:0}
   .sb-game{display:grid;grid-template-columns:minmax(140px,1fr) auto;grid-template-rows:auto auto 1fr;grid-template-areas:"x board" "top board" "bar board";gap:.35rem .5rem;width:100%;height:100dvh;padding:.3rem .45rem;box-sizing:border-box;align-items:stretch;justify-items:stretch}
-  .sb-board{grid-area:board;width:auto;height:calc(100dvh - .6rem);max-width:calc(100vw - 150px);aspect-ratio:1.45/1;align-self:center;box-shadow:0 0 0 2px #2a2a2a,5px 5px 0 var(--red)}
+  .sb-board{grid-area:board;width:min(calc((100dvh - .6rem) * 1.45),calc(100vw - 160px));height:auto;max-width:none;aspect-ratio:1.45/1;align-self:center;box-shadow:0 0 0 2px #2a2a2a,5px 5px 0 var(--red)}
   .sb-top{grid-area:top;width:auto;flex-direction:column;gap:.3rem}
   .sb-pl{font-size:.95rem;padding:.15rem .45rem;gap:.3rem;flex:none}
   .sb-pl b{font-size:1.05rem}.sb-pl .sb-pip{display:none}.sb-pl .sb-sc{font-size:1.5rem}
