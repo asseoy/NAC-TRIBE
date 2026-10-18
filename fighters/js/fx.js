@@ -11,7 +11,7 @@ NF.glow = (() => {
   };
 })();
 NF.FX = class FX {
-  constructor() { this.p = []; this.rings = []; this.cracks = []; this.texts = []; this.flash = 0; this.flashCol = '#fff'; this.max = 900; }
+  constructor() { this.p = []; this.rings = []; this.cracks = []; this.texts = []; this.flash = 0; this.flashCol = '#fff'; this.max = 260; }
   clear() { this.p.length = 0; this.rings.length = 0; this.cracks.length = 0; this.texts.length = 0; this.flash = 0; }
   add(o) { if (this.p.length < this.max) this.p.push(o); }
 

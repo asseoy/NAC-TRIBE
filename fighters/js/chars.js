@@ -360,7 +360,7 @@ NF.chars = (() => {
           ctx.beginPath(); ctx.moveTo(-r * .2, r * .08); ctx.quadraticCurveTo(r * .7, r * .02, r * 1.08, r * .12); ctx.quadraticCurveTo(r * 1.0, r * .8, r * .5, r * .98); ctx.quadraticCurveTo(-r * .2, r * 1.0, -r * .3, r * .5); ctx.closePath();
           ctx.fillStyle = '#150e10'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = R.INK; ctx.stroke();
           // glowing eyes
-          ctx.shadowColor = '#ff2a3a'; ctx.shadowBlur = 14;
+          ctx.shadowColor = '#ff2a3a'; ctx.shadowBlur = 0;
           ctx.beginPath(); ctx.ellipse(r * .58, -r * .14, r * .2, r * .07, -.15, 0, 7); ctx.ellipse(r * .1, -r * .12, r * .12, r * .05, -.15, 0, 7); ctx.fillStyle = '#ff4a52'; ctx.fill();
           ctx.shadowBlur = 0;
           // hood
@@ -453,7 +453,7 @@ NF.chars = (() => {
       // brow ridge + eyes
       const glow = f.glowEyes || 0;
       ctx.beginPath(); ctx.moveTo(-r * .05, -r * .02); ctx.lineTo(r * 1.0, r * .02); ctx.lineWidth = 6; ctx.strokeStyle = DEV.dark; ctx.stroke();
-      if (glow) { ctx.shadowColor = '#ffcf40'; ctx.shadowBlur = 20 * glow; }
+      if (glow) { ctx.shadowColor = '#ffcf40'; ctx.shadowBlur = 0; }
       for (const [ex, w] of [[r * .65, r * .26], [r * .12, r * .18]]) {
         ctx.beginPath(); ctx.ellipse(ex, r * .14, w, r * .13, .12, 0, 7); ctx.fillStyle = glow ? '#ffe070' : '#fff1d0'; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = K; ctx.stroke();
         ctx.beginPath(); ctx.arc(ex + w * .3, r * .16, r * .08, 0, 7); ctx.fillStyle = glow ? '#ff2000' : '#2a0b05'; ctx.fill();

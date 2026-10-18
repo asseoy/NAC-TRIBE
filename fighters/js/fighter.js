@@ -249,7 +249,7 @@ NF.Fighter = class Fighter {
     this.pose.en = target.en ?? 1; this.pose.ef = target.ef ?? 1; this.pose.kn = target.kn ?? 1; this.pose.kf = target.kf ?? 1; this.pose.wpn = NF.lerp(this.pose.wpn || 0, target.wpn || 0, .4);
     this.J = R.solve(d.sk, this.pose);
     if (d.calcWpn) d.calcWpn(this, this.J);
-    if (this.trailOn > 0) { this.trailOn--; if (this.t % 2 === 0 && typeof document !== 'undefined' && !NF.headless) { const pool = NF.Fighter.pool(); this.trail.push({ x: this.x, y: this.y, face: this.face, cv: this.snapshot(R.copy(this.pose), this.def.trailTint || 'rgba(255,40,30,.8)', pool.pop()), life: 14 }); } }
+    if (this.trailOn > 0) { this.trailOn--; if (this.t % 4 === 0 && this.trail.length < 4 && typeof document !== 'undefined' && !NF.headless) { const pool = NF.Fighter.pool(); this.trail.push({ x: this.x, y: this.y, face: this.face, cv: this.snapshot(R.copy(this.pose), this.def.trailTint || 'rgba(255,40,30,.8)', pool.pop()), life: 14 }); } }
     for (const tr of this.trail) { tr.life--; if (tr.life <= 0 && tr.cv) { const pool = NF.Fighter.pool(); if (pool.length < 40) pool.push(tr.cv); tr.cv = null; } }
     this.trail = this.trail.filter(tr => tr.life > 0);
   }
@@ -288,9 +288,9 @@ NF.Fighter = class Fighter {
     if (this.spinA && this.state === 'attack' && this.move && this.move.type === 'spin') { ctx.translate(0, -110 * this.sc); ctx.scale(Math.cos(this.spinA * 1.6), 1); ctx.translate(0, 110 * this.sc); }
     d.draw(ctx, this, this.J);
     ctx.restore();
-    if (this.hitFlash > 0 && !NF.headless) {   // white hit flash over the body
-      this._flashCv = this.snapshot(this.pose, '#fff', this._flashCv);
-      ctx.save(); ctx.globalAlpha = .55 * this.hitFlash / 3; ctx.translate(this.x, this.y); ctx.scale(this.face, 1); ctx.drawImage(this._flashCv, -this._flashCv._ox, -this._flashCv._oy); ctx.restore();
+    if (this.hitFlash > 0 && NF.glow) {   // hit flash: one additive glow sprite (no re-render of the body)
+      const c = this.wj('chest'), g = NF.glow.soft || NF.glow.hot, r = 150 * this.sc;
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .35 * this.hitFlash / 3; ctx.drawImage(g, c[0] - r, c[1] - r, r * 2, r * 2); ctx.restore();
     }
   }
 };

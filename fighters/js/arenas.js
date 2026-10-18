@@ -50,7 +50,7 @@ NF.arenas = (() => {
     floor(ctx, cam, t) {
       const g = ctx.createLinearGradient(0, F(), 0, F() + 200); g.addColorStop(0, '#2a0b08'); g.addColorStop(1, '#070202');
       ctx.fillStyle = g; ctx.fillRect(cam.x - 1500, F(), 3000, 400);
-      ctx.save(); ctx.strokeStyle = `rgba(255,90,20,${.5 + Math.sin(t * .05) * .2})`; ctx.lineWidth = 3; ctx.shadowColor = '#ff3000'; ctx.shadowBlur = 10;
+      ctx.save(); ctx.strokeStyle = `rgba(255,90,20,${.5 + Math.sin(t * .05) * .2})`; ctx.lineWidth = 3; ctx.shadowColor = '#ff3000'; ctx.shadowBlur = 0;
       for (let i = -8; i <= 8; i++) { const x = i * 170 + rnd(i) * 60; ctx.beginPath(); ctx.moveTo(x, F() + 4); ctx.lineTo(x + 40, F() + 30); ctx.lineTo(x + 20, F() + 70); ctx.lineTo(x + 70, F() + 120); ctx.stroke(); }
       ctx.restore();
       ctx.fillStyle = '#ff5a10'; ctx.fillRect(cam.x - 1500, F() - 2, 3000, 3);
@@ -142,7 +142,7 @@ NF.arenas = (() => {
           if (broken) { ctx.fillStyle = '#05030a'; ctx.beginPath(); ctx.moveTo(x - 56, F() - 60 - h); ctx.lineTo(x + 10, F() - 90 - h); ctx.lineTo(x + 56, F() - 36 - h); ctx.fill(); }
           // glowing runes
           const a = .45 + Math.sin(t * .05 + i * 1.7) * .35;
-          ctx.save(); ctx.shadowColor = '#ff1a3a'; ctx.shadowBlur = 16; ctx.strokeStyle = `rgba(255,30,60,${a})`; ctx.lineWidth = 3;
+          ctx.save(); ctx.shadowColor = '#ff1a3a'; ctx.shadowBlur = 0; ctx.strokeStyle = `rgba(255,30,60,${a})`; ctx.lineWidth = 3;
           for (let k = 0; k < 3; k++) { const ry = F() - 120 - h * .25 - k * 80; ctx.beginPath(); ctx.moveTo(x - 14, ry); ctx.lineTo(x, ry - 18); ctx.lineTo(x + 14, ry); ctx.moveTo(x, ry - 18); ctx.lineTo(x, ry + 14); ctx.stroke(); }
           ctx.restore();
         }
@@ -164,7 +164,7 @@ NF.arenas = (() => {
       ctx.fillStyle = g; ctx.fillRect(cam.x - 1500, F(), 3000, 400);
       ctx.strokeStyle = 'rgba(255,255,255,.05)'; ctx.lineWidth = 2;
       for (let i = -12; i <= 12; i++) { ctx.beginPath(); ctx.moveTo(i * 120, F()); ctx.lineTo(i * 220, F() + 300); ctx.stroke(); }
-      ctx.save(); ctx.globalAlpha = .4 + Math.sin(t * .04) * .2; ctx.strokeStyle = '#d01a3a'; ctx.lineWidth = 3; ctx.shadowColor = '#ff1a3a'; ctx.shadowBlur = 14;
+      ctx.save(); ctx.globalAlpha = .4 + Math.sin(t * .04) * .2; ctx.strokeStyle = '#d01a3a'; ctx.lineWidth = 3; ctx.shadowColor = '#ff1a3a'; ctx.shadowBlur = 0;
       ctx.beginPath(); ctx.ellipse(0, F() + 50, 300, 34, 0, 0, 7); ctx.stroke(); ctx.restore();
     },
     front(ctx, cam, t) {   // drifting fog

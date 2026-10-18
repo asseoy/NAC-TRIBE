@@ -101,22 +101,18 @@ NF.rig = (() => {
     ctx.closePath();
   }
   function capsule(ctx, a, b, r1, r2, fill, ink = INK, lw = 4, shade = true) {
+    const sh = shade && NF.shading !== false && r1 > 4 && darker(fill);
     capPath(ctx, a, b, r1, r2);
-    ctx.fillStyle = fill; ctx.fill();
-    if (shade && NF.shading !== false && r1 > 4) {
-      const sh = darker(fill); if (sh) {
-        const dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1;
-        let nx = -dy / d, ny = dx / d; if (nx - ny * .5 > 0) { nx = -nx; ny = -ny; }   // side away from the light
-        ctx.save(); ctx.clip();
-        const o = Math.max(r1, r2) * .62;
-        capPath(ctx, [a[0] + nx * o * 1.6, a[1] + ny * o * 1.6], [b[0] + nx * o * 1.6, b[1] + ny * o * 1.6], r1 * 1.25, r2 * 1.25);
-        ctx.fillStyle = sh; ctx.fill();
-        // thin highlight on the lit side
-        ctx.beginPath(); ctx.moveTo(a[0] - nx * r1 * .55, a[1] - ny * r1 * .55); ctx.lineTo(b[0] - nx * r2 * .55, b[1] - ny * r2 * .55);
-        ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = Math.max(1.5, r1 * .22); ctx.lineCap = 'round'; ctx.stroke();
-        ctx.restore();
-        capPath(ctx, a, b, r1, r2);
-      }
+    ctx.fillStyle = sh || fill; ctx.fill();
+    if (sh) {   // cel shading without clip(): lit capsule inset toward the light (cheap on the GPU)
+      const dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1;
+      let nx = -dy / d, ny = dx / d; if (nx - ny * .5 > 0) { nx = -nx; ny = -ny; }   // (nx,ny) = side away from the light
+      const o1 = r1 * .27, o2 = r2 * .27;
+      capPath(ctx, [a[0] - nx * o1, a[1] - ny * o1], [b[0] - nx * o2, b[1] - ny * o2], r1 * .7, r2 * .7);
+      ctx.fillStyle = fill; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(a[0] - nx * r1 * .55, a[1] - ny * r1 * .55); ctx.lineTo(b[0] - nx * r2 * .55, b[1] - ny * r2 * .55);
+      ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = Math.max(1.5, r1 * .2); ctx.lineCap = 'round'; ctx.stroke();
+      capPath(ctx, a, b, r1, r2);
     }
     if (lw) { ctx.lineWidth = lw; ctx.strokeStyle = ink; ctx.lineJoin = 'round'; ctx.stroke(); }
   }
@@ -136,7 +132,13 @@ NF.rig = (() => {
     if (fill) {
       ctx.fillStyle = fill; ctx.fill();
       const sh = shadeDir && NF.shading !== false && darker(fill);
-      if (sh) { ctx.save(); ctx.clip(); path(shadeDir[0], shadeDir[1]); ctx.fillStyle = sh; ctx.fill(); ctx.restore(); path(); }
+      if (sh) {
+        ctx.fillStyle = sh; ctx.fill();
+        let cx = 0, cy = 0; for (const p of pts) { cx += p[0]; cy += p[1]; } cx /= pts.length; cy /= pts.length;
+        const k = .8, ox = -shadeDir[0] * .12, oy = -shadeDir[1] * .12;
+        ctx.beginPath(); pts.forEach((p, i) => { const x = cx + (p[0] - cx) * k + ox, y = cy + (p[1] - cy) * k + oy; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.closePath();
+        ctx.fillStyle = fill; ctx.fill(); path();
+      }
     }
     if (lw) { ctx.lineWidth = lw; ctx.strokeStyle = ink; ctx.lineJoin = 'round'; ctx.stroke(); }
   }

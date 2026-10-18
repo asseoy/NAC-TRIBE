@@ -5,8 +5,8 @@ const NF = window.NF = {};
 NF.W = 1280;            // logical stage width
 NF.H = 720;             // logical stage height
 NF.FLOOR = 640;         // ground line (world y, down is +)
-NF.STAGE_L = -560;      // world bounds (camera centre is x=0)
-NF.STAGE_R = 560;
+NF.STAGE_L = -470;      // world bounds (camera centre is x=0)
+NF.STAGE_R = 470;
 NF.DT = 1 / 60;         // fixed simulation step
 
 NF.clamp = (v, a, b) => v < a ? a : v > b ? b : v;

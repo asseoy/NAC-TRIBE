@@ -4,7 +4,7 @@
   const cv = document.getElementById('stage'), ctx = cv.getContext('2d');
   let cw = 0, ch = 0, dpr = 1, scale = 1, ox = 0, oy = 0;
   function resize() {
-    dpr = Math.min(2, devicePixelRatio || 1); cw = innerWidth; ch = innerHeight;
+    dpr = Math.min(1.25, devicePixelRatio || 1); cw = innerWidth; ch = innerHeight;
     cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
     scale = Math.min(cw / NF.W, ch / NF.H); ox = (cw - NF.W * scale) / 2; oy = (ch - NF.H * scale) / 2;
   }

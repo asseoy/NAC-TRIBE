@@ -80,7 +80,7 @@ NF.Match = class Match {
     if (big) this.fx.burst([px, py], '#ff3a20', 16);
     if (m.fire || ['fireFist', 'dragon', 'fireTrail'].includes(m.fx)) this.fx.flame(px, py, 8, 1);
     NF.audio.play(big ? 'hitH' : 'hitL');
-    att.meter = Math.min(100, att.meter + (m.meter || 5)); def.meter = Math.min(100, def.meter + dmg * .06);
+    if (m.kind !== 'ult') { att.meter = Math.min(100, att.meter + (m.meter ?? 5)); def.meter = Math.min(100, def.meter + dmg * .05); }
     if (att.meter >= 100 && !att.ultReadyShown) { att.ultReadyShown = 1; NF.audio.play('meter'); }
     if (def.hp <= 0) this.ko(att, def);
     return 'hit';
@@ -119,7 +119,7 @@ NF.Match = class Match {
     if (this.hitstop > 0) { this.hitstop--; a.frozen = b.frozen = true; this.updateCam(); return; }
     a.frozen = b.frozen = false;
 
-    if (this.cine) { const done = this.cine.update(this); a.updatePose(this, b); b.updatePose(this, a); if (done) this.cine = null; this.updateCam(); return; }
+    if (this.cine) { const done = this.cine.update(this); for (const f of this.f) f.x = NF.clamp(f.x, NF.STAGE_L - 60, NF.STAGE_R + 60); a.updatePose(this, b); b.updatePose(this, a); if (done) this.cine = null; this.updateCam(); return; }
 
     this.pt++;
     if (this.phase === 'intro') {
@@ -230,7 +230,7 @@ NF.Match = class Match {
     const mx = (a.x + b.x) / 2, dist = Math.abs(a.x - b.x);
     const z = NF.clamp(1040 / (dist + 640), .78, 1.0);
     const hy = Math.min(a.y, b.y);
-    cam.x = NF.lerp(cam.x, NF.clamp(mx, NF.STAGE_L + 520, NF.STAGE_R - 520), .12);
+    cam.x = NF.lerp(cam.x, NF.clamp(mx, -70, 70), .12);
     cam.z = NF.lerp(cam.z, z, .06);
     cam.y = NF.lerp(cam.y, 420 - Math.max(0, NF.FLOOR - 120 - hy) * .3, .08);
   }
@@ -259,16 +259,19 @@ NF.Match = class Match {
     // ambient colour grade
     ctx.save(); ctx.fillStyle = ar.light; ctx.globalCompositeOperation = 'overlay'; ctx.fillRect(0, 0, W, H); ctx.restore();
     // vignette
-    const vg = ctx.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, H * .95); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.55)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+    if (!NF._vig) { const v = NF._vig = document.createElement('canvas'); v.width = 320; v.height = 180; const g = v.getContext('2d'), vg = g.createRadialGradient(160, 90, 63, 160, 90, 171); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.55)'); g.fillStyle = vg; g.fillRect(0, 0, 320, 180); }
+    ctx.drawImage(NF._vig, 0, 0, W, H);
     if (this.cine && this.cine.drawScreen) this.cine.drawScreen(ctx, W, H, this);
     this.drawHUD(ctx, W, H);
     this.fx.drawScreen(ctx, W, H);
   }
   drawClone(ctx, c) {
     const d = c.owner.def, f = c.owner;
-    c.cv = f.snapshot(c.pose, 'rgba(40,0,12,.9)', c.cv);
-    ctx.save(); ctx.globalAlpha = c.t > 36 ? (46 - c.t) / 10 * .85 : .85; ctx.translate(c.x, c.y); ctx.scale(c.face, 1);
-    ctx.shadowColor = '#ff1a3a'; ctx.shadowBlur = 18; ctx.drawImage(c.cv, -c.cv._ox, -c.cv._oy); ctx.restore();
+    if (!c.cv || c.t % 3 === 0) c.cv = f.snapshot(c.pose, 'rgba(40,0,12,.9)', c.cv);   // re-render the clone only every 3rd frame
+    const a = c.t > 36 ? (46 - c.t) / 10 * .85 : .85, g = NF.glow && NF.glow.hot;
+    if (g) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = a * .35; ctx.drawImage(g, c.x - 130, c.y - 260, 260, 260); ctx.restore(); }
+    ctx.save(); ctx.globalAlpha = a; ctx.translate(c.x, c.y); ctx.scale(c.face, 1);
+    ctx.drawImage(c.cv, -c.cv._ox, -c.cv._oy); ctx.restore();
   }
   drawProj(ctx, q) {
     if (q.age < 0) return;
