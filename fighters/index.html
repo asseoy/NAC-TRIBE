@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>NAC FIGHTERS — BATTLE FOR HANASI</title>
+<meta name="description" content="משחק המכות של שבט הנשיא: חמישה לוחמים, מכות על קולנועיות, שני שחקנים או מול המחשב.">
+<meta name="theme-color" content="#0b0708">
+<link rel="icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rubik:wght@400;600;800;900&family=Secular+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="stage" aria-label="זירת הקרב"></canvas>
+  <div id="ui"></div>
+  <div id="touch" hidden>
+    <div class="stick" id="stick"><div class="knob" id="knob"></div></div>
+    <div class="btns">
+      <button data-k="light">אגרוף<small>קל</small></button>
+      <button data-k="heavy">בעיטה<small>חזק</small></button>
+      <button data-k="special">מיוחד</button>
+      <button data-k="ult" class="ultb">על</button>
+    </div>
+    <button class="tpause" id="tpause" aria-label="הפסקה">II</button>
+  </div>
+  <div id="rotate">סובבו את הטלפון לרוחב 🔄</div>
+</div>
+<script src="js/util.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/input.js"></script>
+<script src="js/rig.js"></script>
+<script src="js/chars.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/arenas.js"></script>
+<script src="js/fighter.js"></script>
+<script src="js/ultimates.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/match.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
