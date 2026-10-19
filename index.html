@@ -3372,15 +3372,17 @@ function sheshPlay(stage,lvl,ctl){
       drag=null;
     }
     const colX=c=>G.m+c*G.pw+(c>=6?G.bw:0)+G.pw/2;
-    const ptCol=i=>i>=12?i-12:11-i,isTop=i=>i>=12;
+    /* online, the friend (black) sees the board turned top-to-bottom, so their home is bottom-right like for white */
+    const FLIP=online&&ME===1,vI=i=>FLIP?23-i:i,vP=p=>FLIP?1-p:p;
+    const ptCol=i=>{i=vI(i);return i>=12?i-12:11-i},isTop=i=>vI(i)>=12;
     const barX=()=>G.m+6*G.pw+G.bw/2;
     /* centre of the k-th checker of a stack of n on point i (stacks squeeze above 5) */
     function slotXY(i,k,n){
       const x=colX(ptCol(i)),step=n>1?Math.min(G.r*2,(G.ph-G.r*2)/(n-1)):G.r*2;
       const y=isTop(i)?G.m+G.r+k*step:H-G.m-G.r-k*step;return [x,y];
     }
-    function barXY(p,k,n){const step=Math.min(G.r*2,(G.ih*.4-G.r)/Math.max(1,n-1));const y=p===0?H/2+G.r*1.6+k*step:H/2-G.r*1.6-k*step;return [barX(),y]}
-    function offXY(p,k){const h=G.ih*.46/15;return [G.trayX+G.tw/2,p===0?H-G.m-h*(k+.5)-2:G.m+h*(k+.5)+2]}
+    function barXY(p,k,n){const step=Math.min(G.r*2,(G.ih*.4-G.r)/Math.max(1,n-1));const y=vP(p)===0?H/2+G.r*1.6+k*step:H/2-G.r*1.6-k*step;return [barX(),y]}
+    function offXY(p,k){const h=G.ih*.46/15;return [G.trayX+G.tw/2,vP(p)===0?H-G.m-h*(k+.5)-2:G.m+h*(k+.5)+2]}
     function posXY(s,p,where,k){
       if(where==='bar')return barXY(p,k!=null?k:s.bar[p],s.bar[p]+1);
       if(where==='off')return offXY(p,k!=null?k:s.off[p]);
@@ -3392,7 +3394,7 @@ function sheshPlay(stage,lvl,ctl){
       let c;if(x<G.m||x>G.m+G.playW)return null;
       if(x<bx)c=Math.floor((x-G.m)/G.pw);else c=6+Math.floor((x-bx-G.bw)/G.pw);
       if(c<0||c>11)return null;
-      return y<H/2?12+c:11-c;
+      return vI(y<H/2?12+c:11-c);
     }
 
     /* ---------- state ---------- */
@@ -3746,13 +3748,13 @@ function sheshPlay(stage,lvl,ctl){
         ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(x-pw/2+1,top?m:H-m);ctx.lineTo(x+pw/2-1,top?m:H-m);ctx.lineTo(x,top?m+ph:H-m-ph);ctx.closePath();ctx.fill();
         ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=1;ctx.stroke();
         if(selDest.has(i)){ctx.fillStyle=`rgba(243,224,59,${.28+.12*Math.sin(now/140)})`;ctx.fill();ctx.strokeStyle='#F3E03B';ctx.lineWidth=2;ctx.stroke()}
-        if(m>=12){ctx.fillStyle='rgba(255,255,255,.3)';ctx.font=`600 ${Math.min(m*.6,pw*.3)}px system-ui,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(i+1),x,top?m/2:H-m/2)}
+        if(m>=12){ctx.fillStyle='rgba(255,255,255,.3)';ctx.font=`600 ${Math.min(m*.6,pw*.3)}px system-ui,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(String(FLIP?24-i:i+1),x,top?m/2:H-m/2)}
       }
       // bar with the tribe logo
       const bx=m+6*pw;ctx.fillStyle='#050404';ctx.fillRect(bx,m,bw,ih);ctx.strokeStyle='#a8151f';ctx.lineWidth=2;ctx.strokeRect(bx,m,bw,ih);
       if(LOGO_IMG.complete&&LOGO_IMG.naturalWidth){const s=bw*.8;ctx.save();ctx.globalAlpha=.55;ctx.drawImage(LOGO_IMG,bx+bw/2-s/2,H/2-s/2,s,s);ctx.restore()}
       // bear-off trays
-      for(const p of [0,1]){const ty=p===0?H-m-ih*.46:m;ctx.fillStyle='#050404';ctx.fillRect(trayX,ty,tw,ih*.46);ctx.strokeStyle=p===0?'#b8a888':'#a8151f';ctx.lineWidth=2;ctx.strokeRect(trayX,ty,tw,ih*.46);
+      for(const p of [0,1]){const ty=vP(p)===0?H-m-ih*.46:m;ctx.fillStyle='#050404';ctx.fillRect(trayX,ty,tw,ih*.46);ctx.strokeStyle=p===0?'#b8a888':'#a8151f';ctx.lineWidth=2;ctx.strokeRect(trayX,ty,tw,ih*.46);
         if(selDest.has('off')&&turn===p){ctx.fillStyle=`rgba(243,224,59,${.25+.12*Math.sin(now/140)})`;ctx.fillRect(trayX,ty,tw,ih*.46)}}
       // checkers that are still animating are drawn later, so hide their final slot now
       const hide=new Map();for(const a of anims){const k=a.dest+'|'+a.p;hide.set(k,(hide.get(k)||0)+1)}
