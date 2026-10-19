@@ -122,3 +122,15 @@ input[type=range]{accent-color:var(--red2);width:240px}
 @media (max-height:500px){.pcard{width:clamp(56px,7.2vw,78px)}.acard{width:92px;height:42px;font-size:13px}.csel .hint{font-size:12px;margin:2px 0}}
 @media (max-height:500px){.arenas{flex-wrap:nowrap;gap:6px}.acard{width:76px;height:34px;font-size:11px;line-height:1}.pcard{width:clamp(52px,6.4vw,70px)}}
 @media (max-height:500px){.pcard span,.pcard .who{font-size:12px}}
+
+/* short screens (phone sideways): logo beside the menu, everything reachable */
+@media (max-height:500px){
+  .screen{overflow:auto;justify-content:safe center}
+  .mainmenu{flex-direction:row;gap:4vw;padding:10px 16px}
+  .mainmenu .logo b{font-size:clamp(40px,19vh,96px)}
+  .mainmenu .logo span{font-size:clamp(14px,5.5vh,28px);letter-spacing:5px;padding:2px 12px 0}
+  .mainmenu .menu{gap:5px;min-width:0;width:min(380px,46vw);margin:0}
+  .mainmenu .mbtn{font-size:clamp(15px,5.6vh,24px);padding:3px 14px 1px}
+  .mainmenu .mbtn small{font-size:10px}
+  .mainmenu .foot{display:none}
+}
