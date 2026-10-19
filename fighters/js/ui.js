@@ -38,6 +38,7 @@ NF.ui = (() => {
         <button class="mbtn ghost" data-a="back">← BACK TO TRIBE WEBSITE</button>
       </div>
       <div class="foot">שבט הנשיא · מחנאות מעל הכל</div>`);
+    el.classList.add('mainmenu');
     click(el, '[data-a]', b => {
       const a = b.dataset.a;
       if (a === 'play') { S.mode = 'pvc'; S.diff = S.diff || 'normal'; select(); }
