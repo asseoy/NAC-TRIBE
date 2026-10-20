@@ -2848,6 +2848,7 @@ const SBFX=(()=>{
   const MOLTEN={shine:{col:'rgba(255,230,150,.75)',speed:.55,flow:1},deep:'#2a0000',side:'#5a0605',ink:'#120000',glow:'rgba(255,90,20,1)',fill:[[0,'#fff6cf'],[.22,'#ffd04a'],[.5,'#ff6a12'],[.78,'#c2140c'],[1,'#4a0405']]};
   const GOLD={shine:{col:'rgba(255,255,235,.85)',speed:.7},deep:'#2a1600',side:'#5c3a06',ink:'#1a0d00',glow:'rgba(255,200,60,1)',fill:[[0,'#fffbe6'],[.3,'#ffe27a'],[.6,'#e3a51c'],[.85,'#a46a08'],[1,'#5a3500']]};
   const SAND={shine:{col:'rgba(255,250,220,.85)',speed:.6},deep:'#2a1004',side:'#6a3510',ink:'#1a0a02',glow:'rgba(255,170,60,1)',fill:[[0,'#fff6d8'],[.3,'#f7d58a'],[.6,'#e09a3e'],[.85,'#a85a1c'],[1,'#5a2a08']]};
+  const CHROME={shine:{col:'rgba(255,255,255,.9)',speed:1.1},deep:'#05101e',side:'#123a66',ink:'#02060c',glow:'rgba(90,200,255,1)',fill:[[0,'#ffffff'],[.35,'#d7ecff'],[.5,'#7fb3e0'],[.55,'#2a5f96'],[.8,'#a9d4ff'],[1,'#ffffff']]};
   const COSMIC={shine:{col:'rgba(220,250,255,.8)',speed:.8},deep:'#0a0630',side:'#1d1270',ink:'#05031a',glow:'rgba(120,200,255,1)',fill:[[0,'#ffffff'],[.3,'#bff6ff'],[.55,'#6fd8ff'],[.8,'#8a5bff'],[1,'#3a1a9a']]};
 
   /* ---------------- shared drawing helpers ---------------- */
@@ -3049,6 +3050,43 @@ const SBFX=(()=>{
           g.globalAlpha=1};
         S.front=()=>{const k=seg(t,3.05,3.5),al=k*(1-seg(t,5.5,6.2));if(al>0){const sc=1+.25*(1-eb(k));drawTitle(g,S.T,cx,S.ty,sc,al,al*(.6+.3*Math.sin(t*6)),t);
           const ds=Math.min(W,H)*.085,dy=S.ty-S.T.H*.5-ds*.75,sp=eb(seg(t,3.2,3.7));[[4,1],[2,-1]].forEach(([v,s],i)=>{g.globalAlpha=al;if(sp>0)sbDie(g,cx+s*ds*.75,dy,ds*sp,v,0,(1-sp)*s*3+Math.sin(t*2+i)*.08)});g.globalAlpha=1}};
+      }},
+    cross:{dur:5.6,
+      init(S){const {W,H,U}=S;S.port=H>W;S.T=title('6-5 חוצה לוח!',Math.min(W*.15,H*.19),W*.86,CHROME);
+        S.ly=S.port?H*.55:H*.6;S.x0=W*.1;S.x1=W*.88;S.ty=S.port?H*.26:H*.27;S.cr=Math.min(W,H)*.06;S.lines=[];
+        for(let i=0;i<70;i++)S.lines.push({y:R(0,H),x:R(0,W),l:R(.08,.3)*W,v:R(1.6,3.2)*W,w:R(.15,.6)*U});
+        AU.rise(0,1.05,.3);AU.rumble(0,1,.5);AU.whoosh(1.05,.5,.55);AU.boom(1.1,.7);AU.whoosh(1.45,.9,.45);AU.boom(1.75,1.05);
+        AU.noise(AU.T(2.25),.55,.28,'highpass',4200,1800,2,.01);AU.boom(2.3,.6);
+        AU.chord(2.65,[392,493.9,587.3],.32,.13,'sawtooth',3600);AU.chord(3.0,[523.3,659.3,784,1046.5],1.6,.15,'sawtooth',4000);AU.shimmer(3,1.8,12)},
+      frame(S,t,dt){const {g,W,H,U,P}=S,q=S.q,ly=S.ly,cr=S.cr;
+        S.dark=.8*eo(seg(t,0,.6))*(1-seg(t,4.9,5.6));
+        // checker path: charge in place, launch, jump over the middle (the bar), land with a skid
+        const k=seg(t,1.05,2.25),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2,shake0=t<1.05?Math.sin(t*90)*U*.5*seg(t,.2,1.05):0;
+        const cx_=S.x0+(S.x1-S.x0)*e+shake0,cy_=ly-Math.sin(Math.PI*seg(k,.35,.65))*H*.16;S.ck=[cx_,cy_];
+        if(t<1.05&&Math.random()<.8*q)for(let i=0;i<3;i++){const a=R(0,TAU),r=cr*R(1.6,2.6);P.add({home:1,sp:S.S.cyan,add:1,sx:S.x0+Math.cos(a)*r,sy:ly+Math.sin(a)*r,hx:S.x0,hy:ly,k:0,dur:.35,arc:0,s:R(.8,1.8)*U,life:.36,fade:.5})}
+        if(t>1.05&&t<2.3){for(let i=0;i<5*q;i++)P.add({sp:i%2?S.S.fire:S.S.cyan,add:1,x:cx_-cr*R(.6,1.2),y:cy_+R(-cr*.5,cr*.5),vx:-R(20,60)*U,vy:R(-6,6)*U,drag:.92,s:R(3,8)*U,life:R(.25,.6),fade:1.2});
+          for(let i=0;i<3*q;i++)P.add({streak:.025,add:1,col:'#bff6ff',x:cx_,y:cy_+R(-cr,cr),vx:-R(80,200)*U,vy:0,drag:.95,s:R(.2,.5)*U,life:R(.2,.45)})}
+        if(S.once(1.06)){S.shake=U*1.4;S.rings.push({t,x:S.x0,y:ly,v:W*.35,w:U*1,col:'rgba(120,230,255,1)',d:.5})}
+        if(S.once(1.75)){S.flash=.55;S.shake=U*2.6;const c=S.ck;S.rings.push({t,x:c[0],y:c[1],v:Math.max(W,H)*1.2,w:U*1.6,col:'rgba(220,250,255,1)',d:.7});S.rings.push({t:t+.08,x:c[0],y:c[1],v:Math.max(W,H)*.8,w:U*1,col:'rgba(120,200,255,1)',d:.7})}
+        if(S.once(2.25)){S.shake=Math.max(S.shake,U*1.6);for(let i=0;i<90*q;i++){const a=R(Math.PI*.9,Math.PI*1.5),v=R(200,700)*U/8;P.add({streak:.02,add:1,col:Math.random()<.5?'#ffd27a':'#ffffff',x:S.x1,y:ly+cr*.8,vx:Math.cos(a)*v,vy:Math.sin(a)*v,drag:.94,g:U*30,s:R(.25,.55)*U,life:R(.3,.8)})}
+          for(let i=0;i<30*q;i++)P.add({sp:S.S.smoke,x:S.x1-R(0,cr*3),y:ly+cr*.6,vx:-R(5,30)*U,vy:-R(2,10)*U,drag:.95,s:R(6,14)*U,grow:.5,life:R(.6,1.2),fade:1.2,a:.6})}
+        S.back=()=>{const sp=seg(t,.9,1.3)*(1-seg(t,2.3,2.9));if(sp>0){g.globalCompositeOperation='lighter';g.lineCap='round';
+            for(const l of S.lines){l.x-=l.v*dt;if(l.x+l.l<0){l.x=W+R(0,W*.3);l.y=R(0,H)}g.globalAlpha=sp*.55;g.strokeStyle='#bfe9ff';g.lineWidth=l.w;g.beginPath();g.moveTo(l.x,l.y);g.lineTo(l.x+l.l,l.y);g.stroke()}
+            g.globalAlpha=1;g.globalCompositeOperation='source-over'}
+          // the track glow under the checker
+          const tg=seg(t,.3,1)*(1-seg(t,4.6,5.4));if(tg>0){const gr=g.createLinearGradient(S.x0,0,S.x1,0);gr.addColorStop(0,'rgba(80,200,255,0)');gr.addColorStop(.5,'rgba(80,200,255,.35)');gr.addColorStop(1,'rgba(255,210,90,.5)');g.fillStyle=gr;g.globalAlpha=tg;g.fillRect(S.x0,ly+cr*1.05,(S.x1-S.x0)*Math.max(.02,e),U*.8);g.globalAlpha=1}};
+        S.front=()=>{const c=S.ck,ca=1-seg(t,4.6,5.3);
+          if(ca>0){if(t<1.05){const pg=seg(t,.15,1.05),s=cr*(2.6+1.4*pg)*(1+.1*Math.sin(t*40));g.globalCompositeOperation='lighter';g.globalAlpha=.8*pg*ca;g.drawImage(S.S.cyan,c[0]-s,c[1]-s,s*2,s*2);g.globalCompositeOperation='source-over';g.globalAlpha=1}
+            if(t>1.05&&t<2.3){g.globalAlpha=.35*ca;for(let i=1;i<=4;i++){sbChecker(g,c[0]-i*cr*.9,c[1],cr*(1-i*.08),0)}g.globalAlpha=1}
+            g.save();g.globalAlpha=ca;const st=t>1.05&&t<2.3?1.35:1;g.translate(c[0],c[1]);g.scale(st,1/st*1.05);sbChecker(g,0,0,cr,0);g.restore();g.globalAlpha=1}
+          const ka=seg(t,2.55,2.95),al=ka*(1-seg(t,4.9,5.6));if(al>0){
+            // waving checkered flag behind the title
+            const fw=Math.min(W*.96,S.T.W*1.15),fh=S.T.H*1.5,cols=16,rows=6,cw=fw/cols,rh=fh/rows,fx=W/2-fw/2,fy=S.ty-fh*.5;g.globalAlpha=al*.4;
+            for(let i=0;i<cols;i++)for(let j=0;j<rows;j++){const wv=Math.sin(t*6-i*.6)*rh*.35;g.fillStyle=(i+j)%2?'#f4f4f4':'#141414';g.fillRect(fx+i*cw,fy+j*rh+wv,cw+.6,rh+.6)}
+            g.globalAlpha=1;
+            const sc=1+.6*(1-eb(ka)),sx=(1-eo(ka))*W*.35;g.save();g.translate(W/2+sx,S.ty);g.transform(1,0,-.16,1,0,0);drawTitle(g,S.T,0,0,sc,al,al*(.6+.3*Math.sin(t*8)),t);g.restore();
+            g.globalCompositeOperation='lighter';g.globalAlpha=al*(1-seg(t,2.6,3.3));g.strokeStyle='#bff6ff';g.lineWidth=U*.5;for(let i=0;i<6;i++){const yy=S.ty+(i-2.5)*S.T.H*.16;g.beginPath();g.moveTo(W/2+S.T.W*.5,yy);g.lineTo(W/2+S.T.W*.5+W*.25*(1-seg(t,2.6,3.3)),yy);g.stroke()}g.globalCompositeOperation='source-over';g.globalAlpha=1;
+            const ds=Math.min(W,H)*.085,dy=S.ty+S.T.H*.62+ds*.6,dp=eb(seg(t,2.85,3.25));[[6,1],[5,-1]].forEach(([v,s],i)=>{if(dp>0){g.globalAlpha=al;sbDie(g,W/2+s*ds*.75,dy,ds*dp,v,0,(1-dp)*s*4+Math.sin(t*2+i)*.06)}});g.globalAlpha=1}};
       }}
   };
 
@@ -3559,7 +3597,7 @@ function sheshPlay(stage,lvl,ctl){
     }
 
     /* ---------- state ---------- */
-    let st,turn,phase,dice,used,legal,done,turnStart,anims,rollAnim,drag,sel,openRoll,lastMoveT=0,hint=0,turnId=0,noMoves=false,grill=null;let arava42=-1;
+    let st,turn,phase,dice,used,legal,done,turnStart,anims,rollAnim,drag,sel,openRoll,lastMoveT=0,hint=0,turnId=0,noMoves=false,grill=null;let arava42=-1,cross65=-1;
     /* a player with a checker on the bar facing a fully closed home board cannot play at all: "מנגל" */
     const shut=p=>st.bar[p]>0&&(p===0?[18,19,20,21,22,23].every(i=>st.b[i]<=-2):[0,1,2,3,4,5].every(i=>st.b[i]>=2));
     const GR={text:1700,fire:800,tongs:1500,flip:780,out:520};
@@ -3666,6 +3704,10 @@ function sheshPlay(stage,lvl,ctl){
       if(arava42!==turnId&&dice.length===2&&dice.includes(4)&&dice.includes(2)&&done.length===2&&phase!=='lesson'){
         const a8=turn===0?7:16,a6=turn===0?5:18,a4=turn===0?3:20,hit=m=>done.some(d=>d.from===m&&d.to===a4);
         if(hit(a8)&&hit(a6)){arava42=turnId;later(()=>SBFX.play('arava',{board:cv}),520)}}
+      // 6-5: one back checker runs 24→13 in one go = "חוצה לוח"
+      if(cross65!==turnId&&dice.length===2&&dice.includes(6)&&dice.includes(5)&&done.length===2&&phase!=='lesson'){
+        const f=turn===0?23:0,tg=turn===0?12:11;
+        if(done[0].from===f&&done[1].from===done[0].to&&done[1].to===tg){cross65=turnId;later(()=>SBFX.play('cross',{board:cv}),520)}}
       const dur=path.length>1?380:240;
       anims.push({p:turn,from:fromXY,to:stackTop(st,turn,last.to),dest:last.to,t0,dur});
       later(()=>sound(anyHit?'bad':last.to==='off'?'good':'drop'),dur-40);
