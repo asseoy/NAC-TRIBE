@@ -1,0 +1,898 @@
+<!doctype html><html lang="he"><head><meta charset=utf8>
+<title>חנוכיון בית דני · הדרקון המדליק</title>
+<meta name="description" content="מודל תלת־ממד של חנוכיון בית דני: דרקון שנע על מסילה ומדליק את נרות החנוכייה. בחרו ערב והפעילו את המופע.">
+<meta property="og:title" content="חנוכיון בית דני · הדרקון המדליק">
+<meta property="og:description" content="מודל תלת־ממד: דרקון שנע על מסילה ומדליק את נרות החנוכייה. בחרו ערב והפעילו את המופע.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#04070a"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Secular+One&family=Assistant:wght@400;600;700&display=swap">
+<style>
+/* Layout: full-bleed night scene; title top, sensor status under it, control dock at the bottom.
+   One deliberate dark look: the installation is only ever seen after dark. */
+:root{
+  --night:#04070a;
+  --panel:rgba(7,13,11,.84);
+  --panel-2:rgba(255,255,255,.06);
+  --line:rgba(110,255,165,.2);
+  --ink:#eaf3ed;
+  --muted:#93a99c;
+  --led:#3cf28f;
+  --led-ink:#04170c;
+  --fire:#ff9b30;
+  --f-display:"Secular One","Assistant","Arial Hebrew",Arial,sans-serif;
+  --f-body:"Assistant","Arial Hebrew",Arial,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;background:var(--night);color:var(--ink);font-family:var(--f-body);overflow:hidden}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--led);outline-offset:2px}
+#app{position:fixed;inset:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px) 0;direction:rtl}
+#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+.top{position:absolute;top:0;inset-inline:0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 16px;pointer-events:none}
+.brand h1{margin:0;font:400 clamp(26px,4.4vw,44px)/1 var(--f-display);color:#fff;text-shadow:0 0 18px rgba(60,242,143,.55),0 2px 0 #000;text-wrap:balance}
+.brand p{margin:6px 0 0;font-size:14px;font-weight:600;color:var(--muted);letter-spacing:.02em}
+.top button{pointer-events:auto}
+.ghost{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:9px 15px;font-weight:700;font-size:14px;backdrop-filter:blur(8px)}
+.ghost:hover{border-color:var(--led)}
+
+.status{position:absolute;top:calc(14px + clamp(26px,4.4vw,44px) + 34px);inset-inline-start:16px;display:flex;align-items:center;gap:10px;max-width:calc(100% - 32px);padding:8px 13px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-size:14px;font-weight:600;backdrop-filter:blur(8px)}
+.status .dot{width:10px;height:10px;border-radius:50%;background:#5b1414;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);flex:none;transition:background .15s,box-shadow .15s}
+.status .dot.on{background:var(--led);box-shadow:0 0 12px var(--led)}
+.status .dot.fire{background:var(--fire);box-shadow:0 0 14px var(--fire)}
+.status .count{margin-inline-start:4px;padding:2px 8px;border-radius:6px;background:var(--panel-2);font-variant-numeric:tabular-nums;color:#ffd9a8;white-space:nowrap}
+#statusText{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+#labels{position:absolute;inset:0;pointer-events:none}
+.tag3d{position:absolute;transform:translate(-50%,-100%);padding:4px 9px;border-radius:7px;background:rgba(4,10,8,.86);border:1px solid var(--line);font-size:12.5px;font-weight:700;white-space:nowrap;color:#dff7e8}
+.tag3d::after{content:"";position:absolute;left:50%;bottom:-7px;width:1px;height:7px;background:var(--led)}
+
+.dock{position:absolute;bottom:12px;inset-inline:12px;margin-inline:auto;max-width:880px;display:flex;flex-direction:column;gap:9px;padding:12px;border-radius:16px;background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(10px)}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.lbl{font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.04em;min-width:44px}
+.nights{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.nights::-webkit-scrollbar{display:none}
+.chip{flex:none;min-width:40px;height:38px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);font-weight:700;font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"]{background:var(--led);color:var(--led-ink);border-color:var(--led);box-shadow:0 0 14px rgba(60,242,143,.45)}
+.btn{height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel-2);font-weight:700;white-space:nowrap}
+.btn:hover,.chip:hover{border-color:var(--led)}
+.btn.primary{background:linear-gradient(180deg,#ffb04a,#ff7a1a);color:#2a0d00;border-color:#ffb04a;box-shadow:0 0 18px rgba(255,140,40,.4)}
+.btn[aria-pressed="true"]{border-color:var(--led);color:var(--led)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{height:38px;padding:0 13px;border:0;background:transparent;font-weight:700;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--led);color:var(--led-ink)}
+.spacer{flex:1}
+#manualRow label{font-size:13.5px;font-weight:700;color:var(--muted);white-space:nowrap}
+#rope{flex:1;min-width:140px;accent-color:var(--led);height:28px}
+.views .btn{height:34px;padding:0 11px;font-size:13.5px}
+.toggleDock{display:none}
+@media (max-width:640px){
+  .brand p{font-size:12.5px}
+  .status{font-size:12.5px;padding:7px 10px}
+  .dock{padding:10px;gap:8px;bottom:8px;inset-inline:8px}
+  .btn{height:38px;padding:0 12px;font-size:14px}
+  .views .lbl{min-width:0}
+  .nights .lbl{display:none}
+  .dock.min .collapsible{display:none}
+  .toggleDock{display:inline-flex}
+}
+
+.sheet{position:absolute;inset-block:12px;inset-inline-end:12px;width:min(430px,calc(100% - 24px));overflow:auto;padding:20px 20px 24px;border-radius:16px;background:rgba(6,12,10,.95);border:1px solid var(--line);backdrop-filter:blur(12px);line-height:1.6}
+.sheet h2{margin:0 0 4px;font:400 28px/1.1 var(--f-display);color:#fff}
+.sheet h3{margin:20px 0 6px;font:400 19px/1.2 var(--f-display);color:var(--led)}
+.sheet p{margin:0 0 8px;color:#cfe0d5}
+.sheet ol,.sheet ul{margin:0;padding-inline-start:20px;color:#cfe0d5}
+.sheet li{margin-bottom:4px}
+.sheet table{width:100%;border-collapse:collapse;font-size:14px}
+.sheet td{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.sheet td:last-child{text-align:left;white-space:nowrap;font-variant-numeric:tabular-nums;color:#ffd9a8}
+.sheet .note{margin-top:14px;font-size:13px;color:var(--muted)}
+.sheet .close{position:sticky;top:0;float:left;margin:-6px -6px 0 0}
+.err{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div id="app">
+  <canvas id="c" aria-label="מודל תלת־ממד של חנוכיון הדרקון. גררו לסיבוב, צבטו או גללו להגדלה."></canvas>
+  <div id="labels" aria-hidden="true"></div>
+
+  <header class="top">
+    <div class="brand">
+      <h1>חנוכיון בית דני</h1>
+      <p>הדרקון המדליק · מודל תלת־ממד</p>
+    </div>
+    <button class="ghost" id="infoBtn" aria-expanded="false" aria-controls="info">איך זה עובד</button>
+  </header>
+
+  <div class="status" role="status" aria-live="polite">
+    <span class="dot" id="sensorDot" title="חיישן תחנה"></span>
+    <span id="statusText">טוען את המודל…</span>
+    <span class="count" id="litCount">0/5</span>
+  </div>
+
+  <section class="dock" id="dock" aria-label="שליטה במופע">
+    <div class="row nights" role="group" aria-label="ערב החג">
+      <span class="lbl">ערב</span>
+      <button class="chip" data-night="1" aria-pressed="false">1</button>
+      <button class="chip" data-night="2" aria-pressed="false">2</button>
+      <button class="chip" data-night="3" aria-pressed="false">3</button>
+      <button class="chip" data-night="4" aria-pressed="true">4</button>
+      <button class="chip" data-night="5" aria-pressed="false">5</button>
+      <button class="chip" data-night="6" aria-pressed="false">6</button>
+      <button class="chip" data-night="7" aria-pressed="false">7</button>
+      <button class="chip" data-night="8" aria-pressed="false">8</button>
+    </div>
+    <div class="row">
+      <button class="btn primary" id="play">הפעל מופע</button>
+      <button class="btn" id="reset">איפוס</button>
+      <div class="seg" role="group" aria-label="מצב הפעלה">
+        <button data-mode="auto" aria-pressed="true">אוטומטי</button>
+        <button data-mode="manual" aria-pressed="false">ידני · חבל</button>
+      </div>
+      <span class="spacer"></span>
+      <button class="btn toggleDock" id="toggleDock" aria-expanded="true">פחות</button>
+    </div>
+    <div class="row collapsible" id="manualRow" hidden>
+      <label for="rope">משכו את החבל</label>
+      <input type="range" id="rope" min="0" max="1000" value="1000" dir="ltr">
+    </div>
+    <div class="row views collapsible" role="group" aria-label="מצלמה">
+      <span class="lbl">מצלמה</span>
+      <button class="btn" data-view="front">חזית</button>
+      <button class="btn" data-view="side">צד</button>
+      <button class="btn" data-view="back">מאחור · מנגנון</button>
+      <button class="btn" data-view="follow">עקוב אחרי הדרקון</button>
+      <button class="btn" id="spin" aria-pressed="false">סיבוב</button>
+      <button class="btn" id="labelsBtn" aria-pressed="false">תוויות</button>
+    </div>
+  </section>
+
+  <aside class="sheet" id="info" hidden aria-label="איך זה עובד">
+    <button class="ghost close" id="infoClose">סגירה</button>
+    <h2>איך זה עובד</h2>
+    <p>חנוכיה גדולה בירוק ולבן ממבנה סנדות וחבלים, עם תשעה נרות לד. מאחורי הנרות נע על מסילה ראש דרקון מואר בירוק. הלהבה מהפה שלו נדלקת רק כשהוא עוצר מול נר, ורגע אחרי הנשיפה הנר נדלק ונשאר דולק.</p>
+    <h3>רצף הפעולה</h3>
+    <ol>
+      <li>הדרקון נע לאורך המסילה אל תחנת ההדלקה הבאה.</li>
+      <li>הוא נעצר מול הנר, ומפסק הגבול של התחנה שולח אות לבקר.</li>
+      <li>לדי הלהבה מהפה נדלקים באנימציית אש בכתום, אדום וצהוב.</li>
+      <li>אחרי השהיה קצרה נדלק הנר של התחנה, ונשאר דולק.</li>
+      <li>הלהבה כבה, והדרקון ממשיך לתחנה הבאה.</li>
+    </ol>
+    <p class="note">במודל השמש נדלק ראשון, ואז הנרות לפי המנהג: קודם הנר החדש של אותו ערב, משמאל לימין.</p>
+    <h3>מידות במודל (משוערות)</h3>
+    <table>
+      <tr><td>רוחב המבנה</td><td>‎6.8 מ׳</td></tr>
+      <tr><td>גובה עד הסנדה העליונה</td><td>‎3.5 מ׳</td></tr>
+      <tr><td>מרווח בין נרות</td><td>‎58 ס״מ</td></tr>
+      <tr><td>מסילות PVC כפולות, באורך</td><td>‎6.7 מ׳</td></tr>
+    </table>
+    <h3>אלקטרוניקה ותקציב</h3>
+    <table>
+      <tr><td>פסי לדים כתובתיים WS2812B</td><td>‎20–50 ₪</td></tr>
+      <tr><td>בקר ESP32</td><td>‎15–30 ₪</td></tr>
+      <tr><td>ספק כוח 5V לפי העומס</td><td>‎25–50 ₪</td></tr>
+      <tr><td>חוטים, מחברים, מפסקי גבול, בידוד</td><td>‎20–50 ₪</td></tr>
+      <tr><td><b>סה״כ אלקטרוניקה</b></td><td><b>‎80–180 ₪</b></td></tr>
+    </table>
+    <p class="note">בלי מנגנון התנועה, הפרופילים, המשלוח והמסים.</p>
+    <h3>בטיחות</h3>
+    <ul>
+      <li>להבות לד בלבד, בלי אש אמיתית.</li>
+      <li>חבל אבטחה נפרד לראש הדרקון, כדי שלא ייפול על הקהל.</li>
+      <li>חוטים רחוקים מהמסילות ומנקודות צביטה, וכל חיבור מבודד.</li>
+      <li>ספק הכוח מקובע במקום מוגן מגשם ומהקהל, ולדרקון הנע לולאת כבל גמישה.</li>
+      <li>במבנה ציבורי גדול: אישור יציבות, תלייה וחשמל מאחראי בטיחות מוסמך.</li>
+    </ul>
+    <p class="note">המודל ממחיש את החזון של התוכנית ואינו תוכנית הנדסית מאושרת.</p>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.147.0/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/shaders/GammaCorrectionShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/Pass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script>
+(function () {
+'use strict';
+const $ = s => document.querySelector(s);
+const statusText = $('#statusText'), sensorDot = $('#sensorDot'), litCount = $('#litCount');
+
+if (!window.THREE || !THREE.OrbitControls) {
+  statusText.textContent = 'לא הצלחתי לטעון את מנוע התלת־ממד. נסו לרענן את הדף.';
+  return;
+}
+
+/* ================================================================ renderer, camera */
+const canvas = $('#c');
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+} catch (e) {
+  statusText.textContent = 'הדפדפן הזה לא תומך בתלת־ממד (WebGL).';
+  return;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+renderer.outputEncoding = THREE.sRGBEncoding;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x04070a);
+scene.fog = new THREE.FogExp2(0x04070a, 0.022);
+
+const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 220);
+camera.position.set(3.2, 2.5, 8.6);
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.target.set(0, 1.45, -0.1);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 1.6;
+controls.maxDistance = 17;
+controls.maxPolarAngle = Math.PI * 0.495;
+controls.autoRotateSpeed = 0.7;
+
+let composer = null, bloom = null;
+if (THREE.EffectComposer && THREE.RenderPass && THREE.UnrealBloomPass && THREE.ShaderPass && THREE.GammaCorrectionShader) {
+  try {
+    composer = new THREE.EffectComposer(renderer);
+    composer.addPass(new THREE.RenderPass(scene, camera));
+    bloom = new THREE.UnrealBloomPass(new THREE.Vector2(512, 512), 0.8, 0.45, 0.86);
+    composer.addPass(bloom);
+    composer.addPass(new THREE.ShaderPass(THREE.GammaCorrectionShader));
+  } catch (e) { composer = null; }
+}
+
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+const UP = V(0, 1, 0), ZAX = V(0, 0, 1);
+const hdr = (r, g, b) => new THREE.Color(r, g, b);
+
+/* ================================================================ dimensions (metres) */
+const X = 3.4, ZF = 0.6, ZB = -1.0, H = 3.45;
+const SHELF_Y = 1.45, CANDLE_Z = 0.2;
+const RAIL_Y = 2.03, RAIL_Z = -0.7;
+const SHAMASH_X = 2.3, C1_X = 1.68, GAP = 0.58, HEAD_OFFSET = 0.7;
+const candleX = k => (k === 0 ? SHAMASH_X : C1_X - (k - 1) * GAP);   // 0 = shamash, 1..8 right to left
+const stationX = k => candleX(k) + HEAD_OFFSET;
+const PARK_X = 3.12, RAIL_MIN = -3.1, RAIL_MAX = 3.12;
+
+/* ================================================================ textures */
+function canvasTex(c) { const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t; }
+function woodTex(base) {
+  const c = document.createElement('canvas'); c.width = 64; c.height = 256;
+  const x = c.getContext('2d');
+  x.fillStyle = base; x.fillRect(0, 0, 64, 256);
+  for (let i = 0; i < 46; i++) { x.fillStyle = `rgba(55,32,10,${Math.random() * 0.2})`; x.fillRect(Math.random() * 64, 0, 1 + Math.random() * 3, 256); }
+  for (let i = 0; i < 7; i++) { x.fillStyle = 'rgba(45,26,8,.4)'; x.beginPath(); x.ellipse(Math.random() * 64, Math.random() * 256, 3 + Math.random() * 3, 6 + Math.random() * 5, 0, 0, 7); x.fill(); }
+  const t = canvasTex(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1, 3); return t;
+}
+function glowTex(inner, outer) {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const x = c.getContext('2d'); const g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
+  g.addColorStop(0, inner); g.addColorStop(0.35, outer); g.addColorStop(1, 'rgba(0,0,0,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 128, 128); return canvasTex(c);
+}
+function flamePath(x, cx, cy, h) {
+  x.beginPath();
+  x.moveTo(cx, cy - h);
+  x.bezierCurveTo(cx + h * 0.16, cy - h * 0.58, cx + h * 0.64, cy - h * 0.36, cx + h * 0.5, cy + h * 0.12);
+  x.bezierCurveTo(cx + h * 0.4, cy + h * 0.46, cx - h * 0.4, cy + h * 0.46, cx - h * 0.5, cy + h * 0.12);
+  x.bezierCurveTo(cx - h * 0.62, cy - h * 0.26, cx - h * 0.1, cy - h * 0.46, cx, cy - h);
+  x.closePath();
+}
+function emblem(x, cx, cy, s, col, bg) {
+  x.save();
+  x.fillStyle = col; x.beginPath(); x.arc(cx, cy, s, 0, Math.PI * 2); x.fill();
+  x.fillStyle = bg; x.beginPath(); x.arc(cx, cy, s * 0.8, 0, Math.PI * 2); x.fill();
+  x.fillStyle = col; flamePath(x, cx, cy + s * 0.18, s * 0.66); x.fill();
+  x.fillStyle = bg; flamePath(x, cx, cy + s * 0.42, s * 0.27); x.fill();
+  x.restore();
+}
+const bannerCanvas = document.createElement('canvas'); bannerCanvas.width = 2048; bannerCanvas.height = 256;
+function drawBanner() {
+  const x = bannerCanvas.getContext('2d');
+  x.fillStyle = '#f3f6f1'; x.fillRect(0, 0, 2048, 256);
+  x.strokeStyle = '#178a45'; x.lineWidth = 8; x.strokeRect(14, 14, 2020, 228);
+  x.fillStyle = '#127a3c'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.direction = 'rtl';
+  x.font = '400 178px "Secular One", "Assistant", Arial, sans-serif';
+  x.fillText('חנוכיון בית דני', 1024, 136);
+  emblem(x, 170, 128, 92, '#127a3c', '#f3f6f1');
+  emblem(x, 1878, 128, 92, '#127a3c', '#f3f6f1');
+}
+const flagCanvas = document.createElement('canvas'); flagCanvas.width = 256; flagCanvas.height = 640;
+function drawFlag() {
+  const x = flagCanvas.getContext('2d'); x.clearRect(0, 0, 256, 640);
+  x.beginPath(); x.moveTo(8, 0); x.lineTo(248, 0); x.lineTo(248, 520); x.lineTo(128, 634); x.lineTo(8, 520); x.closePath();
+  x.fillStyle = '#eef3ed'; x.fill();
+  x.lineWidth = 10; x.strokeStyle = '#178a45'; x.stroke();
+  emblem(x, 128, 250, 82, '#127a3c', '#eef3ed');
+}
+drawBanner(); drawFlag();
+const bannerTex = canvasTex(bannerCanvas), flagTex = canvasTex(flagCanvas);
+if (document.fonts && document.fonts.load) {
+  document.fonts.load('400 120px "Secular One"').then(() => { drawBanner(); bannerTex.needsUpdate = true; }).catch(() => {});
+}
+
+/* ================================================================ materials */
+const woodMats = ['#b88b4f', '#a87a41', '#c39d62'].map(c => new THREE.MeshStandardMaterial({ map: woodTex(c), roughness: 0.85 }));
+const M = {
+  rope: new THREE.MeshStandardMaterial({ color: 0xcbb68b, roughness: 1 }),
+  pvc: new THREE.MeshStandardMaterial({ color: 0xeef2ee, roughness: 0.32 }),
+  metal: new THREE.MeshStandardMaterial({ color: 0x2a2f2d, roughness: 0.45, metalness: 0.6 }),
+  box: new THREE.MeshStandardMaterial({ color: 0x14202a, roughness: 0.5, metalness: 0.2 }),
+  psu: new THREE.MeshStandardMaterial({ color: 0x9aa3a0, roughness: 0.35, metalness: 0.7 }),
+  led: new THREE.MeshBasicMaterial({ color: hdr(0.22, 2.3, 0.85), toneMapped: false }),
+  dragon: new THREE.MeshStandardMaterial({ color: 0xdfe8e1, roughness: 0.55, flatShading: true, emissive: 0x0d3f1f, emissiveIntensity: 0.3 }),
+  edge: new THREE.LineBasicMaterial({ color: hdr(0.3, 2.2, 0.85), toneMapped: false }),
+  eye: new THREE.MeshBasicMaterial({ color: hdr(0.5, 3.2, 1.2), toneMapped: false }),
+  tooth: new THREE.MeshStandardMaterial({ color: 0xfffdf3, roughness: 0.4, flatShading: true }),
+};
+
+/* ================================================================ helpers */
+const struct = new THREE.Group(); scene.add(struct);
+function pole(a, b, r = 0.045, mat) {
+  const d = new THREE.Vector3().subVectors(b, a); const len = d.length();
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 1.05, len, 10), mat || woodMats[(Math.random() * 3) | 0]);
+  m.position.copy(a).addScaledVector(d, 0.5);
+  m.quaternion.setFromUnitVectors(UP, d.normalize());
+  struct.add(m); return m;
+}
+const lashGeo = new THREE.TorusGeometry(0.056, 0.011, 6, 18);
+function lash(p, axis = UP) {
+  for (let i = -1; i <= 1; i++) {
+    const t = new THREE.Mesh(lashGeo, M.rope);
+    t.position.copy(p).addScaledVector(axis, i * 0.023);
+    t.quaternion.setFromUnitVectors(ZAX, axis);
+    struct.add(t);
+  }
+}
+function ledBar(a, b, w = 0.022) {
+  const d = new THREE.Vector3().subVectors(b, a); const len = d.length();
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, len, w), M.led);
+  m.position.copy(a).addScaledVector(d, 0.5);
+  m.quaternion.setFromUnitVectors(UP, d.normalize());
+  struct.add(m); return m;
+}
+
+/* ================================================================ ground, sky, trees */
+const ground = new THREE.Mesh(new THREE.CircleGeometry(45, 64), new THREE.MeshStandardMaterial({ color: 0x0c130f, roughness: 1 }));
+ground.rotation.x = -Math.PI / 2; scene.add(ground);
+const pool = new THREE.Mesh(new THREE.PlaneGeometry(11, 6), new THREE.MeshBasicMaterial({ map: glowTex('rgba(60,242,143,.55)', 'rgba(30,160,90,.18)'), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+pool.rotation.x = -Math.PI / 2; pool.position.set(0, 0.01, 0.4); scene.add(pool);
+{
+  const n = 900, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const th = Math.random() * Math.PI * 2, ph = Math.random() * Math.PI * 0.45;
+    pos[i * 3] = Math.cos(th) * Math.sin(ph) * 90; pos[i * 3 + 1] = Math.cos(ph) * 90 + 4; pos[i * 3 + 2] = Math.sin(th) * Math.sin(ph) * 90;
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xcfe8ff, size: 1.6, sizeAttenuation: false, fog: false, transparent: true, opacity: 0.8 })));
+  const treeMat = new THREE.MeshStandardMaterial({ color: 0x06100b, roughness: 1 });
+  for (let i = 0; i < 26; i++) {
+    const a = (i / 26) * Math.PI * 2 + Math.random() * 0.2, r = 17 + Math.random() * 10, h = 4 + Math.random() * 5;
+    const t = new THREE.Mesh(new THREE.ConeGeometry(1.2 + Math.random(), h, 7), treeMat);
+    t.position.set(Math.cos(a) * r, h / 2 + 0.6, Math.sin(a) * r); scene.add(t);
+  }
+}
+
+/* ================================================================ lights */
+scene.add(new THREE.AmbientLight(0x2c3c4c, 0.42));
+scene.add(new THREE.HemisphereLight(0x1d3040, 0x050a06, 0.4));
+const greenL = new THREE.PointLight(0x35ff85, 0.8, 6, 1.6); greenL.position.set(-X + 0.2, 2.3, ZF + 0.5); scene.add(greenL);
+const greenR = greenL.clone(); greenR.position.x = X - 0.2; scene.add(greenR);
+const bannerFill = new THREE.PointLight(0xa8ffd0, 0.45, 6, 1.4); bannerFill.position.set(0, 0.9, ZF + 1.6); scene.add(bannerFill);
+const canopyL = new THREE.PointLight(0x35ff85, 0.7, 5, 1.5); canopyL.position.set(0, 3.0, -0.2); scene.add(canopyL);
+
+/* ================================================================ structure: scout poles + lashings */
+for (const sx of [-1, 1]) {
+  pole(V(sx * X, 0, ZF), V(sx * X, H + 0.25, ZF), 0.05);
+  pole(V(sx * X, 0, ZB), V(sx * X, H + 0.25, ZB), 0.05);
+  pole(V(sx * 1.15, 0, ZB), V(sx * 1.15, 2.2, ZB), 0.045);
+  pole(V(sx * 1.15, 0, ZF), V(sx * 1.15, 1.42, ZF), 0.045);
+  for (const y of [0.3, 1.36, H]) {           // side beams front-to-back
+    pole(V(sx * (X + 0.06), y, ZB - 0.15), V(sx * (X + 0.06), y, ZF + 0.15));
+    lash(V(sx * X, y, ZF)); lash(V(sx * X, y, ZB));
+  }
+  pole(V(sx * (X + 0.1), 0.3, ZF), V(sx * (X + 0.1), 1.36, ZB), 0.04);   // side diagonals
+  pole(V(sx * (X + 0.1), 1.36, ZF), V(sx * (X + 0.1), H, ZB), 0.04);
+  pole(V(sx * X, 2.05, ZB - 0.06), V(sx * 1.15, H, ZB - 0.06), 0.04);      // back brace
+  for (const x of [sx * (X - 0.02), sx * 1.15]) {                            // rail supports
+    pole(V(x, RAIL_Y - 0.06, ZB), V(x, RAIL_Y - 0.06, -0.42), 0.035);
+    lash(V(x, RAIL_Y - 0.06, ZB));
+  }
+  lash(V(sx * 1.15, 0.3, ZB)); lash(V(sx * 1.15, 1.36, ZF)); lash(V(sx * 1.15, 0.3, ZF));
+}
+for (const y of [0.3, 1.36, H]) pole(V(-X - 0.18, y, ZF + 0.07), V(X + 0.18, y, ZF + 0.07), 0.047);     // front beams
+for (const y of [0.3, 1.36, 2.05, H]) pole(V(-X - 0.18, y, ZB - 0.07), V(X + 0.18, y, ZB - 0.07), 0.047); // back beams
+for (const z of [0.46, 0.28, 0.1, -0.08]) pole(V(-X, SHELF_Y, z), V(X, SHELF_Y, z), 0.045);                // candle deck
+for (const sx of [-1, 1]) for (const y of [0.3, 1.36, H]) lash(V(sx * 1.15, y, ZF + 0.07), V(1, 0, 0));
+
+// green LED strips like the sketch
+for (const sx of [-1, 1]) {
+  ledBar(V(sx * (X - 0.06), 0.15, ZF + 0.06), V(sx * (X - 0.06), H + 0.2, ZF + 0.06));
+  ledBar(V(sx * (X - 0.06), 0.15, ZB + 0.06), V(sx * (X - 0.06), H + 0.2, ZB + 0.06));
+}
+ledBar(V(-X, SHELF_Y + 0.02, 0.53), V(X, SHELF_Y + 0.02, 0.53));
+ledBar(V(-X, 0.37, ZF + 0.14), V(X, 0.37, ZF + 0.14));
+ledBar(V(-X, H - 0.06, ZF + 0.14), V(X, H - 0.06, ZF + 0.14));
+
+/* ================================================================ banner, pennants, flags, canopy */
+const banner = new THREE.Mesh(new THREE.PlaneGeometry(6.5, 0.81),
+  new THREE.MeshStandardMaterial({ map: bannerTex, emissive: 0xffffff, emissiveMap: bannerTex, emissiveIntensity: 0.12, roughness: 0.9, side: THREE.DoubleSide }));
+banner.position.set(0, 0.83, ZF + 0.12); struct.add(banner);
+{
+  const w = 0.25, h = 0.27, shape = new THREE.Shape(); shape.moveTo(-w / 2, 0); shape.lineTo(w / 2, 0); shape.lineTo(0, -h); shape.closePath();
+  const geo = new THREE.ShapeGeometry(shape);
+  const g = new THREE.MeshStandardMaterial({ color: 0x1b9a4c, roughness: 0.9, emissive: 0x0c5a28, emissiveIntensity: 0.25, side: THREE.DoubleSide });
+  const wht = new THREE.MeshStandardMaterial({ color: 0xf0f4ee, roughness: 0.9, emissive: 0x6a7a70, emissiveIntensity: 0.1, side: THREE.DoubleSide });
+  const n = 22;
+  for (const y of [1.33, 0.27]) for (let i = 0; i < n; i++) {
+    const p = new THREE.Mesh(geo, i % 2 ? g : wht);
+    p.position.set(-X + 0.25 + i * ((2 * X - 0.5) / (n - 1)), y, ZF + 0.16 + (y < 1 ? 0.02 : 0));
+    p.rotation.x = 0.06; struct.add(p);
+  }
+  const flagGeo = new THREE.PlaneGeometry(0.56, 1.4);
+  for (const sx of [-1, 1]) for (const z of [ZF + 0.12]) {
+    const f = new THREE.Mesh(flagGeo, new THREE.MeshStandardMaterial({ map: flagTex, transparent: true, alphaTest: 0.4, emissive: 0xffffff, emissiveMap: flagTex, emissiveIntensity: 0.12, side: THREE.DoubleSide }));
+    f.position.set(sx * (X + 0.38), 2.5, z); struct.add(f);
+    pole(V(sx * X, 3.21, z - 0.02), V(sx * (X + 0.7), 3.21, z - 0.02), 0.018);
+  }
+  function sail(pts, color, emissive) {
+    const g2 = new THREE.BufferGeometry();
+    const p = [pts[0], pts[1], pts[2], pts[0], pts[2], pts[3]].flatMap(v => [v.x, v.y, v.z]);
+    g2.setAttribute('position', new THREE.Float32BufferAttribute(p, 3)); g2.computeVertexNormals();
+    const m = new THREE.Mesh(g2, new THREE.MeshStandardMaterial({ color, emissive, emissiveIntensity: 0.6, roughness: 1, side: THREE.DoubleSide, transparent: true, opacity: 0.94 }));
+    struct.add(m);
+  }
+  sail([V(-X - 0.1, 3.5, ZF + 0.12), V(0.7, 3.22, ZF + 0.25), V(-0.3, 3.86, ZB - 0.1), V(-X - 0.1, 3.95, ZB - 0.1)], 0x1d6e3e, 0x0b3d20);
+  sail([V(-0.7, 3.24, ZF + 0.2), V(X + 0.1, 3.5, ZF + 0.12), V(X + 0.1, 3.98, ZB - 0.1), V(0.4, 3.8, ZB - 0.15)], 0xe8eee8, 0x2a3a30);
+  sail([V(-2.0, 3.05, ZF + 0.4), V(2.0, 3.05, ZF + 0.4), V(1.3, 3.6, -0.35), V(-1.3, 3.6, -0.35)], 0x217a45, 0x0d4a26);
+}
+
+/* ================================================================ candles (LED) */
+const flameGeo = (() => {
+  const pts = [];
+  for (let i = 0; i <= 14; i++) { const t = i / 14; pts.push(new THREE.Vector2(Math.max(Math.sin(Math.PI * Math.pow(t, 0.72)) * 0.034 * (1 - t * 0.35), 0.0005), t * 0.14)); }
+  return new THREE.LatheGeometry(pts, 16);
+})();
+const haloTex = glowTex('rgba(255,220,150,1)', 'rgba(255,140,40,.35)');
+const candles = [];
+for (let k = 0; k <= 8; k++) {
+  const g = new THREE.Group();
+  const h = k === 0 ? 0.62 : 0.44;
+  const baseY = SHELF_Y + 0.045 + (k === 0 ? 0.06 : 0);
+  if (k === 0) { const b = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.06, 0.2), woodMats[0]); b.position.y = 0.03; g.add(b); }
+  const bodyMat = new THREE.MeshStandardMaterial({ color: 0xfbfaf4, roughness: 0.45, emissive: 0xffd9a0, emissiveIntensity: 0 });
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.068, h, 22), bodyMat);
+  body.position.y = (k === 0 ? 0.06 : 0) + h / 2; g.add(body);
+  const outer = new THREE.Mesh(flameGeo, new THREE.MeshBasicMaterial({ color: hdr(2.4, 1.15, 0.28), toneMapped: false, transparent: true, opacity: 0.95 }));
+  const core = new THREE.Mesh(flameGeo, new THREE.MeshBasicMaterial({ color: hdr(2.8, 2.5, 1.6), toneMapped: false }));
+  core.scale.setScalar(0.55);
+  const flame = new THREE.Group(); flame.add(outer); flame.add(core);
+  flame.position.y = (k === 0 ? 0.06 : 0) + h + 0.005; flame.scale.setScalar(0.0001); g.add(flame);
+  const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, color: 0xffb060, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }));
+  halo.scale.setScalar(0.5); halo.position.y = flame.position.y + 0.06; g.add(halo);
+  const light = new THREE.PointLight(0xffaa55, 0, 1.8, 2); light.position.y = flame.position.y + 0.1; g.add(light);
+  g.position.set(candleX(k), baseY, CANDLE_Z);
+  scene.add(g);
+  candles.push({ k, g, flame, halo, light, bodyMat, lit: false, litT: 0, phase: Math.random() * 10, wickY: baseY + flame.position.y + 0.07 });
+}
+
+/* ================================================================ rails, cart, dragon */
+for (const dz of [0.1, -0.1]) {
+  const r = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, RAIL_MAX - RAIL_MIN + 0.5, 16), M.pvc);
+  r.rotation.z = Math.PI / 2; r.position.set((RAIL_MIN + RAIL_MAX) / 2, RAIL_Y, RAIL_Z + dz); scene.add(r);
+}
+// limit switches, one per station
+const switches = [];
+for (let k = 0; k <= 8; k++) {
+  const sw = new THREE.Group();
+  const b = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.035, 0.045), M.box); sw.add(b);
+  const ledm = new THREE.Mesh(new THREE.SphereGeometry(0.011, 8, 6), new THREE.MeshBasicMaterial({ color: hdr(1.6, 0.15, 0.1), toneMapped: false }));
+  ledm.position.set(0, 0.022, 0.012); sw.add(ledm);
+  sw.position.set(stationX(k), RAIL_Y - 0.03, RAIL_Z - 0.16); scene.add(sw);
+  switches.push({ k, led: ledm, flash: 0 });
+}
+// controller + power
+const esp = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 0.035), M.box); esp.position.set(X - 0.12, 1.75, ZB + 0.08); scene.add(esp);
+const espLed = new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 6), new THREE.MeshBasicMaterial({ color: hdr(0.3, 0.8, 2.6), toneMapped: false }));
+espLed.position.set(X - 0.16, 1.78, ZB + 0.1); scene.add(espLed);
+const psu = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.11, 0.15), M.psu); psu.position.set(X - 0.45, 0.36, ZB + 0.12); scene.add(psu);
+
+const dragon = new THREE.Group(); scene.add(dragon);
+const edged = (mesh, angle = 18) => { mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry, angle), M.edge)); return mesh; };
+{
+  const cart = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.05, 0.36), M.metal); cart.position.y = 0.065; dragon.add(cart);
+  const rollerGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.05, 14);
+  for (const dx of [-0.17, 0.17]) for (const dz of [0.1, -0.1]) {
+    const r = new THREE.Mesh(rollerGeo, M.dark || M.metal); r.position.set(dx, 0.035, dz); dragon.add(r);
+  }
+}
+// neck
+const neckPts = [V(0.05, 0.12, 0.02), V(0.02, 0.27, 0.08), V(-0.02, 0.41, 0.14)];
+neckPts.forEach((p, i) => {
+  const s = edged(new THREE.Mesh(new THREE.IcosahedronGeometry(0.16 - i * 0.015, 0), M.dragon));
+  s.position.copy(p); s.rotation.set(i * 0.5, i * 0.8, 0.3); dragon.add(s);
+  const spike = edged(new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.17, 3), M.dragon));
+  spike.position.copy(p).add(V(0.08, 0.08, 0)); spike.rotation.z = -0.8; dragon.add(spike);
+});
+const yaw = new THREE.Group(); yaw.position.set(-0.05, 0.56, 0.18); yaw.scale.setScalar(1.45); dragon.add(yaw);
+const tilt = new THREE.Group(); yaw.add(tilt);
+const skull = edged(new THREE.Mesh(new THREE.IcosahedronGeometry(0.2, 0), M.dragon)); skull.scale.set(1.25, 0.82, 0.9); tilt.add(skull);
+const snout = edged(new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.125, 0.36, 5), M.dragon));
+snout.rotation.z = Math.PI / 2; snout.position.set(-0.3, -0.01, 0); tilt.add(snout);
+const jawPivot = new THREE.Group(); jawPivot.position.set(-0.12, -0.09, 0); tilt.add(jawPivot);
+const jaw = edged(new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.085, 0.33, 4), M.dragon));
+jaw.rotation.z = Math.PI / 2; jaw.position.set(-0.17, -0.01, 0); jawPivot.add(jaw);
+for (let i = 0; i < 4; i++) for (const z of [-0.045, 0.045]) {
+  const t = new THREE.Mesh(new THREE.ConeGeometry(0.012, 0.045, 4), M.tooth);
+  t.position.set(-0.4 + i * 0.07, -0.075, z); t.rotation.x = Math.PI; tilt.add(t);
+  const lt = t.clone(); lt.rotation.x = 0; lt.position.set(-0.27 + i * 0.06, 0.025, z * 0.85); jawPivot.add(lt);
+}
+for (const z of [-0.12, 0.12]) {
+  const eye = new THREE.Mesh(new THREE.SphereGeometry(0.028, 10, 8), M.eye); eye.position.set(-0.13, 0.07, z); tilt.add(eye);
+  const brow = edged(new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.16, 3), M.dragon));
+  brow.position.set(-0.08, 0.12, z * 0.95); brow.rotation.set(0, 0, -1.25); tilt.add(brow);
+  const horn = edged(new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.36, 4), M.dragon));
+  horn.position.set(0.16, 0.16, z * 0.7); horn.rotation.set(z * 1.2, 0, -1.05); tilt.add(horn);
+  const nost = new THREE.Mesh(new THREE.SphereGeometry(0.012, 6, 4), new THREE.MeshBasicMaterial({ color: 0x0a1a10 }));
+  nost.position.set(-0.47, 0.03, z * 0.3); tilt.add(nost);
+}
+// crest of spikes fanning out from the back of the skull, like the sketch
+for (let i = 0; i < 9; i++) {
+  const a = -1.1 + i * 0.275;
+  for (const side of [-1, 1]) {
+    if (i === 4 && side === 1) continue;
+    const dir = V(0.75, Math.sin(a) * 0.9, side * (0.55 + Math.cos(a) * 0.25)).normalize();
+    const len = 0.16 + Math.cos(a) * 0.12 + Math.random() * 0.04;
+    const sp = edged(new THREE.Mesh(new THREE.ConeGeometry(0.03, len, 3), M.dragon));
+    sp.position.copy(V(0.12, 0.02, 0).addScaledVector(dir, 0.16 + len / 2));
+    sp.quaternion.setFromUnitVectors(UP, dir); tilt.add(sp);
+  }
+}
+const mouth = new THREE.Object3D(); mouth.position.set(-0.47, -0.06, 0); tilt.add(mouth);
+const headGlow = new THREE.PointLight(0x35ff85, 0.9, 1.6, 2); headGlow.position.set(0, 0.25, 0.2); tilt.add(headGlow);
+const fireLight = new THREE.PointLight(0xff7a1a, 0, 4.5, 1.6); scene.add(fireLight);
+
+// pulleys, pull rope and the flexible cable loop
+const pulleyGeo = new THREE.TorusGeometry(0.06, 0.018, 8, 20);
+for (const x of [RAIL_MIN - 0.12, RAIL_MAX + 0.14]) {
+  const p = new THREE.Mesh(pulleyGeo, M.metal); p.position.set(x, RAIL_Y + 0.06, RAIL_Z); scene.add(p);
+}
+const ropeMat = new THREE.LineBasicMaterial({ color: 0xd7c18f });
+const ropeGeo = new THREE.BufferGeometry().setFromPoints([V(), V(), V(), V(), V()]);
+scene.add(new THREE.Line(ropeGeo, ropeMat));
+const cableGeo = new THREE.BufferGeometry().setFromPoints(new Array(28).fill(0).map(() => V()));
+scene.add(new THREE.Line(cableGeo, new THREE.LineBasicMaterial({ color: 0x111312 })));
+const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.18, 8), woodMats[1]);
+handle.rotation.z = Math.PI / 2; scene.add(handle);
+
+/* ================================================================ fire particles */
+const MAXP = 1100;
+const pPos = new Float32Array(MAXP * 3), pAge = new Float32Array(MAXP).fill(1), pSize = new Float32Array(MAXP);
+const pVel = new Float32Array(MAXP * 3), pLife = new Float32Array(MAXP).fill(1);
+const pGeo = new THREE.BufferGeometry();
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3).setUsage(THREE.DynamicDrawUsage));
+pGeo.setAttribute('aAge', new THREE.BufferAttribute(pAge, 1).setUsage(THREE.DynamicDrawUsage));
+pGeo.setAttribute('aSize', new THREE.BufferAttribute(pSize, 1));
+const pMat = new THREE.ShaderMaterial({
+  uniforms: { uScale: { value: 400 } },
+  vertexShader: `attribute float aAge; attribute float aSize; uniform float uScale; varying float vAge;
+    void main(){ vAge=aAge; vec4 mv=modelViewMatrix*vec4(position,1.0); gl_Position=projectionMatrix*mv;
+      gl_PointSize = aAge>=1.0 ? 0.0 : aSize*uScale*(0.55+aAge*1.7)/max(-mv.z,0.1); }`,
+  fragmentShader: `varying float vAge;
+    void main(){ vec2 c=gl_PointCoord-0.5; float d=length(c); if(d>0.5||vAge>=1.0) discard;
+      float a=smoothstep(0.5,0.0,d);
+      vec3 c1=vec3(1.0,0.93,0.6), c2=vec3(1.0,0.5,0.08), c3=vec3(0.7,0.09,0.02);
+      vec3 col = vAge<0.3 ? mix(c1,c2,vAge/0.3) : mix(c2,c3,(vAge-0.3)/0.7);
+      float al=a*(1.0-vAge);
+      gl_FragColor=vec4(col*1.7*al, al); }`,
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+});
+const fire = new THREE.Points(pGeo, pMat); fire.frustumCulled = false; scene.add(fire);
+let pNext = 0;
+const tmpA = V(), tmpB = V(), tmpD = V();
+function spawnFire(n, from, to) {
+  tmpD.subVectors(to, from); const dist = tmpD.length(); tmpD.normalize();
+  for (let i = 0; i < n; i++) {
+    const j = pNext; pNext = (pNext + 1) % MAXP;
+    pPos[j * 3] = from.x + (Math.random() - 0.5) * 0.03; pPos[j * 3 + 1] = from.y + (Math.random() - 0.5) * 0.03; pPos[j * 3 + 2] = from.z + (Math.random() - 0.5) * 0.03;
+    const sp = dist * (1.9 + Math.random() * 0.8);
+    pVel[j * 3] = tmpD.x * sp + (Math.random() - 0.5) * 0.5; pVel[j * 3 + 1] = tmpD.y * sp + (Math.random() - 0.5) * 0.4; pVel[j * 3 + 2] = tmpD.z * sp + (Math.random() - 0.5) * 0.5;
+    pLife[j] = 0.42 + Math.random() * 0.22; pAge[j] = 0; pSize[j] = 0.07 + Math.random() * 0.07;
+  }
+  pGeo.attributes.aSize.needsUpdate = true;
+}
+function updateFire(dt) {
+  for (let j = 0; j < MAXP; j++) {
+    if (pAge[j] >= 1) continue;
+    pAge[j] = Math.min(1, pAge[j] + dt / pLife[j]);
+    pVel[j * 3 + 1] += 0.9 * dt;
+    const damp = 1 - 1.4 * dt; pVel[j * 3] *= damp; pVel[j * 3 + 2] *= damp;
+    pPos[j * 3] += pVel[j * 3] * dt; pPos[j * 3 + 1] += pVel[j * 3 + 1] * dt; pPos[j * 3 + 2] += pVel[j * 3 + 2] * dt;
+  }
+  pGeo.attributes.position.needsUpdate = true; pGeo.attributes.aAge.needsUpdate = true;
+}
+
+/* ================================================================ show logic (what the ESP32 does) */
+let night = 4, mode = 'auto';
+let cartX = PARK_X, cartV = 0;
+let phase = 'idle', phaseT = 0, seq = [], seqI = 0, station = -1, tween = null, burnFired = false;
+let manualTarget = PARK_X;
+const nameOf = k => (k === 0 ? 'השמש' : 'נר ' + k);
+const planFor = n => { const s = [0]; for (let k = n; k >= 1; k--) s.push(k); return s; };   // newest candle first
+const inPlan = k => k === 0 || k <= night;
+function setStatus(t, dot) { statusText.textContent = t; sensorDot.className = 'dot' + (dot ? ' ' + dot : ''); }
+function updateCount() { const need = night + 1; const n = candles.filter(c => c.lit && inPlan(c.k)).length; litCount.textContent = n + '/' + need; }
+function resetAll(keepPos) {
+  candles.forEach(c => { c.lit = false; c.litT = 0; });
+  phase = 'idle'; seq = []; seqI = 0; station = -1; tween = null;
+  if (!keepPos) { cartX = PARK_X; cartV = 0; manualTarget = PARK_X; $('#rope').value = 1000; }
+  updateCount();
+  setStatus(mode === 'auto' ? `מוכן · ערב ${night}: השמש ו־${night} נרות` : 'מצב ידני: משכו את החבל כדי להזיז את הדרקון', '');
+}
+function startShow() {
+  if (mode !== 'auto') setMode('auto');
+  resetAll(true);
+  seq = planFor(night); seqI = 0; goTo(seq[0]);
+}
+function goTo(k) {
+  station = k; const to = stationX(k), dist = Math.abs(to - cartX);
+  tween = { from: cartX, to, t: 0, dur: Math.max(0.35, 0.45 + dist / 1.25) };
+  phase = 'moving'; setStatus('הדרקון נע לתחנה: ' + nameOf(k), '');
+}
+function triggerStation(k) {
+  station = k; phase = 'arrive'; phaseT = 0; burnFired = false;
+  switches[k].flash = 1;
+  setStatus('מפסק הגבול זיהה תחנה: ' + nameOf(k), 'on');
+}
+const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+function stepShow(dt) {
+  if (mode === 'auto') {
+    if (phase === 'moving' && tween) {
+      tween.t = Math.min(1, tween.t + dt / tween.dur);
+      const nx = tween.from + (tween.to - tween.from) * ease(tween.t);
+      cartV = (nx - cartX) / Math.max(dt, 1e-4); cartX = nx;
+      if (tween.t >= 1) { tween = null; cartV = 0; triggerStation(station); }
+    }
+  } else {
+    const k = 34, c = 9.5;                       // rope pull: a damped spring towards the slider
+    if (phase === 'moving' || phase === 'idle' || phase === 'done') {
+      cartV += ((manualTarget - cartX) * k - cartV * c) * dt;
+      cartX = Math.min(RAIL_MAX, Math.max(RAIL_MIN, cartX + cartV * dt));
+      // the controller only reacts to a station it has not lit yet: no double lighting
+      let near = -1, best = 0.05;
+      for (let s = 0; s <= 8; s++) { const d = Math.abs(cartX - stationX(s)); if (d < best) { best = d; near = s; } }
+      if (near >= 0 && Math.abs(cartV) < 0.25 && inPlan(near) && !candles[near].lit) triggerStation(near);
+      else if (near >= 0) sensorDot.className = 'dot on';
+      else if (phase !== 'done') sensorDot.className = 'dot';
+    }
+  }
+  if (phase === 'arrive') {
+    phaseT += dt;
+    if (phaseT > 0.35) { phase = 'burn'; phaseT = 0; setStatus('נשיפת אש: אנימציית להבה בכתום, אדום וצהוב', 'fire'); }
+  } else if (phase === 'burn') {
+    phaseT += dt;
+    if (phaseT < 1.15) {
+      mouth.getWorldPosition(tmpA);
+      const c = candles[station]; tmpB.set(c.g.position.x, c.wickY + 0.02, c.g.position.z);
+      spawnFire(Math.ceil(520 * dt), tmpA, tmpB);
+    }
+    if (!burnFired && phaseT > 0.78) {
+      burnFired = true; const c = candles[station]; c.lit = true; c.litT = 0; updateCount();
+      setStatus(nameOf(station) + ' נדלק ונשאר דולק', 'fire');
+    }
+    if (phaseT > 1.55) { phase = 'after'; phaseT = 0; }
+  } else if (phase === 'after') {
+    phaseT += dt;
+    if (phaseT > 0.25) {
+      if (mode === 'auto') {
+        seqI++;
+        if (seqI < seq.length) goTo(seq[seqI]);
+        else { phase = 'done'; setStatus(`החנוכייה דולקת · ערב ${night}`, 'fire'); }
+      } else {
+        const left = candles.filter(c => inPlan(c.k) && !c.lit).length;
+        phase = left ? 'moving' : 'done';
+        setStatus(left ? `נשארו ${left} תחנות. משכו את החבל לתחנה הבאה` : `החנוכייה דולקת · ערב ${night}`, left ? '' : 'fire');
+      }
+    }
+  }
+}
+
+/* ================================================================ animation */
+const clock = new THREE.Clock();
+let t = 0;
+const yawTarget = V();
+let followCam = false;
+const camGoal = { pos: null, target: null, t: 0 };
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05); t += dt;
+  stepShow(dt);
+
+  dragon.position.set(cartX, RAIL_Y + 0.025, RAIL_Z);
+  // aim the head at the candle of the current (or next) station
+  const aimK = station >= 0 ? station : 0;
+  const ac = candles[aimK];
+  yawTarget.set(ac.g.position.x, ac.wickY, ac.g.position.z);
+  yaw.getWorldPosition(tmpA);
+  const dx = yawTarget.x - tmpA.x, dz = yawTarget.z - tmpA.z, dy = yawTarget.y - tmpA.y;
+  const wantYaw = Math.atan2(dz, -dx), lxz = Math.hypot(dx, dz);
+  const wantPitch = Math.max(-0.2, Math.min(0.9, Math.atan2(-dy, lxz)));
+  const idleBob = phase === 'burn' ? 0 : Math.sin(t * 1.7) * 0.05;
+  yaw.rotation.y += (wantYaw - yaw.rotation.y) * Math.min(1, dt * 5);
+  tilt.rotation.z += (wantPitch + idleBob - tilt.rotation.z) * Math.min(1, dt * 5);
+  const jawOpen = phase === 'burn' && phaseT < 1.3 ? 0.42 : phase === 'arrive' ? 0.12 : 0.02;
+  jawPivot.rotation.z += (jawOpen - jawPivot.rotation.z) * Math.min(1, dt * 12);
+  headGlow.intensity = 0.8 + Math.sin(t * 3) * 0.15;
+
+  // fire light follows the flame
+  const burning = phase === 'burn' && phaseT < 1.25;
+  mouth.getWorldPosition(tmpA);
+  if (station >= 0) { const c = candles[station]; tmpB.set(c.g.position.x, c.wickY, c.g.position.z); fireLight.position.lerpVectors(tmpA, tmpB, 0.45); }
+  const fGoal = burning ? 3.2 + Math.sin(t * 40) * 0.6 + Math.sin(t * 23) * 0.4 : 0;
+  fireLight.intensity += (fGoal - fireLight.intensity) * Math.min(1, dt * 14);
+  updateFire(dt);
+
+  // LED candles
+  for (const c of candles) {
+    if (c.lit) {
+      c.litT = Math.min(1, c.litT + dt * 2.6);
+      const pop = c.litT < 1 ? 1 + Math.sin(c.litT * Math.PI) * 0.6 : 1;
+      const fl = 1 + Math.sin(t * 13 + c.phase) * 0.05 + Math.sin(t * 29 + c.phase * 2) * 0.03;
+      c.flame.scale.set(pop, pop * fl, pop);
+      c.flame.rotation.z = Math.sin(t * 5 + c.phase) * 0.05;
+      c.halo.material.opacity = 0.75 * c.litT + (c.litT < 1 ? (1 - c.litT) * 0.6 : 0);
+      c.light.intensity = 0.75 * fl * c.litT;
+      c.bodyMat.emissiveIntensity = 0.22 * c.litT;
+    } else {
+      c.flame.scale.setScalar(0.0001); c.halo.material.opacity = 0; c.light.intensity = 0; c.bodyMat.emissiveIntensity = 0;
+    }
+  }
+  // limit-switch LEDs: red, green while triggered
+  for (const s of switches) {
+    s.flash = Math.max(0, s.flash - dt * 0.8);
+    const on = s.flash > 0 || (phase !== 'moving' && station === s.k && phase !== 'idle');
+    s.led.material.color.copy(on ? hdr(0.3, 2.6, 0.6) : (inPlan(s.k) ? hdr(1.5, 0.12, 0.08) : hdr(0.35, 0.05, 0.03)));
+  }
+  espLed.material.color.copy(Math.sin(t * 6) > 0 ? hdr(0.3, 0.8, 2.6) : hdr(0.05, 0.12, 0.4));
+
+  // rope through the pulleys, and the flexible cable loop
+  const cy = RAIL_Y + 0.07;
+  const rp = ropeGeo.attributes.position;
+  rp.setXYZ(0, cartX - 0.23, cy, RAIL_Z); rp.setXYZ(1, RAIL_MIN - 0.12, cy, RAIL_Z);
+  rp.setXYZ(2, RAIL_MIN - 0.12, cy, RAIL_Z); rp.setXYZ(3, cartX + 0.23, cy, RAIL_Z);
+  rp.setXYZ(4, RAIL_MAX + 0.14, cy, RAIL_Z);
+  rp.needsUpdate = true;
+  const pull = (PARK_X - cartX) * 0.12;
+  handle.position.set(RAIL_MAX + 0.22, 1.05 - pull, RAIL_Z + 0.15);
+  ropeGeo.setDrawRange(0, 5);
+  const cp = cableGeo.attributes.position; const a = V(X - 0.12, 1.8, ZB + 0.1), b = V(cartX + 0.15, RAIL_Y + 0.05, RAIL_Z - 0.12);
+  for (let i = 0; i < 28; i++) {
+    const u = i / 27; const sag = Math.sin(u * Math.PI) * (0.35 + Math.abs(b.x - a.x) * 0.04);
+    cp.setXYZ(i, a.x + (b.x - a.x) * u, a.y + (b.y - a.y) * u - sag, a.z + (b.z - a.z) * u);
+  }
+  cp.needsUpdate = true;
+
+  // camera moves
+  if (camGoal.pos) {
+    camGoal.t = Math.min(1, camGoal.t + dt / 1.1); const e = ease(camGoal.t);
+    camera.position.lerpVectors(camGoal.fromPos, camGoal.pos, e); controls.target.lerpVectors(camGoal.fromTarget, camGoal.target, e);
+    if (camGoal.t >= 1) camGoal.pos = null;
+  } else if (followCam) {
+    tilt.getWorldPosition(tmpA);
+    controls.target.lerp(tmpA, Math.min(1, dt * 3));
+    camera.position.lerp(tmpB.set(tmpA.x + 1.3, tmpA.y + 0.45, tmpA.z + 1.9), Math.min(1, dt * 2));
+  }
+  controls.update();
+  if (labelsOn) placeLabels();
+  composer ? composer.render() : renderer.render(scene, camera);
+}
+
+/* ================================================================ labels */
+const labelsEl = $('#labels');
+let labelsOn = false;
+const labelDefs = [
+  { text: 'ראש דרקון · לדים WS2812B ירוקים', at: () => tilt.getWorldPosition(V()).add(V(0, 0.42, 0)) },
+  { text: 'עגלת החלקה על שתי מסילות', at: () => dragon.getWorldPosition(V()).add(V(0.15, 0.02, -0.25)) },
+  { text: 'מסילות PVC כפולות', at: () => V(-2.4, RAIL_Y, RAIL_Z) },
+  { text: 'מפסק גבול לכל תחנה', at: () => switches[5].led.getWorldPosition(V()) },
+  { text: 'חבל משיכה', at: () => handle.getWorldPosition(V()) },
+  { text: 'בקר ESP32', at: () => esp.getWorldPosition(V()) },
+  { text: 'ספק כוח 5V', at: () => psu.getWorldPosition(V()) },
+  { text: 'לולאת כבל גמישה', at: () => V((X - 0.12 + cartX) / 2, 1.6, (ZB + RAIL_Z) / 2) },
+  { text: 'תשעה נרות לד', at: () => V(0.3, SHELF_Y + 0.6, CANDLE_Z) },
+  { text: 'מבנה סנדות וחבלים', at: () => V(-X, 2.9, ZF) },
+];
+const labelEls = labelDefs.map(d => { const e = document.createElement('div'); e.className = 'tag3d'; e.textContent = d.text; labelsEl.appendChild(e); return e; });
+function placeLabels() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  labelDefs.forEach((d, i) => {
+    const p = d.at().project(camera); const el = labelEls[i];
+    if (p.z > 1 || p.x < -1.1 || p.x > 1.1 || p.y < -1.1 || p.y > 1.1) { el.hidden = true; return; }
+    el.hidden = false; el.style.left = ((p.x + 1) / 2 * w) + 'px'; el.style.top = ((1 - p.y) / 2 * h - 6) + 'px';
+  });
+}
+
+/* ================================================================ resize */
+function resize() {
+  const w = canvas.clientWidth || window.innerWidth, h = canvas.clientHeight || window.innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h; camera.fov = w < 640 ? 55 : 42; camera.updateProjectionMatrix();
+  if (composer) { composer.setSize(w, h); if (bloom) bloom.resolution.set(w, h); }
+  pMat.uniforms.uScale.value = h * renderer.getPixelRatio() / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2));
+}
+window.addEventListener('resize', resize);
+resize();
+
+/* ================================================================ UI */
+document.querySelectorAll('[data-night]').forEach(b => b.addEventListener('click', () => {
+  night = +b.dataset.night;
+  document.querySelectorAll('[data-night]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  resetAll(); if (mode === 'auto') startShow();
+}));
+$('#play').addEventListener('click', startShow);
+$('#reset').addEventListener('click', () => resetAll());
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('[data-mode]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.mode === m)));
+  $('#manualRow').hidden = m !== 'manual';
+  resetAll(m === 'manual');
+  if (m === 'manual') { manualTarget = cartX; $('#rope').value = Math.round((cartX - RAIL_MIN) / (RAIL_MAX - RAIL_MIN) * 1000); phase = 'moving'; }
+}
+document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+$('#rope').addEventListener('input', e => { manualTarget = RAIL_MIN + (e.target.value / 1000) * (RAIL_MAX - RAIL_MIN); });
+
+const views = {
+  front: { pos: V(0, 2.1, 8.8), target: V(0, 1.7, 0) },
+  side: { pos: V(8.4, 2.8, 3.4), target: V(0, 1.85, -0.3) },
+  back: { pos: V(2.2, 3.4, -6.2), target: V(0, 2.0, -0.6) },
+};
+function flyTo(v) { followCam = false; camGoal.fromPos = camera.position.clone(); camGoal.fromTarget = controls.target.clone(); camGoal.pos = v.pos.clone(); camGoal.target = v.target.clone(); camGoal.t = 0; }
+document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => {
+  const v = b.dataset.view;
+  if (v === 'follow') { camGoal.pos = null; followCam = true; } else flyTo(views[v]);
+}));
+controls.addEventListener('start', () => { followCam = false; camGoal.pos = null; });
+$('#spin').addEventListener('click', e => { controls.autoRotate = !controls.autoRotate; e.currentTarget.setAttribute('aria-pressed', String(controls.autoRotate)); });
+$('#labelsBtn').addEventListener('click', e => {
+  labelsOn = !labelsOn; e.currentTarget.setAttribute('aria-pressed', String(labelsOn));
+  labelsEl.hidden = !labelsOn;
+});
+labelsEl.hidden = true;
+const info = $('#info'), infoBtn = $('#infoBtn');
+function toggleInfo(open) { info.hidden = !open; infoBtn.setAttribute('aria-expanded', String(open)); }
+infoBtn.addEventListener('click', () => toggleInfo(info.hidden));
+$('#infoClose').addEventListener('click', () => toggleInfo(false));
+$('#toggleDock').addEventListener('click', e => {
+  const dock = $('#dock'); const min = dock.classList.toggle('min');
+  e.currentTarget.textContent = min ? 'עוד' : 'פחות'; e.currentTarget.setAttribute('aria-expanded', String(!min));
+});
+
+// phones: start further back so the whole structure fits, and keep the dock compact
+if (canvas.clientWidth < 640) {
+  camera.position.set(4.2, 3.4, 13.5); controls.target.set(0, 1.9, -0.1);
+  const dock = $('#dock'); dock.classList.add('min');
+  $('#toggleDock').textContent = 'עוד'; $('#toggleDock').setAttribute('aria-expanded', 'false');
+  views.front.pos.set(0, 2.3, 13);
+  views.side.pos.set(11.5, 3.2, 4.5);
+  views.back.pos.set(3, 4, -9.5);
+}
+resetAll();
+animate();
+setTimeout(startShow, 1200);   // plays even with reduced motion, like the tribe site
+})();
+</script>
+
+</body></html>
