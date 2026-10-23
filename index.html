@@ -111,6 +111,16 @@ h3{font-family:var(--display);font-size:2.1rem;line-height:1;margin:0 0 .4rem;fo
 .art-fdle span{background:#222;height:20px}
 .art-fdle span.g{background:var(--lily)}
 .art-fdle span.y{background:var(--yellow)}
+.art-year{background:#0e0e0e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:0 18px}
+.art-year b{font-family:var(--display);font-size:2.8rem;line-height:1;color:var(--yellow)}
+.art-year .ar{position:relative;width:min(78%,300px);height:6px;background:#3a3a3a}
+.art-year .ar i{position:absolute;top:-9px;width:6px;height:24px;background:var(--flag);transform:translateX(50%)}
+.art-hl{background:#0e0e0e;display:flex;align-items:center;justify-content:center;gap:14px;padding:0 18px}
+.art-hl span{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:92px;height:76px;padding:0 .6rem;font-family:var(--display);font-size:1.7rem;line-height:1}
+.art-hl span small{font-size:1.15rem;margin-top:4px}
+.art-hl .k{background:#fff;color:#000}.art-hl .k small{color:var(--red)}
+.art-hl .u{background:#1c1c1c;color:#fff;border:2px dashed var(--yellow)}.art-hl .u small{color:var(--yellow)}
+.art-hl b{font-family:var(--display);font-size:2.4rem;color:var(--flag)}
 .art-time{background:#1a1a1a;display:flex;align-items:center;gap:10px;padding:0 18px}
 .art-time b{font-family:var(--display);font-size:2.2rem;color:#fff;border:2px solid #fff;padding:0 .5rem;background:#000}
 .art-time b.n{border-color:var(--yellow);color:var(--yellow);transform:translateY(-14px) rotate(3deg)}
@@ -899,7 +909,7 @@ footer p.credit b{font-family:var(--display);font-size:1.6rem;color:var(--yellow
 .yg-step{width:52px;height:52px;flex:0 0 auto;background:#fff;color:#000;border:0;font-family:var(--display);font-size:2.2rem;cursor:pointer;line-height:1}
 .yg-step:hover:not(:disabled){background:var(--yellow)}
 .yg-step:disabled{opacity:.3}
-.yg-strip{position:relative;height:70px;max-width:640px;margin:1.2rem auto 0;border-top:3px solid #fff}
+.yg-strip{position:relative;height:70px;width:min(640px,calc(100% - 6rem));margin:1.2rem auto 0;border-top:3px solid #fff}
 .yg-strip .tick{position:absolute;top:4px;transform:translateX(50%);font-family:var(--display);font-size:1.1rem;color:#8d867e}
 .yg-strip .tick::before{content:"";position:absolute;top:-10px;right:50%;height:8px;border-right:2px solid #fff}
 .yg-strip .pin{position:absolute;top:-20px;width:4px;height:36px;transform:translateX(50%);animation:pop .4s}
