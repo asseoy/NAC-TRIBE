@@ -2868,6 +2868,7 @@ const SBFX=(()=>{
   const WRAPS={shine:{col:'rgba(255,240,200,.9)',speed:.8},deep:'#3a0004',side:'#8a0c12',ink:'#1a0002',glow:'rgba(255,190,60,1)',fill:[[0,'#fff1d6'],[.25,'#ffd34a'],[.5,'#ff4a3a'],[.8,'#c4121a'],[1,'#5a0306']]};
   const CHICK={shine:{col:'rgba(255,255,230,.9)',speed:.9},deep:'#3a1a00',side:'#8a4a00',ink:'#1a0a00',glow:'rgba(255,170,40,1)',fill:[[0,'#fffbe0'],[.3,'#ffe45a'],[.6,'#ffb020'],[.85,'#e0600a'],[1,'#7a2a00']]};
   const CHICK2={deep:'#1a0a00',side:'#3a2000',ink:'#000',glow:'rgba(255,200,80,.8)',fill:[[0,'#ffffff'],[.6,'#ffe9b0'],[1,'#ffc040']]};
+  const SIGN={shine:{col:'rgba(255,255,255,.9)',speed:.9},deep:'#04112a',side:'#0f3478',ink:'#020814',glow:'rgba(70,150,255,1)',fill:[[0,'#ffffff'],[.45,'#eaf3ff'],[.7,'#9cc6ff'],[1,'#3d7fe0']]};
   const COSMIC={shine:{col:'rgba(220,250,255,.8)',speed:.8},deep:'#0a0630',side:'#1d1270',ink:'#05031a',glow:'rgba(120,200,255,1)',fill:[[0,'#ffffff'],[.3,'#bff6ff'],[.55,'#6fd8ff'],[.8,'#8a5bff'],[1,'#3a1a9a']]};
 
   /* ---------------- shared drawing helpers ---------------- */
@@ -3148,6 +3149,55 @@ const SBFX=(()=>{
             const sc=1+.6*(1-eb(ka)),sx=(1-eo(ka))*W*.35;g.save();g.translate(W/2+sx,S.ty);g.transform(1,0,-.16,1,0,0);drawTitle(g,S.T,0,0,sc,al,al*(.6+.3*Math.sin(t*8)),t);g.restore();
             g.globalCompositeOperation='lighter';g.globalAlpha=al*(1-seg(t,2.6,3.3));g.strokeStyle='#bff6ff';g.lineWidth=U*.5;for(let i=0;i<6;i++){const yy=S.ty+(i-2.5)*S.T.H*.16;g.beginPath();g.moveTo(W/2+S.T.W*.5,yy);g.lineTo(W/2+S.T.W*.5+W*.25*(1-seg(t,2.6,3.3)),yy);g.stroke()}g.globalCompositeOperation='source-over';g.globalAlpha=1;
             const ds=Math.min(W,H)*.085,dy=S.ty+S.T.H*.62+ds*.6,dp=eb(seg(t,2.85,3.25));[[6,1],[5,-1]].forEach(([v,s],i)=>{if(dp>0){g.globalAlpha=al;sbDie(g,W/2+s*ds*.75,dy,ds*dp,v,0,(1-dp)*s*4+Math.sin(t*2+i)*.06)}});g.globalAlpha=1}};
+      }},
+    onlyway:{dur:5.6,
+      init(S){const {W,H,U}=S;S.port=H>W;
+        S.T=title('יש רק דרך אחת',Math.min(W*.15,H*.2),W*.88,SIGN);S.T2=title('לשחק 6-1!',Math.min(W*.12,H*.15),W*.7,GOLD);
+        S.sw=Math.min(W*.62,H*(S.port?.3:.36)*2.3);S.sh=S.sw*.43;S.sy=S.port?H*.27:H*.25;S.ty=S.sy+S.sh*.5+S.T.H*.62+U*2;S.t2y=S.ty+S.T.H*.5+S.T2.H*.5;
+        S.ds=Math.min(W,H)*.09;
+        S.ways=[];const n=7,ord=[0,3,6,2,5,1,4];for(let i=0;i<n;i++){const j=ord[i];S.ways.push({a:-Math.PI/2+Math.PI/n+j*TAU/n+R(-.12,.12),l:Math.min(W,H)*R(.3,.4),at:.85+i*.07,x:1.35+i*.075})}
+        AU.whoosh(.05,.5,.3);[.52,.6,.7,.78,.86].forEach((s,i)=>AU.tek(s,.55-i*.08));
+        AU.rise(.85,.55,.18);S.ways.forEach(w=>{const at=AU.T(w.x);AU.osc('square',170,120,at,.13,.07);AU.noise(at,.12,.18,'highpass',2500,900,1,.002)});
+        AU.whoosh(1.9,.35,.4);AU.boom(2.2,.8);AU.rattle(2.2,.55,40);
+        [[2.55,.22],[2.85,.4]].forEach(([s,d])=>{const at=AU.T(s);AU.osc('square',415,415,at,d,.09,.01);AU.osc('square',523,523,at,d,.07,.01)});
+        AU.chord(3.25,[392,493.9,587.3,784],1.6,.14,'sawtooth',3800);AU.shimmer(3.25,1.6,12)},
+      frame(S,t,dt){const {g,W,H,U,cx,cy,P}=S,q=S.q,ds=S.ds;
+        S.dark=.82*eo(seg(t,0,.45))*(1-seg(t,4.9,5.6));
+        // the dice: tumble in from both sides and meet in the middle, then step aside under the title
+        const dk=seg(t,.12,.75),dd=[[6,-1],[1,1]].map(([v,s],i)=>{const e=eo(dk),hop=Math.abs(Math.sin(e*Math.PI*2.2))*(1-e)*H*.18;
+          let x=cx+s*(W*.62*(1-e)+ds*.7),y=cy-hop,r=(1-e)*s*9;
+          const mv=eio(seg(t,1.95,2.4));if(mv>0){const tx=cx+s*(S.T2.W*.5+ds*.85),ty=S.t2y;x+=(tx-x)*mv;y+=(ty-y)*mv;r+=Math.sin(mv*Math.PI)*s*.6}
+          return {v,x,y,r}});
+        if(S.once(.75)){S.shake=U*1.2;for(const d of dd)for(let i=0;i<14*q;i++){const a=R(0,TAU),v=R(10,40)*U;P.add({sp:S.S.white,add:1,x:d.x,y:d.y+ds*.4,vx:Math.cos(a)*v,vy:Math.sin(a)*v*.4,drag:.9,s:R(1,2.4)*U,life:R(.25,.5)})}}
+        // the wrong ways: red arrows shoot out in every direction, each one is crossed out and shatters
+        for(const w of S.ways){if(S.once(w.x)){const ex=cx+Math.cos(w.a)*w.l*.8,ey=cy+Math.sin(w.a)*w.l*.8;S.shake=Math.max(S.shake,U*.8);
+          for(let i=0;i<22*q;i++){const a=R(0,TAU),v=R(8,45)*U;P.add({sp:i%3?S.S.red:S.S.ember,add:1,x:ex+R(-1,1)*U*3,y:ey+R(-1,1)*U*3,vx:Math.cos(a)*v,vy:Math.sin(a)*v,drag:.92,g:U*20,s:R(1.4,3.4)*U,life:R(.3,.8),fade:1.1})}}}
+        if(S.once(2.2)){S.shake=U*2.4;S.flash=.35;S.rings.push({t,x:cx,y:S.sy,v:Math.max(W,H)*.9,w:U*1.2,col:'rgba(120,180,255,1)',d:.7});
+          for(let i=0;i<50*q;i++){const a=R(0,TAU),v=R(15,60)*U;P.add({sp:S.S.cyan,add:1,x:cx+R(-.5,.5)*S.sw,y:S.sy+S.sh*.5,vx:Math.cos(a)*v,vy:-Math.abs(Math.sin(a))*v,drag:.93,g:U*30,s:R(1,2.6)*U,life:R(.4,.9)})}}
+        if(t>3.2&&t<4.8&&Math.random()<.5*q)P.add({sp:S.S.flareG,add:1,x:cx+R(-.5,.5)*S.T.W,y:S.ty+R(-.4,.4)*S.T.H,vx:0,vy:-U*4,s:R(3,6)*U,life:R(.4,.8)});
+        const arrow=(len,w,hl)=>{g.beginPath();g.moveTo(0,-w/2);g.lineTo(len-hl,-w/2);g.lineTo(len-hl,-w*1.25);g.lineTo(len,0);g.lineTo(len-hl,w*1.25);g.lineTo(len-hl,w/2);g.lineTo(0,w/2);g.closePath()};
+        S.back=()=>{const fa=1-seg(t,4.9,5.6);
+          for(const w of S.ways){const k=seg(t,w.at,w.at+.3),gone=seg(t,w.x,w.x+.08);if(k<=0||gone>=1)continue;const len=w.l*eo(k);
+            g.save();g.translate(cx,cy);g.rotate(w.a);g.globalAlpha=fa*(1-gone);g.fillStyle='#e0262e';g.strokeStyle='#3a0003';g.lineWidth=U*.6;arrow(len,U*4.2,U*6.5);g.fill();g.stroke();
+            const xk=seg(t,w.x-.22,w.x-.06);if(xk>0){g.translate(len*.7,0);g.rotate(-w.a);const s=U*5.5*eb(xk);g.strokeStyle='#fff';g.lineCap='round';g.lineWidth=U*1.8;g.beginPath();g.moveTo(-s,-s);g.lineTo(s,s);g.moveTo(s,-s);g.lineTo(-s,s);g.stroke()}
+            g.restore()}
+          g.globalAlpha=1;
+          for(const d of dd){g.globalAlpha=fa;sbDie(g,d.x,d.y,ds,d.v,0,d.r)}g.globalAlpha=1};
+        S.front=()=>{const fa=1-seg(t,4.9,5.6);
+          // the one-way road sign drops in on its chains and swings to a stop
+          const sk=seg(t,1.9,2.2);if(sk>0&&fa>0){const sw=S.sw,sh=S.sh,y=S.sy-(1-ei(sk))*H*.7,sw8=t>2.2?Math.sin((t-2.2)*7)*.09*Math.exp(-(t-2.2)*1.6):0;
+            g.save();g.globalAlpha=fa;g.translate(cx,y-sh*.9);g.rotate(sw8);
+            g.strokeStyle='#8a8f96';g.lineWidth=U*.7;g.setLineDash([U*1.6,U*.8]);[-1,1].forEach(s=>{g.beginPath();g.moveTo(s*sw*.3,-H);g.lineTo(s*sw*.3,sh*.9-sh*.5);g.stroke()});g.setLineDash([]);
+            g.translate(0,sh*.9);
+            const gl=Math.max(W,H)*.5;g.globalCompositeOperation='lighter';g.globalAlpha=fa*.35*(.8+.2*Math.sin(t*5));g.drawImage(S.S.cyan,-gl/2,-gl/2,gl,gl);g.globalCompositeOperation='source-over';g.globalAlpha=fa;
+            const rr=sh*.12,bx=-sw/2,by=-sh/2,box=()=>{g.beginPath();g.moveTo(bx+rr,by);g.arcTo(bx+sw,by,bx+sw,by+sh,rr);g.arcTo(bx+sw,by+sh,bx,by+sh,rr);g.arcTo(bx,by+sh,bx,by,rr);g.arcTo(bx,by,bx+sw,by,rr);g.closePath()};
+            g.fillStyle='#fff';box();g.fill();g.save();g.translate(0,0);g.scale(.93,.88);const bg=g.createLinearGradient(0,by,0,by+sh);bg.addColorStop(0,'#2f7ae0');bg.addColorStop(1,'#123f8f');g.fillStyle=bg;box();g.fill();g.restore();
+            g.save();g.translate(sw*.36,0);g.rotate(Math.PI);g.fillStyle='#fff';arrow(sw*.72,sh*.2,sh*.3);g.fill();g.clip();
+            // light running along the arrow (clipped to the arrow)
+            g.globalCompositeOperation='lighter';const ph=(((t-2.3)*.8%1.3+1.3)%1.3)*sw*.9,lg=g.createLinearGradient(ph-sw*.12,0,ph+sw*.12,0);lg.addColorStop(0,'rgba(120,200,255,0)');lg.addColorStop(.5,'rgba(120,200,255,.85)');lg.addColorStop(1,'rgba(120,200,255,0)');g.fillStyle=lg;g.fillRect(0,-sh,sw,sh*2);g.restore();
+            g.restore();g.globalAlpha=1}
+          const k1=seg(t,2.45,2.75),a1=k1*fa;if(a1>0){const tr=t<3?U*.5*(1-k1):0;drawTitle(g,S.T,cx+R(-tr,tr),S.ty,1+.8*(1-eb(k1)),a1,a1*(.55+.3*Math.sin(t*7)),t)}
+          const k2=seg(t,2.8,3.15),a2=k2*fa;if(a2>0)drawTitle(g,S.T2,cx,S.t2y+(1-eo(k2))*U*10,.6+.4*eb(k2),a2,a2*(.5+.3*Math.sin(t*8)),t)};
       }},
     wrap:{dur:5.6,
       init(S){const {W,H,U}=S;S.port=H>W;S.T=title('אח שלנו עטוף!',Math.min(W*.15,H*.19),W*.88,WRAPS);S.v=S.opt.v||6;
@@ -3810,6 +3860,9 @@ function sheshPlay(stage,lvl,ctl){
       legal=SB.sequences(st,turn,dice.length===2&&dice[0]===dice[1]?[dice[0],dice[0],dice[0],dice[0]]:dice);
       if(dice.length===2&&dice[0]===dice[1]){dice=[dice[0],dice[0],dice[0],dice[0]];used=[false,false,false,false]}
       const human=!remote(turn);
+      // 6-1 = "יש רק דרך אחת לשחק 6-1" (every 6-1 roll, also the opening roll; not inside lessons)
+      const d61=dice.length===2&&dice.includes(6)&&dice.includes(1)&&!LESSON;
+      if(d61)later(()=>SBFX.play('onlyway',{board:cv}),150);
       if(!legal.some(o=>o.seq.length)){noMoves=true;const id=turnId;setMsg(`ל${SB_NAME[turn]} אין מהלך אפשרי עם ${dice.slice(0,2).join('–')}. התור עובר.`);hud();later(()=>endTurn(id),1700);return}
       setMsg(human?`תור ה${SB_NAME[turn]}: ${dice.length===4?'דאבל '+dice[0]+'! ארבעה מהלכים':dice.join('–')}. גררו אבן או לחצו עליה.`:(online?'החבר משחק...':'המחשב חושב...'));
       hud();
