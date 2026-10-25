@@ -9,7 +9,7 @@
 <link rel="icon" href="img/logo.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rubik:wght@400;500;700;800;900&family=Secular+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Karantina:wght@400;700&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="locker.css">
 </head>
 <body>
@@ -17,20 +17,20 @@
 
 <header class="top">
   <a class="back" href="../#games" aria-label="חזרה לאתר השבט">→ <span>לאתר</span></a>
-  <div class="brand"><b>הלוקר</b><span>של הנשיא</span></div>
+  <div class="brand"><b>הלוקר</b><span>שבט הנשיא</span></div>
   <div class="wallet">
-    <button class="chip coin" id="wCoins" title="אסימונים: מקבלים אסימון על כל נקודת פנאט במשחקי האתר"><i class="ic-coin"></i><b>0</b></button>
+    <button class="chip coin" id="wCoins" title="אסימונים: אסימון אחד על כל 10 נקודות פנאט במשחקי האתר"><i class="ic-coin"></i><b>0</b></button>
     <button class="chip crate" id="wCrates" title="ארגזים שמחכים לפתיחה"><i class="ic-crate"></i><b>0</b></button>
     <span class="chip rank" id="wRank" title="הדרגה שלך מהמשחקים">חניך</span>
-    <button class="chip snd" id="sndBtn" aria-pressed="true" title="צליל">🔊</button>
+    <button class="chip snd" id="sndBtn" aria-pressed="true" title="צליל">צליל</button>
   </div>
 </header>
 
 <nav class="tabs" role="tablist">
-  <button role="tab" data-v="avatar" class="on"><i>🧍</i>הדמות</button>
-  <button role="tab" data-v="locker"><i>🗄️</i>הלוקר</button>
-  <button role="tab" data-v="crates"><i>📦</i>ארגזים<em id="crBadge" hidden></em></button>
-  <button role="tab" data-v="trade"><i>🤝</i>טרייד</button>
+  <button role="tab" data-v="avatar" class="on">הדמות</button>
+  <button role="tab" data-v="locker">הלוקר</button>
+  <button role="tab" data-v="crates">ארגזים<em id="crBadge" hidden></em></button>
+  <button role="tab" data-v="trade">טרייד</button>
 </nav>
 
 <main>
@@ -47,9 +47,9 @@
         <p class="sub">לוחצים על חלק בגוף או על משבצת ובוחרים פריט מהלוקר. הבגד מופיע על הדמות.</p>
         <div class="slot-list" id="slotList"></div>
         <div class="av-btns">
-          <button class="btn ghost" id="avRand">🎲 תלבושת אקראית</button>
+          <button class="btn ghost" id="avRand">תלבושת אקראית</button>
           <button class="btn ghost" id="avClear">הורידו הכל</button>
-          <button class="btn ghost" id="avRename">✏️ שינוי שם</button>
+          <button class="btn ghost" id="avRename">שינוי שם</button>
         </div>
       </div>
     </div>
@@ -57,6 +57,7 @@
 
   <!-- ===== LOCKER ===== -->
   <section class="view" id="v-locker">
+    <h2>הלוקר</h2>
     <div class="lk-head">
       <div class="prog"><b id="colNum">0</b><span>/ <i id="colTot">0</i> פריטים באוסף</span><div class="pbar"><i id="colBar"></i></div></div>
       <div class="lk-ctl">
@@ -70,7 +71,7 @@
         
       </div>
     </div>
-    <div class="seg" id="modeSeg"><button data-m="mine" class="on">🗄️ הפריטים שלי</button><button data-m="all">📖 כל הקטלוג</button><button data-m="sets">🏆 אוספים<em hidden></em></button></div>
+    <div class="seg" id="modeSeg"><button data-m="mine" class="on">הפריטים שלי</button><button data-m="all">כל הקטלוג</button><button data-m="sets">אוספים<em hidden></em></button></div>
     <div class="chips" id="cats"></div>
     <div class="rar-legend" id="rarLegend"></div>
     <div class="grid" id="grid"></div>
@@ -79,12 +80,13 @@
 
   <!-- ===== CRATES ===== -->
   <section class="view" id="v-crates">
+    <h2>ארגזים</h2>
     <div class="daily" id="daily"></div>
     <div class="crates" id="crateList"></div>
     <div class="earn">
       <h3>איך משיגים עוד?</h3>
       <ul>
-        <li><b>משחקים באתר השבט:</b> כל נקודת פנאט שווה אסימון אחד.</li>
+        <li><b>משחקים באתר השבט:</b> כל 10 נקודות פנאט שוות אסימון אחד.</li>
         <li><b>ארגז יומי:</b> ארגז מחסן חינם כל יום.</li>
         <li><b>פירוק:</b> פריטים כפולים מפרקים לאסימונים. פריט ישן יותר שווה יותר.</li>
         <li><b>טרייד:</b> מחליפים בגדים עם חברים בזמן אמת.</li>
@@ -116,7 +118,7 @@
       </div>
       <div class="tr-table">
         <div class="tr-side me"><h4>ההצעה שלכם <span class="val" id="trValMe">0</span></h4><div class="tr-offer" id="trOfferMe"></div><div class="tr-lock" id="trLockMe">פתוח</div></div>
-        <div class="tr-mid"><div class="tr-bal" id="trBal"><i></i></div><button class="btn" id="trLockBtn" disabled>🔒 נעלו הצעה</button><button class="btn gold" id="trAccept" disabled>🤝 אשרו טרייד</button><div class="emotes" id="emotes"><button>🔥</button><button>🤝</button><button>😂</button><button>👀</button><button>💸</button><button>😡</button></div></div>
+        <div class="tr-mid"><div class="tr-bal" id="trBal"><i></i></div><button class="btn" id="trLockBtn" disabled>נעלו הצעה</button><button class="btn gold" id="trAccept" disabled>אשרו טרייד</button><div class="emotes" id="emotes"><button>🔥</button><button>🤝</button><button>😂</button><button>👀</button><button>💸</button><button>😡</button></div></div>
         <div class="tr-side them"><h4>ההצעה של <span id="trThem2">החבר</span> <span class="val" id="trValThem">0</span></h4><div class="tr-offer" id="trOfferThem"></div><div class="tr-lock" id="trLockThem">פתוח</div></div>
       </div>
       <div class="tr-pick">
@@ -136,7 +138,7 @@
   <div class="reel-wrap" id="reelWrap" hidden><div class="reel" id="reel"></div><i class="reel-mark"></i><i class="reel-fade l"></i><i class="reel-fade r"></i></div>
   <div class="win" id="win" hidden></div>
   <i class="op-flash" id="opFlash"></i>
-  <button class="op-skip" id="opSkip">דלגו ⏭</button>
+  <button class="op-skip" id="opSkip">דלגו</button>
 </div>
 <div class="ov" id="ovInspect" hidden></div>
 <div class="ov" id="ovPick" hidden></div>

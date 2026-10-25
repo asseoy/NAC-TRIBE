@@ -12,30 +12,30 @@ const today=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+
 
 /* ---------------- data ---------------- */
 const RAR=[
-  {k:'leg', n:'אגדי',     stamp:'אגדי!!',      c:'#ffcc33',val:1000,yrs:'לפני 2000'},
-  {k:'myth',n:'מיתולוגי', stamp:'מיתולוגי!',   c:'#ff4040',val:400, yrs:'2000–2005'},
-  {k:'epic',n:'אפי',      stamp:'אפי!',        c:'#e040fb',val:160, yrs:'2006–2010'},
-  {k:'rare',n:'נדיר',     stamp:'נדיר!',       c:'#8c5bff',val:70,  yrs:'2011–2015'},
-  {k:'spec',n:'מיוחד',    stamp:'מיוחד',       c:'#3d82ff',val:30,  yrs:'2016–2020 או שנה לא ידועה'},
-  {k:'new', n:'רגיל',     stamp:'חדש בלוקר',   c:'#a9b9c9',val:15,  yrs:'2021 והלאה'},
+  {k:'leg', n:'אגדי',     stamp:'אגדי',     c:'#F3E03B',val:300,yrs:'לפני 2000'},
+  {k:'myth',n:'מיתולוגי', stamp:'מיתולוגי', c:'#FD1D1D',val:120,yrs:'2000–2005'},
+  {k:'epic',n:'אפי',      stamp:'אפי',      c:'#c64bd8',val:50, yrs:'2006–2010'},
+  {k:'rare',n:'נדיר',     stamp:'נדיר',     c:'#8a63ff',val:22, yrs:'2011–2015'},
+  {k:'spec',n:'מיוחד',    stamp:'מיוחד',    c:'#3f86ff',val:10, yrs:'2016–2020 או שנה לא ידועה'},
+  {k:'new', n:'רגיל',     stamp:'רגיל',     c:'#b8b2aa',val:5,  yrs:'2021 והלאה'},
 ];
 const ITEMS=LK_ITEMS.map((a,ix)=>({id:a[0],n:a[1],y:a[2],c:a[3],s:a[4],r:a[5],sl:a[6],im:a[7],col:a[8],ix}));
 const BYID=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 const BYR=RAR.map((_,r)=>ITEMS.filter(i=>i.r===r));
 const SLOTS=[
-  {k:'hat',  n:'כובע',          ic:'🧢',cats:'כובעים'},
-  {k:'neck', n:'צעיף / חם צוואר',ic:'🧣',cats:'צעיפים, חם צוואר'},
-  {k:'shirt',n:'חולצה',         ic:'👕',cats:'חולצות'},
-  {k:'outer',n:'שכבה עליונה',   ic:'🧥',cats:'סווצ׳רטים, פליזים, סרבלים'},
-  {k:'pants',n:'מכנסיים',       ic:'🩳',cats:'מכנסיים'},
-  {k:'acc',  n:'אביזר',         ic:'⌚',cats:'מגני זיעה, צמידים, חאקי ועוד'},
+  {k:'hat',  n:'כובע',          ic:'+',cats:'כובעים'},
+  {k:'neck', n:'צעיף / חם צוואר',ic:'+',cats:'צעיפים, חם צוואר'},
+  {k:'shirt',n:'חולצה',         ic:'+',cats:'חולצות'},
+  {k:'outer',n:'שכבה עליונה',   ic:'+',cats:'סווצ׳רטים, פליזים, סרבלים'},
+  {k:'pants',n:'מכנסיים',       ic:'+',cats:'מכנסיים'},
+  {k:'acc',  n:'אביזר',         ic:'+',cats:'מגני זיעה, צמידים, חאקי ועוד'},
 ];
 const CRATES=[
-  {k:'mahsan',  n:'ארגז המחסן',   d:'ארגז העץ הקלאסי של השבט. כל פריט יכול לצאת.',price:150,
+  {k:'mahsan',  n:'ארגז המחסן',   d:'ארגז העץ הקלאסי של השבט. כל פריט יכול לצאת.',price:100,
    w:[.8,3.2,9,17,30,40], wood:'linear-gradient(135deg,#b07a3f,#6b3f17)',trim:'#3a210b',band:'#d62b2f',cc:'#c98a4a'},
-  {k:'mahteret',n:'תיבת המחתרת',  d:'בלי פריטים רגילים, וסיכוי גבוה יותר לבגד ישן.',price:450,
+  {k:'mahteret',n:'תיבת המחתרת',  d:'בלי פריטים רגילים, וסיכוי גבוה יותר לבגד ישן.',price:300,
    w:[1.5,6.5,15,32,45,0], wood:'linear-gradient(135deg,#2a1b1f,#0b0607)',trim:'#d62b2f',band:'#f6be3c',cc:'#d62b2f'},
-  {k:'archive', n:'ארגז הארכיון', d:'רק פריטים מ־2010 ומטה: אפי ומעלה בלבד.',price:1200,
+  {k:'archive', n:'ארגז הארכיון', d:'רק פריטים מ־2010 ומטה: אפי ומעלה בלבד.',price:800,
    w:[6,24,70,0,0,0], wood:'linear-gradient(135deg,#ffe28a,#b8790a)',trim:'#5a3a00',band:'#140a0b',cc:'#ffcc33'},
 ];
 const CR=Object.fromEntries(CRATES.map(c=>[c.k,c]));
@@ -56,8 +56,8 @@ const readXP=()=>{try{return JSON.parse(localStorage.getItem('hanasi:xp'))||0}ca
 let S=null;
 function load(){
   let s=null;if(lsOK){try{s=JSON.parse(localStorage.getItem(KEY))}catch(e){}}
-  if(!s||s.v!==1){s={v:1,name:'',coins:0,xpSeen:0,inv:[],eq:{},crates:{mahsan:3,mahteret:1,archive:0},daily:'',seen:{},hist:[],stats:{opened:0,traded:0},fresh:1}}
-  s.sets=s.sets||{};s.inv=(s.inv||[]).filter(x=>BYID[x.i]);
+  if(!s||s.v!==1){s={v:1,name:'',coins:0,xpSeen:0,inv:[],eq:{},crates:{mahsan:2,mahteret:0,archive:0},daily:'',seen:{},hist:[],stats:{opened:0,traded:0},fresh:1}}
+  s.sets=s.sets||{};if(!s.eco2){s.coins=Math.floor((s.coins||0)/10);s.eco2=1;s.xpRem=0}s.inv=(s.inv||[]).filter(x=>BYID[x.i]);
   for(const k in s.eq)if(!s.inv.some(x=>x.u===s.eq[k]))delete s.eq[k];
   return s;
 }
@@ -87,7 +87,7 @@ const SND={
 /* ---------------- particles (canvas) ---------------- */
 const FX=(()=>{const cv=$('#fx'),g=cv.getContext('2d');let P=[],run=false,dpr=1;
   function size(){dpr=Math.min(1.5,devicePixelRatio||1);cv.width=innerWidth*dpr;cv.height=innerHeight*dpr}
-  const LOW=Math.min(innerWidth,innerHeight)<700, K=LOW?.55:1;
+  const LOW=Math.min(innerWidth,innerHeight)<700, K=LOW?.3:.5;
   size();addEventListener('resize',size);
   function loop(){g.clearRect(0,0,cv.width,cv.height);P=P.filter(p=>p.l>0);
     for(const p of P){p.l-=1/60;p.vy+=p.g;p.vx*=p.dr;p.vy*=p.dr;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;
@@ -114,7 +114,8 @@ function wallet(bump){
   const n=crateCount(),bd=$('#crBadge');bd.hidden=!n;bd.textContent=n;
   if(bump){const el=$(bump==='coins'?'#wCoins':'#wCrates');el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')}
 }
-function syncXP(){const xp=readXP();if(xp>S.xpSeen){const d=xp-S.xpSeen;S.xpSeen=xp;S.coins+=d;save();wallet('coins');toast(`+${fmt(d)} אסימונים מנקודות הפנאט שצברתם במשחקים`,'gold');SND.coin()}}
+const XP_PER_COIN=10;
+function syncXP(){const xp=readXP();if(xp>S.xpSeen){const pool=(S.xpRem||0)+xp-S.xpSeen;S.xpSeen=xp;const d=Math.floor(pool/XP_PER_COIN);S.xpRem=pool-d*XP_PER_COIN;if(d>0){S.coins+=d;wallet('coins');toast(`+${fmt(d)} אסימונים מהמשחקים`,'gold');SND.coin()}save()}}
 
 /* ---------------- avatar ---------------- */
 const eqItem=k=>{const x=S.eq[k]&&inst(S.eq[k]);return x?BYID[x.i]:null};
@@ -130,7 +131,7 @@ function figSVG(flash){
   const SK='#e0ad84',SKD='#c08c62',SKS='#a8744d';
   const skin=d=>`<path d="${d}" fill="${SK}" ${O}/><path d="${d}" fill="url(#vol)" pointer-events="none"/>`;
   let s=`<svg viewBox="0 0 320 640" xmlns="http://www.w3.org/2000/svg"><defs>${SLOTS.map(x=>it[x.k]?pat(x.k,it[x.k]):'').join('')}
-  <linearGradient id="vol" x1="0" y1="0" x2="1" y2=".25"><stop offset="0" stop-color="#000" stop-opacity=".34"/><stop offset=".42" stop-color="#000" stop-opacity="0"/><stop offset=".7" stop-color="#fff" stop-opacity=".07"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></linearGradient>
+  <linearGradient id="vol" x1="0" y1="0" x2="1" y2=".25"><stop offset="0" stop-color="#000" stop-opacity=".28"/><stop offset=".38" stop-color="#000" stop-opacity="0"/><stop offset=".38" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".08"/></linearGradient>
   <linearGradient id="khaki" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cdb27a"/><stop offset="1" stop-color="#b39660"/></linearGradient>
   <linearGradient id="navy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26324f"/><stop offset="1" stop-color="#1a2238"/></linearGradient>
   <pattern id="stripes" patternUnits="userSpaceOnUse" width="18" height="18" patternTransform="rotate(38)"><rect width="18" height="18" fill="#c8161c"/><rect width="7" height="18" fill="#140a0b"/><rect x="7" width="2" height="18" fill="#f6be3c"/></pattern>
@@ -196,11 +197,11 @@ function figSVG(flash){
 function renderAvatar(flash){
   const fig=$('#fig');fig.innerHTML=figSVG(flash);if(flash){fig.classList.remove('pop');void fig.offsetWidth;fig.classList.add('pop')}
   let best=6,score=0;SLOTS.forEach(s=>{const x=S.eq[s.k]&&inst(S.eq[s.k]);if(x){score+=valOf(x);best=Math.min(best,BYID[x.i].r)}});
-  $('#stage').style.setProperty('--glow',best<6?RAR[best].c:'#d62b2f');
+  
   $('#avName').textContent=S.name||'צופה של הנשיא';
   $('#avScore').textContent=score?`ערך הלבוש: ${fmt(score)} אסימונים · ${rankOf(readXP())}`:'הדמות לובשת את מדי הבסיס. הלבישו אותה מהלוקר!';
   if(flash){const g=$$('.flashme',fig);g.forEach(p=>{const c=p.cloneNode();c.removeAttribute('class');c.setAttribute('class','flash');c.setAttribute('fill','#fff');c.removeAttribute('stroke');p.after(c)});
-    const el=g[0];if(el){const [x,y]=centerOf(el);const r=eqItem(flash);FX.burst(x,y,40,[r?RAR[r.r].c:'#fff','#fff','#ffd75a'],{t:'s',s:3,sp:7,g:.05})}}
+    const el=g[0];if(el){const [x,y]=centerOf(el);const r=eqItem(flash);FX.burst(x,y,40,[r?RAR[r.r].c:'#fff','#fff','#ffd75a'],{s:3,sp:7,g:.12})}}
   fig.querySelectorAll('.part').forEach(p=>p.addEventListener('click',()=>openPicker(p.dataset.slot)));
   $('#slotList').innerHTML=SLOTS.map(s=>{const it=eqItem(s.k);
     return `<button class="slot ${it?'r'+it.r:''}" data-slot="${s.k}"><span class="sth" style="${it?`background-image:url(${imgSrc(it)})`:''}">${it?'':s.ic}</span><span><b>${s.n}</b>${it?`<small>${esc(it.n)}</small><small class="rn">${RAR[it.r].n} · ${yrTxt(it)}</small>`:`<small>ריק · ${s.cats}</small>`}</span></button>`}).join('');
@@ -248,20 +249,20 @@ function renderGrid(){
 
 /* ---------------- collections (sets) ---------------- */
 const SETS=[
-  {k:'old',  n:'דור המייסדים',        d:'כל הפריטים מלפני 2006',              f:i=>i.y&&i.y<2006, rw:{c:3000,cr:'archive'}},
-  {k:'mit0', n:'מתקני העשור הראשון',  d:'חולצות המתקן 2003–2010',             f:i=>i.s.startsWith('מתקן')&&i.y&&i.y<=2010, rw:{c:2500,cr:'archive'}},
-  {k:'mit1', n:'מתקני 2011–2015',     d:'חולצות המתקן 2011–2015',             f:i=>i.s.startsWith('מתקן')&&i.y>=2011&&i.y<=2015, rw:{c:1500,cr:'mahteret'}},
-  {k:'mit2', n:'מתקני 2016–2020',     d:'חולצות המתקן 2016–2020',             f:i=>i.s.startsWith('מתקן')&&i.y>=2016&&i.y<=2020, rw:{c:900,cr:'mahteret'}},
-  {k:'mit3', n:'מתקני 2021 והלאה',    d:'חולצות המתקן מ־2021',                f:i=>i.s.startsWith('מתקן')&&i.y>=2021, rw:{c:600,cr:'mahsan'}},
-  {k:'halutz',n:'חלוץ לדורותיו',      d:'כל חולצות החלוץ',                    f:i=>i.c==='חולצות'&&i.s==='חלוץ', rw:{c:800,cr:'mahteret'}},
-  {k:'scarf',n:'צעיפי השכבות',        d:'כל הצעיפים',                         f:i=>i.c==='צעיפים', rw:{c:1200,cr:'mahteret'}},
-  {k:'hats', n:'מדף הכובעים',          d:'כל הכובעים',                         f:i=>i.c==='כובעים', rw:{c:900,cr:'mahteret'}},
-  {k:'hood', n:'ארון הסווצ׳רטים',      d:'כל הסווצ׳רטים',                      f:i=>i.c==='סווצ׳רטים', rw:{c:1000,cr:'mahteret'}},
-  {k:'pants',n:'מכנסי השבט',           d:'כל המכנסיים',                        f:i=>i.c==='מכנסיים', rw:{c:700,cr:'mahsan'}},
-  {k:'army', n:'פעולות בנים וצבא',     d:'כל חולצות הפעולות',                  f:i=>i.s.startsWith('פעולות'), rw:{c:800,cr:'mahteret'}},
-  {k:'mht',  n:'המחתרת',               d:'כל חולצות המחתרת',                   f:i=>i.s==='מחתרת', rw:{c:500,cr:'mahteret'}},
-  {k:'etgar',n:'אתגר',                 d:'כל חולצות האתגר',                    f:i=>i.s==='אתגר', rw:{c:400,cr:'mahsan'}},
-  {k:'small',n:'הקטנים',               d:'מגני זיעה, צמידים, חאקי, תיקים ושונות',f:i=>['מגני זיעה','צמידים','חאקי','שונות','תיקים','חם צוואר'].includes(i.c), rw:{c:700,cr:'mahteret'}},
+  {k:'old',  n:'דור המייסדים',        d:'כל הפריטים מלפני 2006',              f:i=>i.y&&i.y<2006, rw:{c:400,cr:'archive'}},
+  {k:'mit0', n:'מתקני העשור הראשון',  d:'חולצות המתקן 2003–2010',             f:i=>i.s.startsWith('מתקן')&&i.y&&i.y<=2010, rw:{c:300,cr:'archive'}},
+  {k:'mit1', n:'מתקני 2011–2015',     d:'חולצות המתקן 2011–2015',             f:i=>i.s.startsWith('מתקן')&&i.y>=2011&&i.y<=2015, rw:{c:200,cr:'mahteret'}},
+  {k:'mit2', n:'מתקני 2016–2020',     d:'חולצות המתקן 2016–2020',             f:i=>i.s.startsWith('מתקן')&&i.y>=2016&&i.y<=2020, rw:{c:110,cr:'mahteret'}},
+  {k:'mit3', n:'מתקני 2021 והלאה',    d:'חולצות המתקן מ־2021',                f:i=>i.s.startsWith('מתקן')&&i.y>=2021, rw:{c:70,cr:'mahsan'}},
+  {k:'halutz',n:'חלוץ לדורותיו',      d:'כל חולצות החלוץ',                    f:i=>i.c==='חולצות'&&i.s==='חלוץ', rw:{c:100,cr:'mahteret'}},
+  {k:'scarf',n:'צעיפי השכבות',        d:'כל הצעיפים',                         f:i=>i.c==='צעיפים', rw:{c:150,cr:'mahteret'}},
+  {k:'hats', n:'מדף הכובעים',          d:'כל הכובעים',                         f:i=>i.c==='כובעים', rw:{c:110,cr:'mahteret'}},
+  {k:'hood', n:'ארון הסווצ׳רטים',      d:'כל הסווצ׳רטים',                      f:i=>i.c==='סווצ׳רטים', rw:{c:120,cr:'mahteret'}},
+  {k:'pants',n:'מכנסי השבט',           d:'כל המכנסיים',                        f:i=>i.c==='מכנסיים', rw:{c:80,cr:'mahsan'}},
+  {k:'army', n:'פעולות בנים וצבא',     d:'כל חולצות הפעולות',                  f:i=>i.s.startsWith('פעולות'), rw:{c:100,cr:'mahteret'}},
+  {k:'mht',  n:'המחתרת',               d:'כל חולצות המחתרת',                   f:i=>i.s==='מחתרת', rw:{c:60,cr:'mahsan'}},
+  {k:'etgar',n:'אתגר',                 d:'כל חולצות האתגר',                    f:i=>i.s==='אתגר', rw:{c:50,cr:'mahsan'}},
+  {k:'small',n:'הקטנים',               d:'מגני זיעה, צמידים, חאקי, תיקים ושונות',f:i=>['מגני זיעה','צמידים','חאקי','שונות','תיקים','חם צוואר'].includes(i.c), rw:{c:90,cr:'mahsan'}},
 ].map(z=>Object.assign(z,{items:ITEMS.filter(z.f)})).filter(z=>z.items.length);
 function setProg(z){const own=new Set(S.inv.map(x=>x.i));return z.items.filter(i=>own.has(i.id)).length}
 function renderSets(){
@@ -269,11 +270,11 @@ function renderSets(){
     const show=z.items.slice().sort((a,b)=>own.has(b.id)-own.has(a.id)||a.r-b.r).slice(0,6);
     return `<div class="set${done?' done':''}${got?' got':''}"><div class="sth6">${show.map(i=>`<i class="${own.has(i.id)?'':'miss'} r${i.r}" style="${thStyle(i)}"></i>`).join('')}</div>
     <div class="sinfo"><b>${z.n}</b><small>${z.d}</small><div class="pbar"><i style="width:${n/t*100}%"></i></div><span class="snum">${n} / ${t}</span>
-    <div class="srw">פרס: <b>${fmt(z.rw.c)}</b>🪙 + ${CR[z.rw.cr].n}</div>
-    ${got?'<span class="sdone">✓ הפרס נאסף</span>':done?`<button class="btn gold" data-set="${z.k}">🏆 קבלו את הפרס</button>`:''}</div></div>`}).join('')}</div>`}
+    <div class="srw">פרס: <b>${fmt(z.rw.c)}</b> אסימונים + ${CR[z.rw.cr].n}</div>
+    ${got?'<span class="sdone">הפרס נאסף</span>':done?`<button class="btn gold" data-set="${z.k}">קבלו את הפרס</button>`:''}</div></div>`}).join('')}</div>`}
 function claimSet(k,btn){const z=SETS.find(q=>q.k===k);if(!z||S.sets[k]||setProg(z)<z.items.length)return;S.sets[k]=1;S.coins+=z.rw.c;S.crates[z.rw.cr]=(S.crates[z.rw.cr]||0)+1;save();
-  const [x,y]=centerOf(btn);FX.burst(x,y,120,['#ffd75a','#fff','#d62b2f'],{sp:13,s:5});FX.rain(120,['#ffd75a','#fff']);SND.win(0);wallet('coins');toast(`🏆 השלמתם את "${z.n}"! קיבלתם ${fmt(z.rw.c)} אסימונים ו${CR[z.rw.cr].n}`,'gold');renderGrid()}
-function checkSets(){SETS.forEach(z=>{if(!S.sets[z.k]&&!(S.setsSeen||{})[z.k]&&setProg(z)>=z.items.length){S.setsSeen=S.setsSeen||{};S.setsSeen[z.k]=1;save();toast(`🏆 השלמתם את האוסף "${z.n}"! הפרס מחכה בלוקר ← אוספים`,'gold')}})}
+  const [x,y]=centerOf(btn);FX.burst(x,y,100,['#F3E03B','#fff','#FD1D1D','#000'],{sp:12,s:5});SND.win(0);wallet('coins');toast(`השלמתם את "${z.n}"! קיבלתם ${fmt(z.rw.c)} אסימונים ו${CR[z.rw.cr].n}`,'gold');renderGrid()}
+function checkSets(){SETS.forEach(z=>{if(!S.sets[z.k]&&!(S.setsSeen||{})[z.k]&&setProg(z)>=z.items.length){S.setsSeen=S.setsSeen||{};S.setsSeen[z.k]=1;save();toast(`השלמתם את האוסף "${z.n}". הפרס מחכה בלוקר ← אוספים`,'gold')}})}
 
 /* ---------------- inspect ---------------- */
 function inspect(it,x,opts={}){
@@ -287,7 +288,7 @@ function inspect(it,x,opts={}){
    <div class="info"><span class="rpill">${RAR[it.r].n} · ${RAR[it.r].yrs}</span><h3>${esc(it.n)}</h3>
     <div class="meta"><b>שנה:</b> ${it.y||'לא ידועה'} · <b>סוג:</b> ${esc(it.c)}${it.s?` · <b>תיקייה:</b> ${esc(it.s)}`:''}<br>${x?`<b>מספר סידורי:</b> #${x.u.toUpperCase()} · <b>הגיע מ:</b> ${orig}<br><b>שווי:</b> <span style="color:var(--gold)">${fmt(valOf(x))} אסימונים</span>`:'<b>עוד לא בלוקר שלכם.</b> פתחו ארגזים או עשו טרייד כדי להשיג אותו.'}</div>
     ${x?`<div class="wear"><small>מצב: <b>${wearName(x.w)}</b> (${x.w.toFixed(3)})</small><div class="wb"><i style="right:calc(${x.w*100}% - 2px)"></i></div></div>`:''}
-    ${x&&!opts.view?`<div class="acts">${worn?`<button class="btn ghost" data-a="off">הורידו מהדמות</button>`:`<button class="btn gold" data-a="on">👕 לבשו על הדמות</button>`}<button class="btn ghost" data-a="rec">♻️ פירוק ל־${fmt(valOf(x))} אסימונים</button></div>`:''}
+    ${x&&!opts.view?`<div class="acts">${worn?`<button class="btn ghost" data-a="off">הורידו מהדמות</button>`:`<button class="btn gold" data-a="on">לבשו על הדמות</button>`}<button class="btn ghost" data-a="rec">פירוק ל־${fmt(valOf(x))} אסימונים</button></div>`:''}
     ${dup&&!opts.view?`<div class="dupes">יש לכם ${dup+1} עותקים · <span class="copies">${S.inv.filter(z=>z.i===it.id).map(z=>`<button data-cp="${z.u}" class="${z.u===x.u?'on':''}">${z.sg?'✍ ':''}${wearName(z.w)}</button>`).join('')}</span></div>`:''}</div></div>`;
   const close=()=>{ov.hidden=true;ov.innerHTML=''};
   ov.onclick=e=>{if(e.target===ov||e.target.closest('.x'))close()};
@@ -313,7 +314,7 @@ function inspect(it,x,opts={}){
 function openPicker(k){
   const sl=SLOTS.find(s=>s.k===k),ov=$('#ovPick');ov.hidden=false;
   const list=S.inv.filter(x=>BYID[x.i].sl===k).sort((a,b)=>BYID[a.i].r-BYID[b.i].r);
-  ov.innerHTML=`<div class="sheet"><header><h3>${sl.ic} ${sl.n}</h3>${S.eq[k]?'<button class="btn ghost" data-off>הורידו</button>':''}<button class="btn ghost" data-x>סגירה</button></header>
+  ov.innerHTML=`<div class="sheet"><header><h3>${sl.n}</h3>${S.eq[k]?'<button class="btn ghost" data-off>הורידו</button>':''}<button class="btn ghost" data-x>סגירה</button></header>
    ${list.length?`<div class="grid small">${list.map((x,i)=>cardHTML(BYID[x.i],x,{i,sel:S.eq[k]===x.u})).join('')}</div>`:`<p class="empty">אין לכם עדיין ${sl.n} (${sl.cats}).<br><button class="btn" data-cr>לפתיחת ארגזים ←</button></p>`}</div>`;
   const close=()=>{ov.hidden=true;ov.innerHTML=''};
   ov.onclick=e=>{const c=e.target.closest('.card');
@@ -354,17 +355,17 @@ function newInst(it,o){const age=it.y?clamp((2027-it.y)/35,0,1):.4;const w=clamp
   return {u:uid(),i:it.id,w:+w.toFixed(4),sg:rnd()<.04?1:0,t:Date.now(),o,nw:1}}
 function renderCrates(){
   const d=$('#daily');
-  if(S.daily!==today())d.innerHTML=`<div class="dbox"><span style="font-size:40px">🎁</span><div><b>הארגז היומי מחכה!</b><p>ארגז מחסן חינם, פעם ביום.</p></div><button class="btn gold" id="dailyBtn">קבלו ארגז</button></div>`;
-  else{const t=new Date();t.setHours(24,0,0,0);const m=Math.ceil((t-Date.now())/60000);d.innerHTML=`<div class="dbox" style="opacity:.75"><span style="font-size:34px">⏳</span><div><b>הארגז היומי נלקח</b><p>הארגז הבא עוד ${Math.floor(m/60)} שעות ו־${m%60} דקות.</p></div></div>`}
+  if(S.daily!==today())d.innerHTML=`<div class="dbox"><span>יומי</span><div><b>הארגז היומי מחכה</b><p>ארגז מחסן חינם, פעם ביום.</p></div><button class="btn gold" id="dailyBtn">קבלו ארגז</button></div>`;
+  else{const t=new Date();t.setHours(24,0,0,0);const m=Math.ceil((t-Date.now())/60000);d.innerHTML=`<div class="dbox" style="opacity:.75"><span>מחר</span><div><b>הארגז היומי נלקח</b><p>הארגז הבא עוד ${Math.floor(m/60)} שעות ו־${m%60} דקות.</p></div></div>`}
   $('#crateList').innerHTML=CRATES.map(c=>{const tot=c.w.reduce((a,b)=>a+b,0),own=S.crates[c.k]||0;
     return `<div class="crt" style="--cc:${c.cc}">${own?`<span class="own">יש לכם ${own}</span>`:''}
     <div class="crimg">${crateArt(c.k)}</div>
     <h3>${c.n}</h3><p>${c.d}</p>
     <div class="odds">${c.w.map((w,r)=>w?`<i class="r${r}" style="flex:${w}"></i>`:'').join('')}</div>
     <div class="oddt">${c.w.map((w,r)=>w?`<span class="r${r}">${RAR[r].n} ${(w/tot*100).toFixed(w/tot<.02?1:0)}%</span>`:'').join('')}</div>
-    <div class="acts">${own?`<button class="btn gold" data-open="${c.k}">פתחו ארגז</button>`:''}<button class="btn${own?' ghost':''}" data-buy="${c.k}" ${S.coins<c.price?'disabled':''}>קנו ופתחו · <span class="price">${fmt(c.price)}</span>🪙</button></div>
-    ${own>=5||S.coins>=c.price*5?`<button class="btn five" data-five="${c.k}">✋ פתחו 5 בבת אחת${own>=5?'':` · <span class="price">${fmt(c.price*5)}</span>🪙`}</button>`:''}</div>`}).join('');
-  const db=$('#dailyBtn');if(db)db.onclick=()=>{S.daily=today();S.crates.mahsan=(S.crates.mahsan||0)+1;save();const [x,y]=centerOf(db);FX.burst(x,y,50,['#ffd75a','#d62b2f','#fff'],{up:1,sp:10});SND.coin();wallet('crates');toast('קיבלתם ארגז מחסן! 📦','gold');renderCrates()};
+    <div class="acts">${own?`<button class="btn gold" data-open="${c.k}">פתחו ארגז</button>`:''}<button class="btn${own?' ghost':''}" data-buy="${c.k}" ${S.coins<c.price?'disabled':''}>קנו ופתחו · <span class="price">${fmt(c.price)}</span> אסימונים</button></div>
+    ${own>=5||S.coins>=c.price*5?`<button class="btn five" data-five="${c.k}">פתחו 5 בבת אחת${own>=5?'':`  · <span class="price">${fmt(c.price*5)}</span>`}</button>`:''}</div>`}).join('');
+  const db=$('#dailyBtn');if(db)db.onclick=()=>{S.daily=today();S.crates.mahsan=(S.crates.mahsan||0)+1;save();const [x,y]=centerOf(db);FX.burst(x,y,50,['#ffd75a','#d62b2f','#fff'],{up:1,sp:10});SND.coin();wallet('crates');toast('קיבלתם ארגז מחסן','gold');renderCrates()};
 }
 let opening=null;
 function openCrate(k,buy){
@@ -416,16 +417,16 @@ function reveal(it,x,first,st,hit){
   const win=$('#win');win.hidden=false;win.className='win r'+it.r;
   const more=(S.crates[x.o]>0)||S.coins>=(CR[x.o]?.price||1e9);
   win.innerHTML=`<div class="stamp">${RAR[it.r].stamp}</div><div class="wc"><img src="${imgSrc(it)}" alt=""><div class="wi"><b>${esc(it.n)}</b><small>${esc(it.c)} · ${yrTxt(it)}</small></div><i class="shine"></i></div>
-    <div class="wtags"><span class="rpill r${it.r}">${RAR[it.r].n}</span><span>${wearName(x.w)}</span>${x.sg?'<span style="color:#ffd75a">✍ חתום ע״י ראש השבט!</span>':''}${first?'<span style="color:#3ddc84">✦ חדש באוסף</span>':'<span>כפול</span>'}</div>
-    <div class="acts"><button class="btn gold" data-w="wear">👕 לבשו עכשיו</button>${more?`<button class="btn" data-w="again">📦 עוד ארגז</button>`:''}<button class="btn ghost" data-w="lk">ללוקר</button></div>`;
+    <div class="wtags"><span class="rpill r${it.r}">${RAR[it.r].n}</span><span>${wearName(x.w)}</span>${x.sg?'<span style="color:#ffd75a">✍ חתום ע״י ראש השבט!</span>':''}${first?'<span style="color:#F3E03B">חדש באוסף</span>':'<span>כפול</span>'}</div>
+    <div class="acts"><button class="btn gold" data-w="wear">לבשו עכשיו</button>${more?`<button class="btn" data-w="again">עוד ארגז</button>`:''}<button class="btn ghost" data-w="lk">ללוקר</button></div>`;
   const wc=$('.wc',win);
   if(from){const to=wc.getBoundingClientRect();const sx=from.width/to.width,dx=from.left+from.width/2-(to.left+to.width/2),dy=from.top+from.height/2-(to.top+to.height/2);
     wc.animate([{transform:`translate(${dx}px,${dy}px) scale(${sx})`,filter:'brightness(2)'},{transform:'translate(0,-30px) scale(1.08)',filter:'brightness(1.4)',offset:.6},{transform:'none',filter:'none'}],{duration:800,easing:'cubic-bezier(.2,.9,.3,1)'})}
   else wc.animate([{transform:'scale(.3) rotateY(180deg)',opacity:0},{transform:'none',opacity:1}],{duration:600,easing:'cubic-bezier(.2,1.4,.4,1)'});
   SND.win(it.r);const col=RAR[it.r].c;
   const [cx,cy]=[innerWidth/2,innerHeight*.45];
-  FX.burst(cx,cy,it.r<2?160:it.r<4?90:50,[col,'#fff',col,'#ffd75a'],{sp:it.r<2?16:10,s:5,l:2.2});
-  if(it.r<=2)FX.rain(it.r===0?260:it.r===1?160:80,[col,'#fff','#ffd75a','#d62b2f']);
+  FX.burst(cx,cy,it.r<2?120:it.r<4?60:30,[col,'#fff','#FD1D1D','#000'],{sp:it.r<2?13:9,s:5,l:1.8});
+  if(it.r===0)FX.rain(140,['#FD1D1D','#F3E03B','#fff','#000']);
   if(it.r<=1){ov.classList.remove('shake');void ov.offsetWidth;ov.classList.add('shake')}
   win.onclick=e=>{const b=e.target.closest('[data-w]');if(!b)return;const a=b.dataset.w;closeOpen();
     if(a==='wear'){equip(x.u);go('avatar')}else if(a==='again'){openCrate(x.o,!(S.crates[x.o]>0))}else go('locker')};
@@ -450,12 +451,12 @@ function deal(got,st,k){
   if(st.dealt)return;st.dealt=1;$('#opCrate').hidden=true;$('#opSkip').hidden=true;
   const M=$('#multi');M.hidden=false;
   M.innerHTML=`<div class="mrow">${got.map((g,i)=>`<div class="mc r${g.it.r}" style="--d:${i*90}ms"><div class="mci"><div class="mcb"><img src="img/logo.webp" alt=""></div><div class="mcf"><img src="${imgSrc(g.it)}" alt=""><b>${esc(g.it.n)}</b><small>${RAR[g.it.r].n} · ${yrTxt(g.it)}</small>${g.first?'<em>חדש!</em>':''}</div></div></div>`).join('')}</div>
-    <p class="mhint">לחצו על קלף כדי להפוך אותו</p><div class="acts" hidden><button class="btn gold" data-m="lk">ללוקר</button>${(S.crates[k]||0)>=5||S.coins>=CR[k].price*5?'<button class="btn" data-m="again">✋ עוד 5</button>':''}<button class="btn ghost" data-m="x">סגירה</button></div>`;
+    <p class="mhint">לחצו על קלף כדי להפוך אותו</p><div class="acts" hidden><button class="btn gold" data-m="lk">ללוקר</button>${(S.crates[k]||0)>=5||S.coins>=CR[k].price*5?'<button class="btn" data-m="again">עוד 5</button>':''}<button class="btn ghost" data-m="x">סגירה</button></div>`;
   [0,1,2,3,4].forEach(i=>setTimeout(()=>tone(500+i*60,.08,'triangle',.1),i*90));
   const cards=$$('.mc',M);let n=0;
   const flip=i=>{const el=cards[i];if(!el||el.classList.contains('open'))return;el.classList.add('open');n++;const g=got[i],r=g.it.r;
     setTimeout(()=>{const [x,y]=centerOf(el);FX.burst(x,y,r<2?90:r<3?55:25,[RAR[r].c,'#fff','#ffd75a'],{sp:r<2?12:8,s:4});SND.win(r);
-      if(r<=1){const ov=$('#ovOpen');ov.classList.add('lit');ov.classList.remove('shake');void ov.offsetWidth;ov.classList.add('shake');FX.rain(r===0?200:120,[RAR[r].c,'#fff','#ffd75a'])}},260);
+      if(r<=1){const ov=$('#ovOpen');ov.classList.add('lit');ov.classList.remove('shake');void ov.offsetWidth;ov.classList.add('shake');r===0&&FX.rain(120,['#FD1D1D','#F3E03B','#fff','#000'])}},260);
     if(n===cards.length)setTimeout(()=>{$('.mhint',M).hidden=true;$('.acts',M).hidden=false;opening=null;st.done=true;renderCrates();renderGrid()},900)};
   M.onclick=e=>{const c=e.target.closest('.mc');if(c){flip(cards.indexOf(c));return}const b=e.target.closest('[data-m]');if(!b)return;const a=b.dataset.m;closeOpen();
     if(a==='lk')go('locker');else if(a==='again')openFive(k)};
@@ -502,7 +503,7 @@ async function trStart(role,code){
 }
 function trOn(m){if(!T)return;T.seen=Date.now();
   if(m.t==='hi'){const was=!!T.them;T.them=Object.assign(T.them||{},{name:m.name||'חבר',rank:m.rank,inv:m.inv||[],offer:m.offer||[],lock:!!m.lock,acc:!!m.acc});
-    if(m.ask)trHello(false);if(!was){toast(`${esc(T.them.name)} נכנס לחדר!`,'gold');SND.deal()}trRender();return}
+    if(m.ask)trHello(false);if(!was){toast(`${esc(T.them.name)} נכנס לחדר`,'gold');SND.deal()}trRender();return}
   if(!T.them)return;
   if(m.t==='st'){const old=(T.them.offer||[]).map(z=>z.u).sort().join();const nu=(m.offer||[]).map(z=>z.u).sort().join();
     T.them.offer=m.offer||[];T.them.lock=!!m.lock;T.them.acc=!!m.acc;if(m.inv)T.them.inv=m.inv;
@@ -536,8 +537,8 @@ function tradeFx(give,get){
       d.style.left=x0+'px';d.style.top=y+'px';box.append(d);
       d.animate([{transform:'translate(0,0) scale(.6) rotate(0)',opacity:0},{transform:`translate(${(x1-x0)/2}px,${-90*dir}px) scale(1.25) rotate(${dir*12}deg)`,opacity:1,offset:.5},{transform:`translate(${x1-x0}px,0) scale(1) rotate(0)`,opacity:1}],{duration:1300,delay:i*90,easing:'cubic-bezier(.5,0,.3,1)',fill:'forwards'})};
     give.forEach((z,i)=>mk(z,i,-1,give.length));get.forEach((z,i)=>mk(z,i,1,get.length));
-    setTimeout(()=>{FX.burst(innerWidth/2,innerHeight/2,140,['#3ddc84','#ffd75a','#fff','#d62b2f'],{sp:14,s:5});FX.rain(120,['#3ddc84','#ffd75a','#fff']);
-      box.insertAdjacentHTML('beforeend','<div class="done">טרייד בוצע!</div>');SND.win(1)},1200);
+    setTimeout(()=>{FX.burst(innerWidth/2,innerHeight/2,120,['#FD1D1D','#F3E03B','#fff','#000'],{sp:13,s:5});
+      box.insertAdjacentHTML('beforeend','<div class="done">טרייד בוצע</div>');SND.win(1)},1200);
     setTimeout(()=>{ov.hidden=true;ov.innerHTML=''},3600)};
   step();
 }
@@ -552,11 +553,11 @@ function trRender(){
   const mineL=T.me.offer.map(inst).filter(Boolean);
   $('#trOfferMe').innerHTML=offerHTML(mineL,true);$('#trOfferThem').innerHTML=th?offerHTML(th.offer||[],false):'';
   const vm=mineL.reduce((a,z)=>a+valOf(z),0),vt=th?(th.offer||[]).reduce((a,z)=>a+(BYID[z.i]?valOf(z):0),0):0;
-  $('#trValMe').textContent=fmt(vm)+'🪙';$('#trValThem').textContent=fmt(vt)+'🪙';$('#trBal i').style.width=(vm+vt?vt/(vm+vt)*100:50)+'%';
+  $('#trValMe').textContent=fmt(vm);$('#trValThem').textContent=fmt(vt);$('#trBal i').style.width=(vm+vt?vt/(vm+vt)*100:50)+'%';
   const sm=$('.tr-side.me'),sT=$('.tr-side.them');sm.classList.toggle('locked',T.me.lock);sm.classList.toggle('acc',T.me.acc);sT.classList.toggle('locked',!!th&&th.lock);sT.classList.toggle('acc',!!th&&th.acc);
-  $('#trLockMe').textContent=T.me.acc?'✓ אישרתם':T.me.lock?'🔒 נעול':'פתוח · בחרו פריטים למטה';$('#trLockThem').textContent=!th?'':th.acc?'✓ אישר':th.lock?'🔒 נעול':'בוחר פריטים…';
-  const lb=$('#trLockBtn');lb.disabled=!th||T.me.acc;lb.textContent=T.me.lock?'🔓 פתחו הצעה':'🔒 נעלו הצעה';
-  const ab=$('#trAccept');ab.disabled=!(th&&T.me.lock&&th.lock&&!T.me.acc&&(T.me.offer.length||(th.offer||[]).length));ab.textContent=T.me.acc?'מחכים לחבר…':'🤝 אשרו טרייד';
+  $('#trLockMe').textContent=T.me.acc?'אישרתם':T.me.lock?'נעול':'פתוח · בחרו פריטים למטה';$('#trLockThem').textContent=!th?'':th.acc?'אישר':th.lock?'נעול':'בוחר פריטים…';
+  const lb=$('#trLockBtn');lb.disabled=!th||T.me.acc;lb.textContent=T.me.lock?'פתחו הצעה':'נעלו הצעה';
+  const ab=$('#trAccept');ab.disabled=!(th&&T.me.lock&&th.lock&&!T.me.acc&&(T.me.offer.length||(th.offer||[]).length));ab.textContent=T.me.acc?'מחכים לחבר…':'אשרו טרייד';
   $$('.tr-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===trTab));
   const g=$('#trGrid');
   if(trTab==='mine'){const sel=new Set(T.me.offer);g.innerHTML=S.inv.slice().sort(sortFn).map((x,i)=>cardHTML(BYID[x.i],x,{i,sel:sel.has(x.u)})).join('')||'<p class="empty">הלוקר שלכם ריק.</p>'}
@@ -575,9 +576,9 @@ function go(v){$$('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v
 $$('.tabs button').forEach(b=>b.onclick=()=>{SND.click();go(b.dataset.v)});
 document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)go(g.dataset.go)});
 $('#wCrates').onclick=()=>go('crates');
-$('#wCoins').onclick=()=>toast('🪙 כל נקודת פנאט במשחקי האתר שווה אסימון. קונים בהם ארגזים.');
-$('#sndBtn').onclick=e=>{AU.on=!AU.on;e.currentTarget.textContent=AU.on?'🔊':'🔇';e.currentTarget.setAttribute('aria-pressed',AU.on);try{localStorage.setItem('hanasi:lksnd',AU.on?'1':'0')}catch(_){}if(AU.on)SND.click()};
-$('#sndBtn').textContent=AU.on?'🔊':'🔇';
+$('#wCoins').onclick=()=>toast('כל 10 נקודות פנאט במשחקים = אסימון אחד. קונים בהם ארגזים.');
+$('#sndBtn').onclick=e=>{AU.on=!AU.on;e.currentTarget.textContent=AU.on?'צליל':'שקט';e.currentTarget.setAttribute('aria-pressed',AU.on);try{localStorage.setItem('hanasi:lksnd',AU.on?'1':'0')}catch(_){}if(AU.on)SND.click()};
+$('#sndBtn').textContent=AU.on?'צליל':'שקט';
 $('#grid').onclick=e=>{const c=e.target.closest('.card');if(!c)return;SND.click();const it=BYID[c.dataset.id];const x=c.dataset.u?inst(c.dataset.u):null;inspect(it,x)};
 $('#cats').onclick=e=>{const b=e.target.closest('button');if(!b)return;F.cat=b.dataset.c;SND.click();renderGrid()};
 $('#q').oninput=e=>{F.q=e.target.value;renderGrid()};
@@ -591,7 +592,7 @@ if(matchMedia('(hover:hover) and (pointer:fine)').matches){let cur=null;
   $('#grid').addEventListener('pointerleave',()=>{if(cur){cur.style.transform='';cur=null}})}
 $('#rarLegend').innerHTML=RAR.map((r,i)=>`<span class="r${i}"><i></i>${r.n} · ${r.yrs}</span>`).join('');
 $('#slotList').onclick=e=>{const b=e.target.closest('.slot');if(b){SND.click();openPicker(b.dataset.slot)}};
-$('#avRand').onclick=()=>{let any=false;SLOTS.forEach(s=>{const l=S.inv.filter(x=>BYID[x.i].sl===s.k);if(l.length){S.eq[s.k]=pick(l).u;any=true}});if(!any){toast('אין עדיין בגדים בלוקר. פתחו ארגז!');return}save();SND.equip();renderAvatar('shirt');const [x,y]=centerOf($('#fig'));FX.burst(x,y,60,['#ffd75a','#d62b2f','#fff'],{t:'s',sp:9,g:.04})};
+$('#avRand').onclick=()=>{let any=false;SLOTS.forEach(s=>{const l=S.inv.filter(x=>BYID[x.i].sl===s.k);if(l.length){S.eq[s.k]=pick(l).u;any=true}});if(!any){toast('אין עדיין בגדים בלוקר. פתחו ארגז!');return}save();SND.equip();renderAvatar('shirt');const [x,y]=centerOf($('#fig'));FX.burst(x,y,60,['#ffd75a','#d62b2f','#fff'],{sp:9,g:.12})};
 $('#avClear').onclick=()=>{S.eq={};save();SND.click();renderAvatar()};
 $('#avRename').onclick=()=>{const n=prompt('השם של הדמות שלכם:',S.name||'');if(n!=null){S.name=n.trim().slice(0,18);save();renderAvatar()}};
 $('#crateList').onclick=e=>{const o=e.target.closest('[data-open]'),b=e.target.closest('[data-buy]'),f=e.target.closest('[data-five]');if(f)openFive(f.dataset.five);else if(o)openCrate(o.dataset.open,false);else if(b)openCrate(b.dataset.buy,true)};
@@ -615,7 +616,7 @@ addEventListener('pagehide',()=>{if(T)trSend('bye')});
 
 /* ---------------- init ---------------- */
 S=load();
-if(S.fresh){delete S.fresh;save();setTimeout(()=>toast('ברוכים הבאים ללוקר! קיבלתם 4 ארגזים במתנה 📦','gold'),600)}
+if(S.fresh){delete S.fresh;save();setTimeout(()=>toast('ברוכים הבאים ללוקר! קיבלתם 2 ארגזים במתנה','gold'),600)}
 syncXP();wallet();renderAvatar();renderCrates();renderGrid();renderTradeLobby();
 addEventListener('focus',()=>{syncXP();wallet()});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncXP();wallet()}});
