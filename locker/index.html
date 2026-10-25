@@ -19,7 +19,7 @@
   <a class="back" href="../#games" aria-label="חזרה לאתר השבט">→ <span>לאתר</span></a>
   <div class="brand"><b>הלוקר</b><span>שבט הנשיא</span></div>
   <div class="wallet">
-    <button class="chip coin" id="wCoins" title="אסימונים: אסימון אחד על כל 10 נקודות פנאט במשחקי האתר"><i class="ic-coin"></i><b>0</b></button>
+    <button class="chip coin" id="wCoins" title="אסימונים: ממשימות יומיות, ואסימון על כל 25 נקודות פנאט במשחקים"><i class="ic-coin"></i><b>0</b></button>
     <button class="chip crate" id="wCrates" title="ארגזים שמחכים לפתיחה"><i class="ic-crate"></i><b>0</b></button>
     <span class="chip rank" id="wRank" title="הדרגה שלך מהמשחקים">חניך</span>
     <button class="chip snd" id="sndBtn" aria-pressed="true" title="צליל">צליל</button>
@@ -30,6 +30,7 @@
   <button role="tab" data-v="avatar" class="on">הדמות</button>
   <button role="tab" data-v="locker">הלוקר</button>
   <button role="tab" data-v="crates">ארגזים<em id="crBadge" hidden></em></button>
+  <button role="tab" data-v="missions">משימות<em id="msBadge" hidden></em></button>
   <button role="tab" data-v="trade">טרייד</button>
 </nav>
 
@@ -86,13 +87,21 @@
     <div class="earn">
       <h3>איך משיגים עוד?</h3>
       <ul>
-        <li><b>משחקים באתר השבט:</b> כל 10 נקודות פנאט שוות אסימון אחד.</li>
+        <li><b>משימות יומיות:</b> שלוש משימות כל יום, ושק בגדים למי שמסיים את כולן.</li>
+        <li><b>משחקים באתר השבט:</b> כל 25 נקודות פנאט שוות אסימון אחד.</li>
         <li><b>ארגז יומי:</b> ארגז מחסן חינם כל יום.</li>
         <li><b>פירוק:</b> פריטים כפולים מפרקים לאסימונים. פריט ישן יותר שווה יותר.</li>
         <li><b>טרייד:</b> מחליפים בגדים עם חברים בזמן אמת.</li>
       </ul>
       <a class="btn" href="../#games">למשחקי השבט ←</a>
     </div>
+  </section>
+
+  <!-- ===== MISSIONS ===== -->
+  <section class="view" id="v-missions">
+    <h2>משימות היום</h2>
+    <p class="sub">כל יום שלוש משימות חדשות. מגיעים לתוצאה, מקבלים אסימונים. מסיימים את כולן, מקבלים שק בגדים.</p>
+    <div id="missions"></div>
   </section>
 
   <!-- ===== TRADE ===== -->
