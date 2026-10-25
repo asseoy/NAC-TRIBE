@@ -13,12 +13,12 @@ a{color:inherit}
 [hidden]{display:none!important}
 
 .bg{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
-.bg-grid{position:absolute;inset:-50%;background-image:linear-gradient(rgba(214,43,47,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(214,43,47,.07) 1px,transparent 1px);background-size:44px 44px;transform:perspective(600px) rotateX(55deg) translateY(-10%);animation:gridmove 14s linear infinite}
+.bg-grid{position:absolute;inset:-50%;background-image:linear-gradient(rgba(214,43,47,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(214,43,47,.07) 1px,transparent 1px);background-size:44px 44px;transform:perspective(600px) rotateX(55deg) translateY(-10%)}
 @keyframes gridmove{to{background-position:0 44px,44px 0}}
 .bg-glow{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 0,rgba(214,43,47,.28),transparent 70%),radial-gradient(ellipse 60% 40% at 50% 110%,rgba(246,190,60,.12),transparent 70%)}
 
 /* ---------- top bar ---------- */
-.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;height:var(--top);padding:0 14px;background:rgba(12,7,8,.82);backdrop-filter:blur(10px);border-bottom:1px solid #2a1b1e}
+.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;height:var(--top);padding:0 14px;background:#0c0708;border-bottom:1px solid #2a1b1e}
 .back{text-decoration:none;font-weight:700;font-size:14px;padding:7px 12px;border-radius:99px;background:#1f1518;border:1px solid #3a262b;white-space:nowrap}
 .back:hover{background:#2a1b1f}
 .brand{display:flex;align-items:baseline;gap:7px;margin-inline-end:auto;line-height:1}
@@ -43,7 +43,7 @@ a{color:inherit}
 .tabs button i{font-style:normal}
 .tabs button:hover{background:#22171a}
 .tabs button.on{background:linear-gradient(180deg,#e43237,#9e1418);border-color:#ff6a5a;box-shadow:0 6px 22px rgba(214,43,47,.45),inset 0 1px 0 rgba(255,255,255,.3)}
-.tabs em{position:absolute;top:-7px;left:-6px;min-width:21px;height:21px;padding:0 5px;border-radius:99px;background:var(--gold);color:#2a1600;font:900 12px/21px Rubik;font-style:normal;box-shadow:0 0 0 2px var(--bg);animation:pulse 1.4s infinite}
+.tabs em{position:absolute;top:-7px;left:-6px;min-width:21px;height:21px;padding:0 5px;border-radius:99px;background:var(--gold);color:#2a1600;font:900 12px/21px Rubik;font-style:normal;box-shadow:0 0 0 2px var(--bg),0 0 12px rgba(246,190,60,.7)}
 @keyframes pulse{50%{transform:scale(1.15)}}
 
 main{max-width:1240px;margin:0 auto;padding:6px 16px 80px}
@@ -70,27 +70,30 @@ h2{font-family:var(--disp);font-weight:400;font-size:30px;margin:0 0 4px}
 /* ---------- avatar ---------- */
 .av-wrap{display:grid;grid-template-columns:minmax(300px,1.05fr) 1fr;gap:22px;align-items:start}
 .stage{position:relative;height:min(78vh,700px);min-height:520px;border-radius:24px;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#2a1418,#0e0809 70%);border:1px solid #33222600;box-shadow:inset 0 0 0 1px #3a262b,0 20px 60px rgba(0,0,0,.5)}
-.st-rays{position:absolute;left:50%;top:42%;width:1400px;height:1400px;margin:-700px 0 0 -700px;background:repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--glow,#d62b2f) 30%,transparent) 0 6deg,transparent 6deg 18deg);animation:spin 40s linear infinite;opacity:.55;-webkit-mask:radial-gradient(circle,#000 0,transparent 55%);mask:radial-gradient(circle,#000 0,transparent 55%)}
+.st-rays{position:absolute;left:50%;top:42%;width:1000px;height:1000px;margin:-500px 0 0 -500px;border-radius:50%;background:radial-gradient(circle,transparent 0,rgba(14,8,9,.55) 30%,#0e0809 58%),repeating-conic-gradient(from 0deg,color-mix(in srgb,var(--glow,#d62b2f) 30%,transparent) 0 6deg,transparent 6deg 18deg);animation:spin 40s linear infinite;opacity:.6;will-change:transform}
 @keyframes spin{to{transform:rotate(360deg)}}
 .st-spot{position:absolute;inset:0;background:radial-gradient(ellipse 40% 55% at 50% 45%,color-mix(in srgb,var(--glow,#d62b2f) 35%,transparent),transparent 70%)}
 .st-floor{position:absolute;left:50%;bottom:7%;width:62%;height:70px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse,color-mix(in srgb,var(--glow,#d62b2f) 60%,transparent),transparent 70%);filter:blur(2px)}
 .st-floor::after{content:"";position:absolute;inset:18px 8%;border-radius:50%;border:2px solid color-mix(in srgb,var(--glow,#d62b2f) 80%,#fff);opacity:.6;animation:floorpulse 2.4s ease-in-out infinite}
 @keyframes floorpulse{50%{transform:scale(1.08);opacity:.25}}
-.fig{position:absolute;inset:4% 0 9%;display:flex;justify-content:center}
-.fig svg{height:100%;width:auto;overflow:visible;filter:drop-shadow(0 18px 18px rgba(0,0,0,.6))}
+.fig{position:absolute;inset:4% 0 9%;display:flex;justify-content:center;animation:figfloat 4.2s ease-in-out infinite;will-change:transform}
+@keyframes figfloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-7px) rotate(-.6deg)}}
+.fig svg{height:100%;width:auto;overflow:visible}
+.fig.pop{animation:figpop .55s cubic-bezier(.2,1.6,.4,1)}
+@keyframes figpop{40%{transform:scale(1.05) translateY(-10px)}}
 .st-name{position:absolute;left:0;right:0;bottom:12px;text-align:center}
 .st-name b{display:block;font-family:var(--disp);font-size:22px;text-shadow:0 2px 0 #000}
 .st-name span{font-size:13px;color:#ffd7a8;font-weight:700}
 .fig .part{cursor:pointer;transition:filter .2s}
 .fig .part:hover{filter:brightness(1.25) drop-shadow(0 0 6px #fff)}
-.fig .breathe{animation:breathe 3.6s ease-in-out infinite;transform-origin:160px 300px;transform-box:view-box}
+
 @keyframes breathe{50%{transform:scale(1.012,1.008) translateY(-2px)}}
-.fig .headbob{animation:headbob 3.6s ease-in-out infinite;transform-origin:160px 140px;transform-box:view-box}
+
 @keyframes headbob{50%{transform:translateY(-3px) rotate(-1.2deg)}}
-.fig .sway{animation:sway 2.8s ease-in-out infinite;transform-origin:160px 150px;transform-box:view-box}
+
 @keyframes sway{50%{transform:rotate(3deg)}}
-.fig .armL{animation:armL 3.6s ease-in-out infinite;transform-origin:104px 168px;transform-box:view-box}
-.fig .armR{animation:armR 3.6s ease-in-out infinite;transform-origin:216px 168px;transform-box:view-box}
+
+
 @keyframes armL{50%{transform:rotate(2.5deg)}}
 @keyframes armR{50%{transform:rotate(-2.5deg)}}
 .fig .flash{animation:gflash .9s ease-out forwards;pointer-events:none}
@@ -135,8 +138,8 @@ h2{font-family:var(--disp);font-weight:400;font-size:30px;margin:0 0 4px}
 .card .th::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 120%,color-mix(in srgb,var(--rc) 45%,transparent),transparent 60%);mix-blend-mode:screen}
 .card .th::after{content:"";position:absolute;inset:0;box-shadow:inset 0 -40px 30px -20px rgba(0,0,0,.6)}
 .card.r0 .th,.card.r1 .th{overflow:hidden}
-.card.r0 .th>.holo,.card.r1 .th>.holo{position:absolute;inset:0;z-index:1;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.45) 45%,rgba(255,230,120,.25) 50%,transparent 62%);background-size:250% 100%;animation:holo 3.2s ease-in-out infinite;mix-blend-mode:overlay}
-@keyframes holo{0%{background-position:120% 0}100%{background-position:-120% 0}}
+.card.r0 .th>.holo,.card.r1 .th>.holo{position:absolute;top:0;bottom:0;left:-60%;width:60%;z-index:1;background:linear-gradient(105deg,transparent,rgba(255,255,255,.35) 45%,rgba(255,230,120,.2) 55%,transparent);animation:holo 3.4s ease-in-out infinite;will-change:transform}
+@keyframes holo{0%,25%{transform:translateX(0)}100%{transform:translateX(270%)}}
 .card .cb{padding:8px 9px 11px}
 .card b{display:block;font-size:13.5px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card small{display:block;font-size:11.5px;color:var(--mut);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -173,6 +176,8 @@ h2{font-family:var(--disp);font-weight:400;font-size:30px;margin:0 0 4px}
 .crt .oddt span{color:var(--rc);font-weight:800}
 .crt .acts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .crt .acts .btn{flex:1;min-width:110px}
+.crt .cube{transition:transform .6s cubic-bezier(.2,1.4,.4,1)}
+.crt:hover .cube{transform:rotateX(-24deg) rotateY(-60deg) translateY(-6px)}
 .crt .price{font-family:var(--num);font-size:20px;font-weight:400;color:var(--gold)}
 .mini3d{width:140px;height:120px;margin:4px auto 0;perspective:500px}
 .earn{margin-top:26px;padding:18px 20px;border-radius:18px;background:var(--panel);border:1px solid #2f2023}
@@ -190,14 +195,13 @@ h2{font-family:var(--disp);font-weight:400;font-size:30px;margin:0 0 4px}
 .cube .f4{transform:rotateY(-90deg) translateZ(calc(var(--s,90px)/2))}
 .cube .f5{transform:rotateX(-90deg) translateZ(calc(var(--s,90px)/2))}
 .cube .lid{transform:rotateX(90deg) translateZ(calc(var(--s,90px)/2));filter:brightness(1.18)}
-.mini3d .cube{animation:crfloat 4s ease-in-out infinite}
-@keyframes crfloat{50%{transform:rotateX(-18deg) rotateY(-52deg) translateY(-8px)}}
+
 
 /* ---------- overlays ---------- */
-.ov{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(5,2,3,.86);backdrop-filter:blur(8px);animation:ovin .25s both}
+.ov{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(7,3,4,.96);animation:ovin .25s both}
 @keyframes ovin{from{opacity:0}}
 .op-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.op-rays{position:absolute;left:50%;top:50%;width:1800px;height:1800px;margin:-900px;background:repeating-conic-gradient(color-mix(in srgb,var(--rc,#d62b2f) 30%,transparent) 0 5deg,transparent 5deg 15deg);opacity:0;transition:opacity .6s;animation:spin 18s linear infinite;-webkit-mask:radial-gradient(circle,#000,transparent 60%);mask:radial-gradient(circle,#000,transparent 60%)}
+.op-rays{position:absolute;left:50%;top:46%;width:1300px;height:1300px;margin:-650px;border-radius:50%;background:radial-gradient(circle,transparent 0,rgba(7,3,4,.35) 28%,#070304 60%),repeating-conic-gradient(color-mix(in srgb,var(--rc,#d62b2f) 45%,transparent) 0 5deg,transparent 5deg 15deg);opacity:0;transition:opacity .6s;animation:spin 22s linear infinite;will-change:transform,opacity}
 .ov.lit .op-rays{opacity:1}
 .op-crate{position:relative;width:260px;height:260px;perspective:800px}
 .op-crate .cube{--s:170px}
@@ -227,13 +231,13 @@ h2{font-family:var(--disp);font-weight:400;font-size:30px;margin:0 0 4px}
 .op-skip{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);padding:8px 18px;border-radius:99px;border:1px solid #4a3236;background:rgba(0,0,0,.5);font-weight:700;font-size:13px;color:#d9c8c4}
 
 .win{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;text-align:center;padding:10px 16px;max-width:96vw}
-.win .wc{position:relative;width:min(320px,70vw);aspect-ratio:3/3.7;border-radius:22px;overflow:hidden;background:#140c0e;box-shadow:0 0 0 3px var(--rc),0 0 80px color-mix(in srgb,var(--rc) 70%,transparent),0 30px 80px rgba(0,0,0,.7);animation:winpop .8s cubic-bezier(.2,1.4,.4,1) both;transform-style:preserve-3d}
+.win .wc{position:relative;width:min(320px,70vw);aspect-ratio:3/3.7;border-radius:22px;overflow:hidden;background:#140c0e;box-shadow:0 0 0 3px var(--rc),0 0 80px color-mix(in srgb,var(--rc) 70%,transparent),0 30px 80px rgba(0,0,0,.7);will-change:transform}
 @keyframes winpop{0%{transform:scale(.2) rotateY(540deg);opacity:0}60%{opacity:1}100%{transform:none}}
 .win .wc img{width:100%;height:78%;object-fit:cover;display:block}
 .win .wc .wi{padding:10px 12px}
 .win .wc .wi b{display:block;font-size:19px}
 .win .wc .wi small{color:var(--mut)}
-.win .wc .shine{position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.55) 48%,transparent 60%);background-size:300% 100%;animation:holo 2.2s .7s ease-in-out infinite;mix-blend-mode:overlay;pointer-events:none}
+.win .wc .shine{position:absolute;top:0;bottom:0;left:-60%;width:60%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.4) 50%,transparent);animation:holo 2.6s .9s ease-in-out infinite;pointer-events:none;will-change:transform}
 .win .stamp{font-family:var(--disp);font-size:clamp(40px,9vw,84px);line-height:1;color:var(--rc);-webkit-text-stroke:2px #000;text-shadow:0 0 30px var(--rc),0 6px 0 #000;margin:0 0 14px;animation:stamp .6s .55s cubic-bezier(.2,1.6,.4,1) both}
 @keyframes stamp{from{transform:scale(3) rotate(-10deg);opacity:0}}
 .win .wtags{margin:12px 0 0;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;animation:fadeup .4s 1s both}
@@ -383,3 +387,25 @@ h2{font-family:var(--disp);font-weight:400;font-size:30px;margin:0 0 4px}
   .daily .dbox .btn{width:100%}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
+/* ---- crate opening v2 ---- */
+.op-crate{animation:crdrop .7s cubic-bezier(.3,1.5,.5,1) both}
+@keyframes crdrop{0%{transform:translateY(-70vh) rotate(-8deg);opacity:0}60%{opacity:1}}
+.op-glow{position:absolute;left:50%;top:50%;width:420px;height:420px;margin:-210px;border-radius:50%;background:radial-gradient(circle,rgba(255,215,120,.9),rgba(255,140,40,.35) 35%,transparent 65%);opacity:0;transform:scale(.3);pointer-events:none;will-change:transform,opacity}
+.op-crate.charge .op-glow{animation:charge 1.25s ease-in forwards}
+@keyframes charge{to{opacity:1;transform:scale(1.25)}}
+.op-crate.charge .cube{animation:crshake2 1.25s linear forwards}
+@keyframes crshake2{0%{transform:rotateX(-18deg) rotateY(-32deg)}
+ 10%{transform:rotateX(-18deg) rotateY(-30deg) translate(-2px,1px)}20%{transform:rotateX(-18deg) rotateY(-34deg) translate(2px,-1px)}
+ 35%{transform:rotateX(-16deg) rotateY(-29deg) translate(-4px,2px) scale(1.02)}50%{transform:rotateX(-20deg) rotateY(-35deg) translate(4px,-3px) scale(1.03)}
+ 65%{transform:rotateX(-15deg) rotateY(-28deg) translate(-6px,3px) scale(1.05)}80%{transform:rotateX(-21deg) rotateY(-36deg) translate(7px,-4px) scale(1.07)}
+ 90%{transform:rotateX(-14deg) rotateY(-27deg) translate(-8px,5px) scale(1.1)}100%{transform:rotateX(-18deg) rotateY(-32deg) scale(1.14)}}
+.op-flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:4}
+.op-flash.go{animation:opflash .55s ease-out}
+@keyframes opflash{0%{opacity:.75}100%{opacity:0}}
+.reel{transform:translate3d(0,0,0)}
+.reel-wrap.stop .rc{transition:opacity .4s,transform .4s}
+.reel-wrap.stop .rc:not(.hit){opacity:.25;transform:scale(.92)}
+.reel-wrap.stop .rc.hit{transform:scale(1.08);box-shadow:inset 0 0 0 2px var(--rc),0 0 40px var(--rc)}
+.reel-wrap.out{transition:opacity .35s;opacity:0}
+.win .stamp{animation-delay:.45s}

@@ -86,17 +86,19 @@ const SND={
 
 /* ---------------- particles (canvas) ---------------- */
 const FX=(()=>{const cv=$('#fx'),g=cv.getContext('2d');let P=[],run=false,dpr=1;
-  function size(){dpr=Math.min(2,devicePixelRatio||1);cv.width=innerWidth*dpr;cv.height=innerHeight*dpr}
+  function size(){dpr=Math.min(1.5,devicePixelRatio||1);cv.width=innerWidth*dpr;cv.height=innerHeight*dpr}
+  const LOW=Math.min(innerWidth,innerHeight)<700, K=LOW?.55:1;
   size();addEventListener('resize',size);
   function loop(){g.clearRect(0,0,cv.width,cv.height);P=P.filter(p=>p.l>0);
     for(const p of P){p.l-=1/60;p.vy+=p.g;p.vx*=p.dr;p.vy*=p.dr;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;
-      g.save();g.globalAlpha=clamp(p.l/p.L*1.6,0,1);g.translate(p.x*dpr,p.y*dpr);g.rotate(p.a);g.fillStyle=p.c;
-      if(p.t==='c'){g.beginPath();g.arc(0,0,p.s*dpr,0,7);g.fill()}else if(p.t==='s'){g.globalCompositeOperation='lighter';g.beginPath();for(let i=0;i<4;i++){g.rotate(Math.PI/2);g.lineTo(0,p.s*2.4*dpr);g.lineTo(p.s*.5*dpr,p.s*.5*dpr)}g.fill()}else g.fillRect(-p.s*dpr,-p.s*.5*dpr,p.s*2*dpr,p.s*dpr);g.restore()}
+      const cs=Math.cos(p.a),sn=Math.sin(p.a);g.setTransform(cs,sn,-sn,cs,p.x*dpr,p.y*dpr);g.globalAlpha=clamp(p.l/p.L*1.6,0,1);g.fillStyle=p.c;
+      if(p.t==='c'){g.beginPath();g.arc(0,0,p.s*dpr,0,7);g.fill()}else if(p.t==='s'){g.beginPath();g.moveTo(0,-p.s*2.4*dpr);g.lineTo(p.s*.5*dpr,0);g.lineTo(0,p.s*2.4*dpr);g.lineTo(-p.s*.5*dpr,0);g.closePath();g.moveTo(-p.s*2.4*dpr,0);g.lineTo(0,p.s*.5*dpr);g.lineTo(p.s*2.4*dpr,0);g.lineTo(0,-p.s*.5*dpr);g.fill()}else g.fillRect(-p.s*dpr,-p.s*.5*dpr,p.s*2*dpr,p.s*dpr)}
+    g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;
     if(P.length)requestAnimationFrame(loop);else{run=false;g.clearRect(0,0,cv.width,cv.height)}}
-  return {burst(x,y,n,cols,o={}){for(let i=0;i<n;i++){const a=o.up?(-Math.PI/2+(rnd()-.5)*(o.spread||1.6)):rnd()*7,sp=(o.sp||6)*(.35+rnd());
+  return {burst(x,y,n,cols,o={}){n=Math.round(n*K);for(let i=0;i<n;i++){const a=o.up?(-Math.PI/2+(rnd()-.5)*(o.spread||1.6)):rnd()*7,sp=(o.sp||6)*(.35+rnd());
       P.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,g:o.g??.18,dr:o.dr??.985,a:rnd()*7,va:(rnd()-.5)*.35,s:(o.s||4)*(.5+rnd()),c:pick(cols),t:o.t||'r',l:(o.l||1.6)*(.6+rnd()*.6),L:o.l||1.6})}
       if(!run){run=true;requestAnimationFrame(loop)}},
-    rain(n,cols){for(let i=0;i<n;i++)P.push({x:rnd()*innerWidth,y:-20-rnd()*innerHeight*.6,vx:(rnd()-.5)*2,vy:2+rnd()*3,g:.05,dr:.995,a:rnd()*7,va:(rnd()-.5)*.3,s:4+rnd()*4,c:pick(cols),t:'r',l:3.5,L:3.5});if(!run){run=true;requestAnimationFrame(loop)}}};
+    rain(n,cols){n=Math.round(n*K);for(let i=0;i<n;i++)P.push({x:rnd()*innerWidth,y:-20-rnd()*innerHeight*.6,vx:(rnd()-.5)*2,vy:2+rnd()*3,g:.05,dr:.995,a:rnd()*7,va:(rnd()-.5)*.3,s:4+rnd()*4,c:pick(cols),t:'r',l:3.5,L:3.5});if(!run){run=true;requestAnimationFrame(loop)}}};
 })();
 const centerOf=el=>{const b=el.getBoundingClientRect();return [b.left+b.width/2,b.top+b.height/2]};
 
@@ -173,7 +175,7 @@ function figSVG(flash){
   return s+'</svg>';
 }
 function renderAvatar(flash){
-  const fig=$('#fig');fig.innerHTML=figSVG(flash);
+  const fig=$('#fig');fig.innerHTML=figSVG(flash);if(flash){fig.classList.remove('pop');void fig.offsetWidth;fig.classList.add('pop')}
   let best=6,score=0;SLOTS.forEach(s=>{const x=S.eq[s.k]&&inst(S.eq[s.k]);if(x){score+=valOf(x);best=Math.min(best,BYID[x.i].r)}});
   $('#stage').style.setProperty('--glow',best<6?RAR[best].c:'#d62b2f');
   $('#avName').textContent=S.name||'צופה של הנשיא';
@@ -292,17 +294,18 @@ function openCrate(k,buy){
   const it=rollItem(c),x=newInst(it,k),first=!S.inv.some(z=>z.i===it.id);
   S.inv.push(x);S.stats.opened++;save();wallet();
   const ov=$('#ovOpen');ov.hidden=false;ov.classList.remove('lit','shake');ov.style.setProperty('--rc',RAR[it.r].c);
-  const crate=$('#opCrate'),cube=$('.cube',crate);crate.hidden=false;crate.className='op-crate';
+  const crate=$('#opCrate'),cube=$('.cube',crate);crate.hidden=false;crate.className='op-crate';crate.style.animation='none';void crate.offsetWidth;crate.style.animation='';
   cube.style.cssText=`--wood:${c.wood};--trim:${c.trim};--band:${c.band};--logo:url(img/logo.webp)`;
   $('#reelWrap').hidden=true;$('#win').hidden=true;$('#opSkip').hidden=false;
   const st={done:false,skip:false};opening=st;
-  /* phase 1: shake */
-  requestAnimationFrame(()=>crate.classList.add('shake'));SND.rise();
-  const t1=setTimeout(()=>{crate.classList.remove('shake');crate.classList.add('pop');
+  /* phase 1: the crate drops in, charges up (glow + growing shake), then bursts open */
+  tone(180,.25,'sine',.25,-90,.45);noise(.18,.15,300,.5);
+  st.t0=setTimeout(()=>{crate.classList.add('charge');SND.rise()},650);
+  st.t1=setTimeout(()=>{crate.classList.remove('charge');crate.classList.add('pop');
     const b=document.createElement('i');b.className='burst';crate.append(b);SND.boom();
-    const [cx,cy]=centerOf(crate);FX.burst(cx,cy,60,['#c98a4a','#6b3f17','#ffd75a','#fff'],{sp:12,s:5});
-    setTimeout(()=>reel(it,x,first,st),420)},st.skip?0:1150);
-  st.t1=t1;
+    const fl=$('#opFlash');fl.classList.remove('go');void fl.offsetWidth;fl.classList.add('go');
+    const [cx,cy]=centerOf(crate);FX.burst(cx,cy,70,['#c98a4a','#6b3f17','#ffd75a','#fff'],{sp:13,s:5});
+    setTimeout(()=>reel(it,x,first,st),380)},1900);
 }
 function reel(it,x,first,st){
   if(st.done)return;$('#opCrate').hidden=true;
@@ -312,22 +315,32 @@ function reel(it,x,first,st){
   R.innerHTML=cards.map(z=>`<div class="rc r${z.r}"><div class="th" style="${thStyle(z)}"></div><b>${esc(z.n)}</b><small>${RAR[z.r].n} · ${yrTxt(z)}</small></div>`).join('');
   const cw=R.firstElementChild.getBoundingClientRect().width+10;
   const target=WIN*cw+cw/2-10/2+(rnd()-.5)*cw*.7;
-  const dur=6200,t0=performance.now();let lastIdx=-1;
-  const ease=t=>1-Math.pow(1-t,4.2);
+  wrap.classList.remove('stop','out');$('.reel-mark').style.cssText='';
+  const dur=5600,t0=performance.now(),ov=cw*.16;let lastIdx=-1;
+  const eo=t=>1-Math.pow(1-t,4),eio=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+  const posAt=t=>t<.9?eo(t/.9)*(target+ov):target+ov*(1-eio((t-.9)/.1));
   function f(now){if(st.done)return;let t=clamp((now-t0)/dur,0,1);if(st.skip)t=1;
-    const pos=ease(t)*target;R.style.transform=`translateX(${-pos}px)`;
+    const pos=posAt(t);R.style.transform=`translate3d(${-pos}px,0,0)`;
     const idx=Math.floor((pos+cw/2)/cw);if(idx!==lastIdx){lastIdx=idx;SND.tick(1-t)}
-    if(t<1)requestAnimationFrame(f);else setTimeout(()=>reveal(it,x,first,st),st.skip?50:450)}
+    if(t<1)requestAnimationFrame(f);else{
+      const hit=R.children[WIN];hit.classList.add('hit');wrap.classList.add('stop');
+      const m=$('.reel-mark');m.style.background=RAR[it.r].c;m.style.boxShadow=`0 0 30px ${RAR[it.r].c}`;
+      tone(it.r<3?880:520,.25,'triangle',.14);setTimeout(()=>reveal(it,x,first,st,hit),st.skip?60:700)}}
   requestAnimationFrame(f);
 }
-function reveal(it,x,first,st){
+function reveal(it,x,first,st,hit){
   if(st.done)return;st.done=true;opening=null;
-  const ov=$('#ovOpen');$('#reelWrap').hidden=true;$('#opSkip').hidden=true;ov.classList.add('lit');
+  const from=hit&&!st.skip?hit.getBoundingClientRect():null;
+  const ov=$('#ovOpen'),rw=$('#reelWrap');rw.classList.add('out');setTimeout(()=>{rw.hidden=true;rw.classList.remove('out','stop')},360);$('#opSkip').hidden=true;ov.classList.add('lit');
   const win=$('#win');win.hidden=false;win.className='win r'+it.r;
   const more=(S.crates[x.o]>0)||S.coins>=(CR[x.o]?.price||1e9);
   win.innerHTML=`<div class="stamp">${RAR[it.r].stamp}</div><div class="wc"><img src="${imgSrc(it)}" alt=""><div class="wi"><b>${esc(it.n)}</b><small>${esc(it.c)} · ${yrTxt(it)}</small></div><i class="shine"></i></div>
     <div class="wtags"><span class="rpill r${it.r}">${RAR[it.r].n}</span><span>${wearName(x.w)}</span>${x.sg?'<span style="color:#ffd75a">✍ חתום ע״י ראש השבט!</span>':''}${first?'<span style="color:#3ddc84">✦ חדש באוסף</span>':'<span>כפול</span>'}</div>
     <div class="acts"><button class="btn gold" data-w="wear">👕 לבשו עכשיו</button>${more?`<button class="btn" data-w="again">📦 עוד ארגז</button>`:''}<button class="btn ghost" data-w="lk">ללוקר</button></div>`;
+  const wc=$('.wc',win);
+  if(from){const to=wc.getBoundingClientRect();const sx=from.width/to.width,dx=from.left+from.width/2-(to.left+to.width/2),dy=from.top+from.height/2-(to.top+to.height/2);
+    wc.animate([{transform:`translate(${dx}px,${dy}px) scale(${sx})`,filter:'brightness(2)'},{transform:'translate(0,-30px) scale(1.08)',filter:'brightness(1.4)',offset:.6},{transform:'none',filter:'none'}],{duration:800,easing:'cubic-bezier(.2,.9,.3,1)'})}
+  else wc.animate([{transform:'scale(.3) rotateY(180deg)',opacity:0},{transform:'none',opacity:1}],{duration:600,easing:'cubic-bezier(.2,1.4,.4,1)'});
   SND.win(it.r);const col=RAR[it.r].c;
   const [cx,cy]=[innerWidth/2,innerHeight*.45];
   FX.burst(cx,cy,it.r<2?160:it.r<4?90:50,[col,'#fff',col,'#ffd75a'],{sp:it.r<2?16:10,s:5,l:2.2});
@@ -337,9 +350,9 @@ function reveal(it,x,first,st){
     if(a==='wear'){equip(x.u);go('avatar')}else if(a==='again'){openCrate(x.o,!(S.crates[x.o]>0))}else go('locker')};
   renderCrates();renderGrid();
 }
-function closeOpen(){const ov=$('#ovOpen');ov.hidden=true;ov.classList.remove('lit','shake');$('#win').innerHTML='';if(opening){opening.done=true;clearTimeout(opening.t1);opening=null}renderCrates();renderGrid()}
+function closeOpen(){const ov=$('#ovOpen');ov.hidden=true;ov.classList.remove('lit','shake');$('#win').innerHTML='';if(opening){opening.done=true;clearTimeout(opening.t0);clearTimeout(opening.t1);opening=null}renderCrates();renderGrid()}
 $('#opSkip').onclick=()=>{if(!opening)return;opening.skip=true;const st=opening;
-  if(!$('#opCrate').hidden){clearTimeout(st.t1);$('#opCrate').hidden=true;const x=S.inv[S.inv.length-1];reel(BYID[x.i],x,!S.inv.slice(0,-1).some(z=>z.i===x.i),st)}};
+  if(!$('#opCrate').hidden){clearTimeout(st.t0);clearTimeout(st.t1);$('#opCrate').hidden=true;const x=S.inv[S.inv.length-1];reel(BYID[x.i],x,!S.inv.slice(0,-1).some(z=>z.i===x.i),st)}};
 
 /* ---------------- trade ---------------- */
 const NET={SRC:['https://unpkg.com/mqtt@5.3.5/dist/mqtt.min.js','https://cdn.jsdelivr.net/npm/mqtt@5.3.5/dist/mqtt.min.js'],
