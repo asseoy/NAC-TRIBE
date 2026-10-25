@@ -57,7 +57,7 @@ let S=null;
 function load(){
   let s=null;if(lsOK){try{s=JSON.parse(localStorage.getItem(KEY))}catch(e){}}
   if(!s||s.v!==1){s={v:1,name:'',coins:0,xpSeen:0,inv:[],eq:{},crates:{mahsan:3,mahteret:1,archive:0},daily:'',seen:{},hist:[],stats:{opened:0,traded:0},fresh:1}}
-  s.inv=(s.inv||[]).filter(x=>BYID[x.i]);
+  s.sets=s.sets||{};s.inv=(s.inv||[]).filter(x=>BYID[x.i]);
   for(const k in s.eq)if(!s.inv.some(x=>x.u===s.eq[k]))delete s.eq[k];
   return s;
 }
@@ -105,8 +105,12 @@ const centerOf=el=>{const b=el.getBoundingClientRect();return [b.left+b.width/2,
 /* ---------------- toast + wallet ---------------- */
 function toast(t,cls=''){const d=document.createElement('div');d.className='toast '+cls;d.innerHTML=t;$('#toasts').append(d);setTimeout(()=>{d.classList.add('out');setTimeout(()=>d.remove(),320)},2600)}
 function crateCount(){return Object.values(S.crates).reduce((a,b)=>a+b,0)}
+let shownCoins=null,coinRaf=0;
+function rollCoins(){const el=$('#wCoins b'),to=S.coins;if(shownCoins===null||Math.abs(to-shownCoins)<2){shownCoins=to;el.textContent=fmt(to);return}
+  cancelAnimationFrame(coinRaf);const from=shownCoins,t0=performance.now(),d=Math.min(1200,300+Math.abs(to-from)/3);
+  const f=n=>{const t=clamp((n-t0)/d,0,1),e=1-Math.pow(1-t,3);shownCoins=from+(to-from)*e;el.textContent=fmt(shownCoins);if(t<1)coinRaf=requestAnimationFrame(f);else shownCoins=to};coinRaf=requestAnimationFrame(f)}
 function wallet(bump){
-  $('#wCoins b').textContent=fmt(S.coins);$('#wCrates b').textContent=crateCount();$('#wRank').textContent=rankOf(readXP());
+  rollCoins();$('#wCrates b').textContent=crateCount();$('#wRank').textContent=rankOf(readXP());
   const n=crateCount(),bd=$('#crBadge');bd.hidden=!n;bd.textContent=n;
   if(bump){const el=$(bump==='coins'?'#wCoins':'#wCrates');el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')}
 }
@@ -114,64 +118,79 @@ function syncXP(){const xp=readXP();if(xp>S.xpSeen){const d=xp-S.xpSeen;S.xpSeen
 
 /* ---------------- avatar ---------------- */
 const eqItem=k=>{const x=S.eq[k]&&inst(S.eq[k]);return x?BYID[x.i]:null};
-const PAT={hat:[106,22,140,74],neck:[128,138,64,104],shirt:[56,150,208,196],outer:[50,30,220,320],pants:[86,312,148,134],acc:[58,292,34,32]};
+const PAT={hat:[110,30,142,74],neck:[126,146,68,110],shirt:[60,146,200,190],outer:[56,124,208,222],pants:[86,314,148,126],acc:[58,296,34,32]};
 function pat(k,it){const [x,y,w,h]=PAT[k];return `<pattern id="pt-${k}" patternUnits="userSpaceOnUse" x="${x}" y="${y}" width="${w}" height="${h}"><rect width="${w}" height="${h}" fill="${it.col}"/><image href="${imgSrc(it)}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice"/></pattern>`}
-const mir=pts=>pts.split(' ').map(p=>{const [x,y]=p.split(',');return (320-x)+','+y}).join(' ');
+const mirD=d=>d.replace(/(-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)/g,(m,x,y)=>(320-x)+' '+y);
+/* the scout: smooth outlined shapes, every garment gets the item photo as its fabric + a soft volume shading on top */
 function figSVG(flash){
   const it={};SLOTS.forEach(s=>it[s.k]=eqItem(s.k));
-  const fill=(k,def)=>it[k]?`url(#pt-${k})`:def;
-  const O='stroke="#0a0506" stroke-width="3.5" stroke-linejoin="round"';
+  const O='stroke="#140a0b" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"';
   const fl=k=>flash===k?' flashme':'';
-  const P=(k,pts,def,extra='')=>`<polygon class="part g-${k}${fl(k)}" data-slot="${k}" points="${pts}" fill="${fill(k,def)}" ${O} ${extra}/>`;
-  const sh=(pts,a)=>`<polygon points="${pts}" fill="${a>0?'#fff':'#000'}" opacity="${Math.abs(a)}" pointer-events="none"/>`;
-  const skin='#d9a57b',skinD='#b98559';
-  const sleeveL='104,158 74,238 98,250 118,198', foreL='78,236 64,318 84,324 98,248', longL='104,156 60,316 86,326 120,198';
+  const G=(k,d,def)=>`<path class="part g-${k}${fl(k)}" data-slot="${k}" d="${d}" fill="${it[k]?`url(#pt-${k})`:def}" ${O}/><path d="${d}" fill="url(#vol)" pointer-events="none"/>`;
+  const SK='#e0ad84',SKD='#c08c62',SKS='#a8744d';
+  const skin=d=>`<path d="${d}" fill="${SK}" ${O}/><path d="${d}" fill="url(#vol)" pointer-events="none"/>`;
   let s=`<svg viewBox="0 0 320 640" xmlns="http://www.w3.org/2000/svg"><defs>${SLOTS.map(x=>it[x.k]?pat(x.k,it[x.k]):'').join('')}
-  <pattern id="stripes" patternUnits="userSpaceOnUse" width="16" height="16" patternTransform="rotate(35)"><rect width="16" height="16" fill="#c4161c"/><rect width="8" height="16" fill="#140a0b"/></pattern>
-  <radialGradient id="shad"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>
-  <ellipse cx="160" cy="590" rx="92" ry="16" fill="url(#shad)"/>`;
-  /* hood (outer) behind head */
-  if(it.outer)s+=`<path class="part g-outer${fl('outer')}" data-slot="outer" d="M112 162 C112 128 136 112 160 112 C184 112 208 128 208 162 Z" fill="url(#pt-outer)" ${O}/>${sh('112,162 160,112 136,120 118,140',-.3)}`;
-  /* legs + shoes */
-  s+=`<g class="breathe"><polygon points="98,436 148,436 142,560 106,560" fill="${skin}" ${O}/><polygon points="172,436 222,436 214,560 178,560" fill="${skin}" ${O}/>
-  ${sh('98,436 122,436 116,560 106,560',-.15)}${sh('172,436 196,436 190,560 178,560',-.15)}
-  <polygon points="102,552 146,552 152,584 84,584 88,566" fill="#151012" ${O}/><polygon points="174,552 218,552 232,566 236,584 168,584" fill="#151012" ${O}/>
-  <polygon points="88,574 152,574 152,580 86,580" fill="#d62b2f"/><polygon points="168,574 234,574 236,580 168,580" fill="#d62b2f"/>`;
-  /* pants */
-  s+=P('pants','96,314 224,314 232,442 168,442 160,362 152,442 88,442','#1f2a44')+sh('96,314 160,314 160,362 152,442 88,442',-.18)+`<polyline points="160,330 160,362" stroke="#0a0506" stroke-width="2.5" fill="none" opacity=".6"/>`;
+  <linearGradient id="vol" x1="0" y1="0" x2="1" y2=".25"><stop offset="0" stop-color="#000" stop-opacity=".34"/><stop offset=".42" stop-color="#000" stop-opacity="0"/><stop offset=".7" stop-color="#fff" stop-opacity=".07"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></linearGradient>
+  <linearGradient id="khaki" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cdb27a"/><stop offset="1" stop-color="#b39660"/></linearGradient>
+  <linearGradient id="navy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26324f"/><stop offset="1" stop-color="#1a2238"/></linearGradient>
+  <pattern id="stripes" patternUnits="userSpaceOnUse" width="18" height="18" patternTransform="rotate(38)"><rect width="18" height="18" fill="#c8161c"/><rect width="7" height="18" fill="#140a0b"/><rect x="7" width="2" height="18" fill="#f6be3c"/></pattern>
+  <radialGradient id="shad"><stop offset="0" stop-color="#000" stop-opacity=".6"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>
+  <ellipse cx="160" cy="592" rx="96" ry="15" fill="url(#shad)"/>`;
+  /* hood resting on the shoulders (behind the head) */
+  if(it.outer)s+=G('outer','M114 168 C112 138 134 124 160 124 C186 124 208 138 206 168 C192 158 128 158 114 168 Z','#000');
+  /* legs, socks, shoes */
+  const legL='M102 432 L148 432 C147 470 145 512 143 552 L109 552 C107 512 104 470 102 432 Z';
+  s+=skin(legL)+skin(mirD(legL));
+  s+=`<path d="M124 470 q6 8 0 16" stroke="${SKS}" stroke-width="2.5" fill="none"/><path d="M196 470 q-6 8 0 16" stroke="${SKS}" stroke-width="2.5" fill="none"/>`;
+  const sock='M108 532 L144 532 L143 556 L109 556 Z';
+  s+=`<path d="${sock}" fill="#f2ece4" ${O}/><path d="${mirD(sock)}" fill="#f2ece4" ${O}/><path d="M109 540 L144 540 M109 546 L144 546 M176 540 L211 540 M176 546 L211 546" stroke="#d62b2f" stroke-width="3"/>`;
+  const shoe='M106 552 L146 552 C151 562 154 572 154 582 L80 582 C80 570 92 560 106 552 Z';
+  s+=`<path d="${shoe}" fill="#1b1416" ${O}/><path d="${mirD(shoe)}" fill="#1b1416" ${O}/><path d="M78 580 L156 580 L156 592 L78 592 Z" fill="#f4f0ea" ${O}/><path d="${mirD('M78 580 L156 580 L156 592 L78 592 Z')}" fill="#f4f0ea" ${O}/>
+  <path d="M112 560 l14 4 M110 566 l14 4 M208 560 l-14 4 M210 566 l-14 4" stroke="#f4f0ea" stroke-width="2.4" stroke-linecap="round"/><path d="M84 574 L152 574 M168 574 L236 574" stroke="#d62b2f" stroke-width="3"/>`;
+  /* shorts */
+  s+=G('pants','M96 316 L224 316 L233 432 L169 436 L160 362 L151 436 L87 432 Z','url(#navy)');
+  s+=`<path d="M96 316 L224 316 L225 332 L95 332 Z" fill="#000" opacity=".3" pointer-events="none"/><path d="M160 334 L160 362 M120 340 l-4 40 M200 340 l4 40" stroke="#140a0b" stroke-width="2.2" opacity=".45" fill="none"/>`;
   /* torso */
+  const shirt='M104 160 C122 151 138 149 146 149 L160 168 L174 149 C182 149 198 151 216 160 L225 236 C223 270 225 300 228 330 L92 330 C95 300 97 270 95 236 Z';
+  const hood='M98 158 C120 146 140 143 160 145 C180 143 200 146 222 158 L231 236 C229 280 231 312 235 344 L85 344 C89 312 91 280 89 236 Z';
   if(!it.outer){
-    s+=P('shirt','104,156 216,156 228,328 92,328','#c8ad74')+sh('104,156 160,156 160,328 92,328',-.16)+sh('160,156 216,156 190,240',.07);
-    s+=`<polygon points="144,156 160,178 176,156" fill="${skinD}" stroke="#0a0506" stroke-width="2.5"/>`;
+    s+=G('shirt',shirt,'url(#khaki)');
+    s+=`<path d="M146 149 L160 170 L174 149" fill="${SKD}" ${O}/><path d="M138 150 L160 176 L182 150" fill="none" stroke="#140a0b" stroke-width="3" opacity=".55"/>`;
+    if(!it.shirt)s+=`<path d="M112 196 L132 196 L132 214 L112 214 Z M188 196 L208 196 L208 214 L188 214 Z" fill="none" stroke="#7d6640" stroke-width="2.5"/><circle cx="160" cy="210" r="2.4" fill="#7d6640"/><circle cx="160" cy="240" r="2.4" fill="#7d6640"/><circle cx="160" cy="270" r="2.4" fill="#7d6640"/>`;
   }else{
-    s+=P('outer','98,152 222,152 234,338 86,338','#000')+sh('98,152 160,152 160,338 86,338',-.18);
-    s+=`<polygon points="122,284 198,284 190,326 130,326" fill="#000" opacity=".22" pointer-events="none" stroke="#0a0506" stroke-width="2"/><line x1="160" y1="160" x2="160" y2="336" stroke="#0a0506" stroke-width="2.5" opacity=".7"/>
-    <path d="M150 166 L146 214 M170 166 L174 214" stroke="#eee" stroke-width="3" stroke-linecap="round"/>`;
+    s+=G('outer',hood,'#000');
+    s+=`<path d="M124 282 L196 282 L206 328 L114 328 Z" fill="#000" opacity=".25" stroke="#140a0b" stroke-width="2.4" pointer-events="none"/><path d="M85 334 L235 334" stroke="#000" stroke-width="7" opacity=".25"/>
+    <path d="M150 168 C148 190 147 204 146 220 M170 168 C172 190 173 204 174 220" stroke="#f4f0ea" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="142" y="218" width="7" height="12" rx="2" fill="#c9c2b8"/><rect x="171" y="218" width="7" height="12" rx="2" fill="#c9c2b8"/>`;
   }
-  /* scarf */
-  s+=`<g class="sway">`+P('neck','136,146 184,146 190,170 130,170',it.neck?'':'url(#stripes)')+P('neck','142,166 160,250 178,166',it.neck?'':'url(#stripes)')+sh('142,166 160,250 160,166',-.2)+`<circle cx="160" cy="192" r="9" fill="#e7c25a" stroke="#0a0506" stroke-width="3"/></g>`;
+  /* neckerchief: tribe stripes by default, or the equipped scarf */
+  const band='M132 150 C146 162 174 162 188 150 L192 168 C176 180 144 180 128 168 Z', tails='M146 172 L160 256 L174 172 C170 176 150 176 146 172 Z';
+  s+=G('neck',tails,'url(#stripes)')+G('neck',band,'url(#stripes)')+`<rect x="150" y="180" width="20" height="16" rx="5" fill="#e9c35a" ${O}/><path d="M153 186 L167 186" stroke="#a37a1c" stroke-width="2"/>`;
   /* arms */
-  const arm=(side)=>{const m=side==='R'?mir:(x=>x);let a=`<g class="arm${side}">`;
-    if(it.outer){a+=P('outer',m(longL),'#000')+sh(m('104,156 60,316 72,320 112,200'),-.15);}
-    else{a+=`<polygon points="${m(foreL)}" fill="${skin}" ${O}/>`+P('shirt',m(sleeveL),'#c8ad74')+sh(m('104,158 74,238 86,244'),-.15);}
-    a+=`<circle cx="${side==='R'?246:74}" cy="332" r="11" fill="${skin}" ${O}/>`;
-    if(side==='L'&&it.acc)a+=P('acc','60,298 90,304 88,322 58,316','#000');
-    return a+'</g>'};
-  s+=arm('L')+arm('R')+'</g>';
+  const sleeveL='M106 160 C92 168 80 196 74 232 L100 244 C104 222 110 206 117 196 Z', armL='M78 230 C72 262 66 292 64 318 L85 324 C89 298 95 268 100 244 Z', longL='M102 158 C84 170 70 210 62 316 L90 324 C96 270 104 226 118 198 Z';
+  const hand=x=>`<path d="M${x-12} 326 C${x-14} 340 ${x-8} 350 ${x+1} 350 C${x+11} 350 ${x+14} 338 ${x+11} 326 Z" fill="${SK}" ${O}/><path d="M${x+10} 330 q8 4 4 12" stroke="#140a0b" stroke-width="2.6" fill="${SK}"/>`;
+  const arm=side=>{const m=side==='R'?mirD:(d=>d);let a='';
+    if(it.outer)a+=G('outer',m(longL),'#000')+`<path d="${m('M62 308 L90 316 L90 326 L61 318 Z')}" fill="#000" opacity=".3" pointer-events="none"/>`;
+    else a+=skin(m(armL))+G('shirt',m(sleeveL),'url(#khaki)')+`<path d="${m('M74 232 L100 244')}" stroke="#140a0b" stroke-width="5" opacity=".25"/>`;
+    a+=side==='R'?hand(246):hand(74);
+    if(side==='L')a+=it.acc?G('acc','M62 300 L88 306 L87 322 L60 316 Z',''):`<path class="part" data-slot="acc" d="M58 294 L92 302 L90 328 L56 320 Z" fill="transparent"/>`;
+    return a};
+  s+=arm('L')+arm('R');
   /* head */
-  s+=`<g class="headbob"><polygon points="146,118 174,118 176,154 144,154" fill="${skinD}" ${O}/>
-  <polygon points="160,30 192,42 204,78 198,112 178,132 160,138 142,132 122,112 116,78 128,42" fill="${skin}" ${O}/>
-  ${sh('160,30 128,42 116,78 122,112 142,132 160,138 160,84',-.12)}${sh('160,30 192,42 204,78 160,84',.1)}
-  <polygon points="134,86 150,82 152,90 136,92" fill="#fff" stroke="#0a0506" stroke-width="2"/><polygon points="186,86 170,82 168,90 184,92" fill="#fff" stroke="#0a0506" stroke-width="2"/>
-  <circle cx="145" cy="88" r="3.2" fill="#140a0b"/><circle cx="175" cy="88" r="3.2" fill="#140a0b"/>
-  <path d="M130 76 L152 72 M190 76 L168 72" stroke="#140a0b" stroke-width="4" stroke-linecap="round"/>
-  <path d="M160 92 L154 108 L162 110" stroke="#9c6a43" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
-  <path d="M146 120 Q162 128 176 116" stroke="#140a0b" stroke-width="3" fill="none" stroke-linecap="round"/>`;
-  if(it.hat)s+=P('hat','116,80 120,48 140,30 180,30 200,48 204,80')+`<polygon class="part g-hat" data-slot="hat" points="198,72 244,82 240,92 196,84" fill="url(#pt-hat)" ${O}/>`+sh('116,80 120,48 140,30 160,30 160,80',-.18);
-  else s+=`<polygon class="part" data-slot="hat" points="120,74 124,46 142,30 178,30 196,46 200,74 186,58 160,52 134,60" fill="#1b1012" ${O}/>`;
-  s+='</g>';
-  /* hit areas for empty acc slot */
-  if(!it.acc)s+=`<rect class="part" data-slot="acc" x="56" y="292" width="36" height="34" fill="transparent"/>`;
+  s+=`<path d="M147 132 L173 132 L175 160 L145 160 Z" fill="${SKD}" ${O}/>`;
+  const ear=x=>`<ellipse cx="${x}" cy="98" rx="9" ry="13" fill="${SK}" ${O}/><path d="M${x} 92 q${x<160?4:-4} 6 0 12" stroke="${SKS}" stroke-width="2.4" fill="none"/>`;
+  s+=ear(115)+ear(205);
+  const head='M160 40 C197 40 207 66 206 94 C205 122 190 144 160 147 C130 144 115 122 114 94 C113 66 123 40 160 40 Z';
+  s+=skin(head);
+  s+=`<ellipse cx="135" cy="118" rx="9" ry="5" fill="#ff6b6b" opacity=".22"/><ellipse cx="185" cy="118" rx="9" ry="5" fill="#ff6b6b" opacity=".22"/>
+  <path d="M128 84 Q140 76 152 82 M168 82 Q180 76 192 84" stroke="#2a1712" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <ellipse cx="141" cy="98" rx="8" ry="6.5" fill="#fff" stroke="#140a0b" stroke-width="2"/><ellipse cx="179" cy="98" rx="8" ry="6.5" fill="#fff" stroke="#140a0b" stroke-width="2"/>
+  <circle cx="143" cy="99" r="4" fill="#2b1a10"/><circle cx="181" cy="99" r="4" fill="#2b1a10"/><circle cx="144.5" cy="97.5" r="1.4" fill="#fff"/><circle cx="182.5" cy="97.5" r="1.4" fill="#fff"/>
+  <path d="M161 104 Q156 116 163 118" stroke="${SKS}" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  <path d="M145 127 Q160 138 176 126" stroke="#140a0b" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="M151 131 Q160 135 169 131" stroke="#fff" stroke-width="2" fill="none" opacity=".7"/>`;
+  if(it.hat){
+    const crown='M114 90 C111 52 134 34 160 34 C188 34 210 52 206 90 C190 82 130 82 114 90 Z', brim='M196 84 C222 82 248 92 252 104 C232 106 210 98 192 92 Z';
+    s+=G('hat',brim,'#000')+`<path d="${brim}" fill="#000" opacity=".25" pointer-events="none"/>`+G('hat',crown,'#000')+`<path d="M160 36 C150 50 144 66 142 86 M160 36 C170 50 176 66 178 86" stroke="#140a0b" stroke-width="2" opacity=".45" fill="none"/><circle cx="160" cy="35" r="5" fill="#140a0b"/>`;
+  }else s+=`<path class="part" data-slot="hat" d="M114 92 C108 56 128 30 160 30 C196 28 214 56 206 92 L198 74 L191 86 L184 66 L172 78 L164 60 L153 76 L142 62 L134 82 L124 70 Z" fill="#2a1712" ${O}/><path d="M138 44 Q160 36 182 46" stroke="#fff" stroke-width="3" opacity=".15" fill="none"/>`;
   return s+'</svg>';
 }
 function renderAvatar(flash){
@@ -190,13 +209,13 @@ function equip(u){const x=inst(u);if(!x)return;const it=BYID[x.i];S.eq[it.sl]=u;
 function unequip(k){delete S.eq[k];save();SND.click();renderAvatar();renderGrid()}
 
 /* ---------------- locker grid ---------------- */
-const F={cat:'הכל',q:'',sort:'rar',all:false};
+const F={cat:'הכל',q:'',sort:'rar',mode:'mine'};
 const CATS=['הכל',...[...new Set(ITEMS.map(i=>i.c))]];
 function cardHTML(it,x,o={}){
   const tags=[];if(x&&Object.values(S.eq).includes(x.u))tags.push('<i class="eq">לבוש</i>');if(x&&x.sg)tags.push('<i class="sg">✍ חתום</i>');if(o.count>1)tags.push(`<i class="ct">×${o.count}</i>`);
   return `<button class="card r${it.r}${o.miss?' miss':''}${o.sel?' sel':''}${o.newf?' new-flag':''}" ${x?`data-u="${x.u}"`:''} data-id="${it.id}" style="--i:${Math.min(o.i||0,40)}">
   <div class="th" style="${thStyle(it)}">${it.r<2&&!o.miss?'<i class="holo"></i>':''}</div><span class="yr">${yrTxt(it)}</span><span class="tg">${tags.join('')}</span>
-  <div class="cb"><b>${esc(it.n)}</b><small>${o.sub||esc(it.c+(it.s?' · '+it.s:''))}</small></div><i class="rb"></i></button>`;
+  <div class="cb"><b>${esc(it.n)}</b><small>${o.sub||esc(it.c+(it.s?' · '+it.s:''))}</small></div><i class="rb"></i><i class="gl"></i></button>`;
 }
 function sortFn(a,b){const A=BYID[a.i],B=BYID[b.i];
   if(F.sort==='rar')return A.r-B.r||(A.y||3000)-(B.y||3000)||(b.t-a.t);
@@ -204,23 +223,57 @@ function sortFn(a,b){const A=BYID[a.i],B=BYID[b.i];
   if(F.sort==='new')return (B.y||0)-(A.y||0);
   return b.t-a.t}
 function match(it){if(F.cat!=='הכל'&&it.c!==F.cat)return false;if(F.q){const q=F.q.trim();return (it.n+' '+it.c+' '+it.s+' '+it.y+' '+RAR[it.r].n).includes(q)}return true}
+function bestOf(xs){return xs.slice().sort((a,b)=>(Object.values(S.eq).includes(b.u)-Object.values(S.eq).includes(a.u))||(b.sg-a.sg)||(a.w-b.w))[0]}
+const secHTML=(r,n)=>`<div class="sec r${r}"><b>${RAR[r].n}</b><span>${RAR[r].yrs}</span><i>${n}</i></div>`;
 function renderGrid(){
   const own=new Set(S.inv.map(x=>x.i));
   $('#colNum').textContent=own.size;$('#colTot').textContent=ITEMS.length;$('#colBar').style.width=(own.size/ITEMS.length*100)+'%';
+  $$('#modeSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===F.mode));
+  const setsMode=F.mode==='sets';$('#cats').hidden=setsMode;$('#rarLegend').hidden=setsMode;$('.lk-ctl input').hidden=setsMode;$('#sort').hidden=setsMode;
+  const ready=SETS.filter(z=>!S.sets[z.k]&&setProg(z)>=z.items.length).length;const sb=$('#modeSeg [data-m=sets] em');sb.hidden=!ready;sb.textContent=ready;
+  if(setsMode){$('#grid').innerHTML=renderSets();$('#lkEmpty').hidden=true;return}
   $('#cats').innerHTML=CATS.map(c=>{const n=c==='הכל'?ITEMS.length:ITEMS.filter(i=>i.c===c).length,m=c==='הכל'?own.size:[...own].filter(id=>BYID[id].c===c).length;return `<button class="${F.cat===c?'on':''}" data-c="${c}">${c}<small>${m}/${n}</small></button>`}).join('');
-  let html='';
-  if(F.all){
-    const cnt={};S.inv.forEach(x=>cnt[x.i]=(cnt[x.i]||0)+1);
-    let list=ITEMS.filter(match);
-    list.sort((a,b)=>F.sort==='old'?(a.y||3000)-(b.y||3000):F.sort==='new'?(b.y||0)-(a.y||0):a.r-b.r||(a.y||3000)-(b.y||3000));
-    html=list.map((it,i)=>{const x=S.inv.find(z=>z.i===it.id);return cardHTML(it,x,{miss:!x,count:cnt[it.id],i})}).join('');
-  }else{
-    const list=S.inv.filter(x=>match(BYID[x.i])).sort(sortFn);
-    html=list.map((x,i)=>cardHTML(BYID[x.i],x,{i,newf:x.nw})).join('');
-  }
+  const groups={};S.inv.forEach(x=>(groups[x.i]=groups[x.i]||[]).push(x));
+  let list;
+  if(F.mode==='all')list=ITEMS.filter(match).map(it=>({it,xs:groups[it.id]||[]}));
+  else list=Object.keys(groups).map(id=>({it:BYID[id],xs:groups[id]})).filter(g=>match(g.it));
+  const yy=g=>g.it.y||3000,tt=g=>Math.max(0,...g.xs.map(x=>x.t));
+  list.sort((a,b)=>F.sort==='old'?yy(a)-yy(b)||a.it.r-b.it.r:F.sort==='new'?(b.it.y||0)-(a.it.y||0):F.sort==='got'?tt(b)-tt(a):a.it.r-b.it.r||yy(a)-yy(b));
+  const secs=F.sort==='rar';let html='',last=-1,i=0;
+  for(const g of list){if(secs&&g.it.r!==last){last=g.it.r;html+=secHTML(last,list.filter(z=>z.it.r===last).length)}
+    const x=g.xs.length?bestOf(g.xs):null;html+=cardHTML(g.it,x,{miss:!x,count:g.xs.length,i:i++,newf:g.xs.some(z=>z.nw)})}
   $('#grid').innerHTML=html;
-  $('#lkEmpty').hidden=!!S.inv.length||F.all;
+  $('#lkEmpty').hidden=!!S.inv.length||F.mode!=='mine';
 }
+
+/* ---------------- collections (sets) ---------------- */
+const SETS=[
+  {k:'old',  n:'דור המייסדים',        d:'כל הפריטים מלפני 2006',              f:i=>i.y&&i.y<2006, rw:{c:3000,cr:'archive'}},
+  {k:'mit0', n:'מתקני העשור הראשון',  d:'חולצות המתקן 2003–2010',             f:i=>i.s.startsWith('מתקן')&&i.y&&i.y<=2010, rw:{c:2500,cr:'archive'}},
+  {k:'mit1', n:'מתקני 2011–2015',     d:'חולצות המתקן 2011–2015',             f:i=>i.s.startsWith('מתקן')&&i.y>=2011&&i.y<=2015, rw:{c:1500,cr:'mahteret'}},
+  {k:'mit2', n:'מתקני 2016–2020',     d:'חולצות המתקן 2016–2020',             f:i=>i.s.startsWith('מתקן')&&i.y>=2016&&i.y<=2020, rw:{c:900,cr:'mahteret'}},
+  {k:'mit3', n:'מתקני 2021 והלאה',    d:'חולצות המתקן מ־2021',                f:i=>i.s.startsWith('מתקן')&&i.y>=2021, rw:{c:600,cr:'mahsan'}},
+  {k:'halutz',n:'חלוץ לדורותיו',      d:'כל חולצות החלוץ',                    f:i=>i.c==='חולצות'&&i.s==='חלוץ', rw:{c:800,cr:'mahteret'}},
+  {k:'scarf',n:'צעיפי השכבות',        d:'כל הצעיפים',                         f:i=>i.c==='צעיפים', rw:{c:1200,cr:'mahteret'}},
+  {k:'hats', n:'מדף הכובעים',          d:'כל הכובעים',                         f:i=>i.c==='כובעים', rw:{c:900,cr:'mahteret'}},
+  {k:'hood', n:'ארון הסווצ׳רטים',      d:'כל הסווצ׳רטים',                      f:i=>i.c==='סווצ׳רטים', rw:{c:1000,cr:'mahteret'}},
+  {k:'pants',n:'מכנסי השבט',           d:'כל המכנסיים',                        f:i=>i.c==='מכנסיים', rw:{c:700,cr:'mahsan'}},
+  {k:'army', n:'פעולות בנים וצבא',     d:'כל חולצות הפעולות',                  f:i=>i.s.startsWith('פעולות'), rw:{c:800,cr:'mahteret'}},
+  {k:'mht',  n:'המחתרת',               d:'כל חולצות המחתרת',                   f:i=>i.s==='מחתרת', rw:{c:500,cr:'mahteret'}},
+  {k:'etgar',n:'אתגר',                 d:'כל חולצות האתגר',                    f:i=>i.s==='אתגר', rw:{c:400,cr:'mahsan'}},
+  {k:'small',n:'הקטנים',               d:'מגני זיעה, צמידים, חאקי, תיקים ושונות',f:i=>['מגני זיעה','צמידים','חאקי','שונות','תיקים','חם צוואר'].includes(i.c), rw:{c:700,cr:'mahteret'}},
+].map(z=>Object.assign(z,{items:ITEMS.filter(z.f)})).filter(z=>z.items.length);
+function setProg(z){const own=new Set(S.inv.map(x=>x.i));return z.items.filter(i=>own.has(i.id)).length}
+function renderSets(){
+  return `<div class="sets">${SETS.map(z=>{const n=setProg(z),t=z.items.length,done=n>=t,got=S.sets[z.k],own=new Set(S.inv.map(x=>x.i));
+    const show=z.items.slice().sort((a,b)=>own.has(b.id)-own.has(a.id)||a.r-b.r).slice(0,6);
+    return `<div class="set${done?' done':''}${got?' got':''}"><div class="sth6">${show.map(i=>`<i class="${own.has(i.id)?'':'miss'} r${i.r}" style="${thStyle(i)}"></i>`).join('')}</div>
+    <div class="sinfo"><b>${z.n}</b><small>${z.d}</small><div class="pbar"><i style="width:${n/t*100}%"></i></div><span class="snum">${n} / ${t}</span>
+    <div class="srw">פרס: <b>${fmt(z.rw.c)}</b>🪙 + ${CR[z.rw.cr].n}</div>
+    ${got?'<span class="sdone">✓ הפרס נאסף</span>':done?`<button class="btn gold" data-set="${z.k}">🏆 קבלו את הפרס</button>`:''}</div></div>`}).join('')}</div>`}
+function claimSet(k,btn){const z=SETS.find(q=>q.k===k);if(!z||S.sets[k]||setProg(z)<z.items.length)return;S.sets[k]=1;S.coins+=z.rw.c;S.crates[z.rw.cr]=(S.crates[z.rw.cr]||0)+1;save();
+  const [x,y]=centerOf(btn);FX.burst(x,y,120,['#ffd75a','#fff','#d62b2f'],{sp:13,s:5});FX.rain(120,['#ffd75a','#fff']);SND.win(0);wallet('coins');toast(`🏆 השלמתם את "${z.n}"! קיבלתם ${fmt(z.rw.c)} אסימונים ו${CR[z.rw.cr].n}`,'gold');renderGrid()}
+function checkSets(){SETS.forEach(z=>{if(!S.sets[z.k]&&!(S.setsSeen||{})[z.k]&&setProg(z)>=z.items.length){S.setsSeen=S.setsSeen||{};S.setsSeen[z.k]=1;save();toast(`🏆 השלמתם את האוסף "${z.n}"! הפרס מחכה בלוקר ← אוספים`,'gold')}})}
 
 /* ---------------- inspect ---------------- */
 function inspect(it,x,opts={}){
@@ -235,23 +288,25 @@ function inspect(it,x,opts={}){
     <div class="meta"><b>שנה:</b> ${it.y||'לא ידועה'} · <b>סוג:</b> ${esc(it.c)}${it.s?` · <b>תיקייה:</b> ${esc(it.s)}`:''}<br>${x?`<b>מספר סידורי:</b> #${x.u.toUpperCase()} · <b>הגיע מ:</b> ${orig}<br><b>שווי:</b> <span style="color:var(--gold)">${fmt(valOf(x))} אסימונים</span>`:'<b>עוד לא בלוקר שלכם.</b> פתחו ארגזים או עשו טרייד כדי להשיג אותו.'}</div>
     ${x?`<div class="wear"><small>מצב: <b>${wearName(x.w)}</b> (${x.w.toFixed(3)})</small><div class="wb"><i style="right:calc(${x.w*100}% - 2px)"></i></div></div>`:''}
     ${x&&!opts.view?`<div class="acts">${worn?`<button class="btn ghost" data-a="off">הורידו מהדמות</button>`:`<button class="btn gold" data-a="on">👕 לבשו על הדמות</button>`}<button class="btn ghost" data-a="rec">♻️ פירוק ל־${fmt(valOf(x))} אסימונים</button></div>`:''}
-    ${dup?`<div class="dupes">יש לכם עוד ${dup} ${dup>1?'עותקים':'עותק'} של הפריט הזה.</div>`:''}</div></div>`;
+    ${dup&&!opts.view?`<div class="dupes">יש לכם ${dup+1} עותקים · <span class="copies">${S.inv.filter(z=>z.i===it.id).map(z=>`<button data-cp="${z.u}" class="${z.u===x.u?'on':''}">${z.sg?'✍ ':''}${wearName(z.w)}</button>`).join('')}</span></div>`:''}</div></div>`;
   const close=()=>{ov.hidden=true;ov.innerHTML=''};
   ov.onclick=e=>{if(e.target===ov||e.target.closest('.x'))close()};
   const tilt=$('.tilt',ov),card=$('.tcard',ov);let flipped=false;
   tilt.onpointermove=e=>{const b=card.getBoundingClientRect(),px=(e.clientX-b.left)/b.width,py=(e.clientY-b.top)/b.height;
-    card.style.transform=`${flipped?'rotateY(180deg) ':''}rotateY(${(px-.5)*(flipped?-22:22)}deg) rotateX(${(.5-py)*18}deg)`;
+    card.style.transform=`perspective(1000px) rotateY(${(px-.5)*22}deg) rotateX(${(.5-py)*18}deg)`;
     $$('.tface',ov).forEach(f=>{f.style.setProperty('--gx',px*100+'%');f.style.setProperty('--gy',py*100+'%');f.style.setProperty('--ga',(px*180)+'deg')})};
-  tilt.onpointerleave=()=>{card.style.transform=flipped?'rotateY(180deg)':''};
+  tilt.onpointerleave=()=>{card.style.transform=''};
   $$('.views button',ov).forEach(b=>b.onclick=e=>{e.stopPropagation();const j=+b.dataset.j;$$('.views button',ov).forEach(z=>z.classList.toggle('on',z===b));
-    if(it.im===2){flipped=j===1;card.style.transform=flipped?'rotateY(180deg)':''}else{$('.tface img',ov).src=imgSrc(it,j)}SND.click()});
+    const swap=()=>{if(it.im===2){flipped=j===1;card.classList.toggle('back',flipped)}else $('.tface img',ov).src=imgSrc(it,j)};
+    card.animate([{transform:'scaleX(1)'},{transform:'scaleX(0)'}],{duration:170,easing:'ease-in'}).onfinish=()=>{swap();card.animate([{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:220,easing:'cubic-bezier(.3,1.4,.5,1)'})};SND.click()});
   $$('[data-a]',ov).forEach(b=>b.onclick=()=>{const a=b.dataset.a;
     if(a==='on'){equip(x.u);close();go('avatar')}
     else if(a==='off'){unequip(it.sl);close()}
     else if(a==='rec'){if(!b.dataset.ok){b.dataset.ok=1;b.textContent=`בטוח? לחצו שוב (+${fmt(valOf(x))})`;b.classList.remove('ghost');return}
       const v=valOf(x),[cx,cy]=centerOf(b);S.inv=S.inv.filter(z=>z.u!==x.u);for(const k in S.eq)if(S.eq[k]===x.u)delete S.eq[k];S.coins+=v;save();
       FX.burst(cx,cy,30,['#ffd75a','#f6be3c','#fff3c0'],{t:'c',s:3,sp:8});SND.coin();wallet('coins');toast(`פירקתם את "${esc(it.n)}" וקיבלתם ${fmt(v)} אסימונים`,'gold');close();renderGrid();renderAvatar()}});
-  if(x&&x.nw){delete x.nw;save()}
+  $$('[data-cp]',ov).forEach(b=>b.onclick=()=>{SND.click();inspect(it,inst(b.dataset.cp),opts)});
+  if(x){let ch=false;S.inv.forEach(z=>{if(z.i===it.id&&z.nw){delete z.nw;ch=true}});if(ch)save()}
 }
 
 /* ---------------- picker (slot) ---------------- */
@@ -268,6 +323,30 @@ function openPicker(k){
     if(e.target===ov||e.target.closest('[data-x]'))close()};
 }
 
+
+/* ---------------- crate art: isometric SVG (no CSS 3D, so it looks the same on iPhone) ---------------- */
+const CRA={mahsan:{t:'#cf9a5e',l:'#a46c37',r:'#76491f',pl:'#5a3517',band:'#d62b2f',bolt:'#2b2222',in:'#1c0e05'},
+  mahteret:{t:'#3d2a2f',l:'#26181b',r:'#170e10',pl:'#4e333a',band:'#d62b2f',bolt:'#f6be3c',in:'#000'},
+  archive:{t:'#ffe48f',l:'#e3ab2d',r:'#a9710b',pl:'#8a5a06',band:'#170a0b',bolt:'#fff6d0',in:'#2a1800'}};
+function crateSVG(k,part){const c=CRA[k],S_='stroke="#0d0708" stroke-width="3" stroke-linejoin="round"';
+  if(part==='lid')return `<svg viewBox="0 0 200 210" class="cr-lid"><g ${S_}>
+    <polygon points="20,72 100,112 100,124 20,84" fill="${c.l}"/><polygon points="100,112 180,72 180,84 100,124" fill="${c.r}"/>
+    <polygon points="20,72 100,32 180,72 100,112" fill="${c.t}"/></g>
+    <g stroke="${c.pl}" stroke-width="2" opacity=".7"><line x1="47" y1="58" x2="127" y2="98"/><line x1="73" y1="45" x2="153" y2="85"/></g>
+    <polygon points="54,55 66,49 146,89 134,95" fill="${c.band}" stroke="#0d0708" stroke-width="2"/>
+    <g fill="${c.bolt}" stroke="#0d0708" stroke-width="1.5"><circle cx="30" cy="77" r="3"/><circle cx="170" cy="77" r="3"/><circle cx="100" cy="117" r="3"/><circle cx="100" cy="38" r="3"/></g>
+    <polyline class="cr-seam" points="20,84 100,124 180,84" fill="none" stroke="#fff3b0" stroke-width="4" stroke-linecap="round"/></svg>`;
+  return `<svg viewBox="0 0 200 210" class="cr-body"><defs><radialGradient id="crin-${k}"><stop offset="0" stop-color="#ffe9a8"/><stop offset=".35" stop-color="#ffb02e" stop-opacity=".8"/><stop offset="1" stop-color="${c.in}"/></radialGradient></defs>
+    <polygon class="cr-in" points="20,84 100,44 180,84 100,124" fill="url(#crin-${k})"/>
+    <g ${S_}><polygon points="20,84 100,124 100,200 20,160" fill="${c.l}"/><polygon points="100,124 180,84 180,160 100,200" fill="${c.r}"/></g>
+    <g stroke="${c.pl}" stroke-width="2" opacity=".75"><line x1="20" y1="110" x2="100" y2="150"/><line x1="20" y1="136" x2="100" y2="176"/><line x1="100" y1="150" x2="180" y2="110"/><line x1="100" y1="176" x2="180" y2="136"/></g>
+    <image href="img/logo.webp" x="22" y="4" width="56" height="46" transform="matrix(.8,.4,0,.8,20,84)" opacity=".95"/>
+    <polygon points="20,126 100,166 100,178 20,138" fill="${c.band}" stroke="#0d0708" stroke-width="2"/><polygon points="100,166 180,126 180,138 100,178" fill="${c.band}" stroke="#0d0708" stroke-width="2" style="filter:brightness(.75)"/>
+    <g fill="#1a1416" stroke="#0d0708" stroke-width="2"><polygon points="20,84 28,88 28,164 20,160"/><polygon points="93,121 100,124 107,121 107,197 100,200 93,197"/><polygon points="172,88 180,84 180,160 172,164"/></g>
+    <g fill="${c.bolt}"><circle cx="24" cy="96" r="2.2"/><circle cx="24" cy="150" r="2.2"/><circle cx="176" cy="96" r="2.2"/><circle cx="176" cy="150" r="2.2"/><circle cx="100" cy="134" r="2.2"/><circle cx="100" cy="188" r="2.2"/></g>
+    <polygon points="100,124 180,84 180,160 100,200" fill="#000" opacity=".12"/></svg>`}
+const crateArt=k=>`<div class="cr cr-${k}"><i class="cr-shadow"></i>${crateSVG(k,'body')}${crateSVG(k,'lid')}</div>`;
+
 /* ---------------- crates ---------------- */
 function rollItem(cr){const w=cr.w,tot=w.reduce((a,b)=>a+b,0);let r=rnd()*tot,t=0;for(;t<w.length;t++){if((r-=w[t])<0)break}t=Math.min(t,5);
   let pool=BYR[t];while(!pool.length&&t<5)pool=BYR[++t];return pick(pool)}
@@ -279,11 +358,12 @@ function renderCrates(){
   else{const t=new Date();t.setHours(24,0,0,0);const m=Math.ceil((t-Date.now())/60000);d.innerHTML=`<div class="dbox" style="opacity:.75"><span style="font-size:34px">⏳</span><div><b>הארגז היומי נלקח</b><p>הארגז הבא עוד ${Math.floor(m/60)} שעות ו־${m%60} דקות.</p></div></div>`}
   $('#crateList').innerHTML=CRATES.map(c=>{const tot=c.w.reduce((a,b)=>a+b,0),own=S.crates[c.k]||0;
     return `<div class="crt" style="--cc:${c.cc}">${own?`<span class="own">יש לכם ${own}</span>`:''}
-    <div class="mini3d"><div class="cube" style="--s:86px;--wood:${c.wood};--trim:${c.trim};--band:${c.band};--logo:url(img/logo.webp)"><i class="f1"></i><i class="f2"></i><i class="f3"></i><i class="f4"></i><i class="f5"></i><i class="lid"></i></div></div>
+    <div class="crimg">${crateArt(c.k)}</div>
     <h3>${c.n}</h3><p>${c.d}</p>
     <div class="odds">${c.w.map((w,r)=>w?`<i class="r${r}" style="flex:${w}"></i>`:'').join('')}</div>
     <div class="oddt">${c.w.map((w,r)=>w?`<span class="r${r}">${RAR[r].n} ${(w/tot*100).toFixed(w/tot<.02?1:0)}%</span>`:'').join('')}</div>
-    <div class="acts">${own?`<button class="btn gold" data-open="${c.k}">פתחו ארגז</button>`:''}<button class="btn${own?' ghost':''}" data-buy="${c.k}" ${S.coins<c.price?'disabled':''}>קנו ופתחו · <span class="price">${fmt(c.price)}</span>🪙</button></div></div>`}).join('');
+    <div class="acts">${own?`<button class="btn gold" data-open="${c.k}">פתחו ארגז</button>`:''}<button class="btn${own?' ghost':''}" data-buy="${c.k}" ${S.coins<c.price?'disabled':''}>קנו ופתחו · <span class="price">${fmt(c.price)}</span>🪙</button></div>
+    ${own>=5||S.coins>=c.price*5?`<button class="btn five" data-five="${c.k}">✋ פתחו 5 בבת אחת${own>=5?'':` · <span class="price">${fmt(c.price*5)}</span>🪙`}</button>`:''}</div>`}).join('');
   const db=$('#dailyBtn');if(db)db.onclick=()=>{S.daily=today();S.crates.mahsan=(S.crates.mahsan||0)+1;save();const [x,y]=centerOf(db);FX.burst(x,y,50,['#ffd75a','#d62b2f','#fff'],{up:1,sp:10});SND.coin();wallet('crates');toast('קיבלתם ארגז מחסן! 📦','gold');renderCrates()};
 }
 let opening=null;
@@ -294,19 +374,20 @@ function openCrate(k,buy){
   const it=rollItem(c),x=newInst(it,k),first=!S.inv.some(z=>z.i===it.id);
   S.inv.push(x);S.stats.opened++;save();wallet();
   const ov=$('#ovOpen');ov.hidden=false;ov.classList.remove('lit','shake');ov.style.setProperty('--rc',RAR[it.r].c);
-  const crate=$('#opCrate'),cube=$('.cube',crate);crate.hidden=false;crate.className='op-crate';crate.style.animation='none';void crate.offsetWidth;crate.style.animation='';
-  cube.style.cssText=`--wood:${c.wood};--trim:${c.trim};--band:${c.band};--logo:url(img/logo.webp)`;
-  $('#reelWrap').hidden=true;$('#win').hidden=true;$('#opSkip').hidden=false;
+  const crate=prepCrate(k);
+  $('#reelWrap').hidden=true;$('#win').hidden=true;$('#multi').hidden=true;$('#opSkip').hidden=false;
   const st={done:false,skip:false};opening=st;
   /* phase 1: the crate drops in, charges up (glow + growing shake), then bursts open */
   tone(180,.25,'sine',.25,-90,.45);noise(.18,.15,300,.5);
   st.t0=setTimeout(()=>{crate.classList.add('charge');SND.rise()},650);
-  st.t1=setTimeout(()=>{crate.classList.remove('charge');crate.classList.add('pop');
-    const b=document.createElement('i');b.className='burst';crate.append(b);SND.boom();
-    const fl=$('#opFlash');fl.classList.remove('go');void fl.offsetWidth;fl.classList.add('go');
-    const [cx,cy]=centerOf(crate);FX.burst(cx,cy,70,['#c98a4a','#6b3f17','#ffd75a','#fff'],{sp:13,s:5});
-    setTimeout(()=>reel(it,x,first,st),380)},1900);
+  st.t1=setTimeout(()=>{popCrate(crate);setTimeout(()=>reel(it,x,first,st),380)},1900);
 }
+function prepCrate(k){const crate=$('#opCrate');crate.hidden=false;crate.className='op-crate';crate.innerHTML='<i class="op-glow"></i>'+crateArt(k);
+  crate.style.animation='none';void crate.offsetWidth;crate.style.animation='';return crate}
+function popCrate(crate){crate.classList.remove('charge');crate.classList.add('pop');
+  const b=document.createElement('i');b.className='burst';crate.append(b);SND.boom();
+  const fl=$('#opFlash');fl.classList.remove('go');void fl.offsetWidth;fl.classList.add('go');
+  const [cx,cy]=centerOf(crate);FX.burst(cx,cy,70,['#c98a4a','#6b3f17','#ffd75a','#fff'],{sp:13,s:5})}
 function reel(it,x,first,st){
   if(st.done)return;$('#opCrate').hidden=true;
   const wrap=$('#reelWrap'),R=$('#reel');wrap.hidden=false;
@@ -350,8 +431,41 @@ function reveal(it,x,first,st,hit){
     if(a==='wear'){equip(x.u);go('avatar')}else if(a==='again'){openCrate(x.o,!(S.crates[x.o]>0))}else go('locker')};
   renderCrates();renderGrid();
 }
-function closeOpen(){const ov=$('#ovOpen');ov.hidden=true;ov.classList.remove('lit','shake');$('#win').innerHTML='';if(opening){opening.done=true;clearTimeout(opening.t0);clearTimeout(opening.t1);opening=null}renderCrates();renderGrid()}
+
+function openFive(k){
+  const c=CR[k];if(opening)return;const own=S.crates[k]||0;
+  if(own>=5)S.crates[k]-=5;else{if(S.coins<c.price*5){SND.err();toast('אין מספיק אסימונים לחמישה ארגזים');return}S.coins-=c.price*5}
+  const got=[];for(let i=0;i<5;i++){const it=rollItem(c),x=newInst(it,k);got.push({it,x,first:!S.inv.some(z=>z.i===it.id)&&!got.some(g=>g.it.id===it.id)});S.inv.push(x)}
+  S.stats.opened+=5;save();wallet();
+  got.sort((a,b)=>b.it.r-a.it.r);const best=got[got.length-1].it.r;
+  const ov=$('#ovOpen');ov.hidden=false;ov.classList.remove('lit','shake');ov.style.setProperty('--rc',RAR[best].c);
+  $('#reelWrap').hidden=true;$('#win').hidden=true;$('#opSkip').hidden=false;const M=$('#multi');M.hidden=true;
+  const crate=prepCrate(k),st={done:false,skip:false,multi:1};opening=st;
+  tone(180,.25,'sine',.25,-90,.45);noise(.18,.15,300,.5);
+  st.t0=setTimeout(()=>{crate.classList.add('charge');SND.rise()},650);
+  st.t1=setTimeout(()=>{popCrate(crate);setTimeout(()=>deal(got,st,k),380)},1900);
+  st.skipDeal=()=>deal(got,st,k);
+}
+function deal(got,st,k){
+  if(st.dealt)return;st.dealt=1;$('#opCrate').hidden=true;$('#opSkip').hidden=true;
+  const M=$('#multi');M.hidden=false;
+  M.innerHTML=`<div class="mrow">${got.map((g,i)=>`<div class="mc r${g.it.r}" style="--d:${i*90}ms"><div class="mci"><div class="mcb"><img src="img/logo.webp" alt=""></div><div class="mcf"><img src="${imgSrc(g.it)}" alt=""><b>${esc(g.it.n)}</b><small>${RAR[g.it.r].n} · ${yrTxt(g.it)}</small>${g.first?'<em>חדש!</em>':''}</div></div></div>`).join('')}</div>
+    <p class="mhint">לחצו על קלף כדי להפוך אותו</p><div class="acts" hidden><button class="btn gold" data-m="lk">ללוקר</button>${(S.crates[k]||0)>=5||S.coins>=CR[k].price*5?'<button class="btn" data-m="again">✋ עוד 5</button>':''}<button class="btn ghost" data-m="x">סגירה</button></div>`;
+  [0,1,2,3,4].forEach(i=>setTimeout(()=>tone(500+i*60,.08,'triangle',.1),i*90));
+  const cards=$$('.mc',M);let n=0;
+  const flip=i=>{const el=cards[i];if(!el||el.classList.contains('open'))return;el.classList.add('open');n++;const g=got[i],r=g.it.r;
+    setTimeout(()=>{const [x,y]=centerOf(el);FX.burst(x,y,r<2?90:r<3?55:25,[RAR[r].c,'#fff','#ffd75a'],{sp:r<2?12:8,s:4});SND.win(r);
+      if(r<=1){const ov=$('#ovOpen');ov.classList.add('lit');ov.classList.remove('shake');void ov.offsetWidth;ov.classList.add('shake');FX.rain(r===0?200:120,[RAR[r].c,'#fff','#ffd75a'])}},260);
+    if(n===cards.length)setTimeout(()=>{$('.mhint',M).hidden=true;$('.acts',M).hidden=false;opening=null;st.done=true;renderCrates();renderGrid()},900)};
+  M.onclick=e=>{const c=e.target.closest('.mc');if(c){flip(cards.indexOf(c));return}const b=e.target.closest('[data-m]');if(!b)return;const a=b.dataset.m;closeOpen();
+    if(a==='lk')go('locker');else if(a==='again')openFive(k)};
+  /* auto-flip in order, the rarest last with a longer pause */
+  st.timers=[];let t=900;cards.forEach((_,i)=>{t+=i===cards.length-1&&got[i].it.r<=2?1300:700;st.timers.push(setTimeout(()=>flip(i),t))});
+}
+
+function closeOpen(){const ov=$('#ovOpen');ov.hidden=true;ov.classList.remove('lit','shake');$('#win').innerHTML='';if(opening){opening.done=true;clearTimeout(opening.t0);clearTimeout(opening.t1);(opening.timers||[]).forEach(clearTimeout);opening=null}$('#multi').hidden=true;$('#multi').innerHTML='';renderCrates();renderGrid();checkSets()}
 $('#opSkip').onclick=()=>{if(!opening)return;opening.skip=true;const st=opening;
+  if(st.multi){clearTimeout(st.t0);clearTimeout(st.t1);st.skipDeal&&st.skipDeal();return}
   if(!$('#opCrate').hidden){clearTimeout(st.t0);clearTimeout(st.t1);$('#opCrate').hidden=true;const x=S.inv[S.inv.length-1];reel(BYID[x.i],x,!S.inv.slice(0,-1).some(z=>z.i===x.i),st)}};
 
 /* ---------------- trade ---------------- */
@@ -408,7 +522,7 @@ function trExec(){
   const gu=new Set(give.map(z=>z.u));S.inv=S.inv.filter(z=>!gu.has(z.u));for(const k in S.eq)if(gu.has(S.eq[k]))delete S.eq[k];
   const now=Date.now();get.forEach(z=>{const u=S.inv.some(q=>q.u===z.u)?uid():z.u;S.inv.push({u,i:z.i,w:z.w,sg:z.sg?1:0,t:now,o:'trade:'+T.them.name,nw:1})});
   S.hist.unshift({d:now,w:T.them.name,g:give.map(z=>z.i),r:get.map(z=>z.i)});S.hist=S.hist.slice(0,30);S.stats.traded++;save();
-  tradeFx(give,get);
+  tradeFx(give,get);setTimeout(checkSets,4000);
   T.me={offer:[],lock:false,acc:false};T.them.offer=[];T.them.lock=T.them.acc=false;T.going=false;
   setTimeout(()=>{if(T){trSend('st',{offer:[],lock:false,acc:false,inv:S.inv.map(pub)});trRender()}},300);
   renderGrid();renderAvatar();wallet();
@@ -468,13 +582,19 @@ $('#grid').onclick=e=>{const c=e.target.closest('.card');if(!c)return;SND.click(
 $('#cats').onclick=e=>{const b=e.target.closest('button');if(!b)return;F.cat=b.dataset.c;SND.click();renderGrid()};
 $('#q').oninput=e=>{F.q=e.target.value;renderGrid()};
 $('#sort').onchange=e=>{F.sort=e.target.value;renderGrid()};
-$('#allBtn').onclick=e=>{F.all=!F.all;e.currentTarget.setAttribute('aria-pressed',F.all);SND.click();renderGrid()};
+$('#modeSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;F.mode=b.dataset.m;SND.click();renderGrid()};
+$('#grid').addEventListener('click',e=>{const b=e.target.closest('[data-set]');if(b){e.stopPropagation();claimSet(b.dataset.set,b)}},true);
+/* hover tilt on cards (mouse only) */
+if(matchMedia('(hover:hover) and (pointer:fine)').matches){let cur=null;
+  $('#grid').addEventListener('pointermove',e=>{const c=e.target.closest('.card');if(cur&&cur!==c){cur.style.transform='';cur=null}if(!c)return;cur=c;const b=c.getBoundingClientRect(),px=(e.clientX-b.left)/b.width-.5,py=(e.clientY-b.top)/b.height-.5;
+    c.style.transform=`perspective(600px) rotateY(${px*14}deg) rotateX(${-py*14}deg) translateY(-4px) scale(1.03)`;c.style.setProperty('--mx',(px+.5)*100+'%');c.style.setProperty('--my',(py+.5)*100+'%')});
+  $('#grid').addEventListener('pointerleave',()=>{if(cur){cur.style.transform='';cur=null}})}
 $('#rarLegend').innerHTML=RAR.map((r,i)=>`<span class="r${i}"><i></i>${r.n} · ${r.yrs}</span>`).join('');
 $('#slotList').onclick=e=>{const b=e.target.closest('.slot');if(b){SND.click();openPicker(b.dataset.slot)}};
 $('#avRand').onclick=()=>{let any=false;SLOTS.forEach(s=>{const l=S.inv.filter(x=>BYID[x.i].sl===s.k);if(l.length){S.eq[s.k]=pick(l).u;any=true}});if(!any){toast('אין עדיין בגדים בלוקר. פתחו ארגז!');return}save();SND.equip();renderAvatar('shirt');const [x,y]=centerOf($('#fig'));FX.burst(x,y,60,['#ffd75a','#d62b2f','#fff'],{t:'s',sp:9,g:.04})};
 $('#avClear').onclick=()=>{S.eq={};save();SND.click();renderAvatar()};
 $('#avRename').onclick=()=>{const n=prompt('השם של הדמות שלכם:',S.name||'');if(n!=null){S.name=n.trim().slice(0,18);save();renderAvatar()}};
-$('#crateList').onclick=e=>{const o=e.target.closest('[data-open]'),b=e.target.closest('[data-buy]');if(o)openCrate(o.dataset.open,false);else if(b)openCrate(b.dataset.buy,true)};
+$('#crateList').onclick=e=>{const o=e.target.closest('[data-open]'),b=e.target.closest('[data-buy]'),f=e.target.closest('[data-five]');if(f)openFive(f.dataset.five);else if(o)openCrate(o.dataset.open,false);else if(b)openCrate(b.dataset.buy,true)};
 $('#ovOpen').addEventListener('click',e=>{if(e.target.id==='ovOpen'&&$('#win').hidden===false)closeOpen()});
 addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#ovOpen').hidden){if(opening)$('#opSkip').click();else closeOpen()}else{['#ovInspect','#ovPick'].forEach(s=>{const o=$(s);if(!o.hidden){o.hidden=true;o.innerHTML=''}})}}});
 /* trade events */

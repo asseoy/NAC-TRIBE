@@ -38,7 +38,7 @@
   <section class="view on" id="v-avatar">
     <div class="av-wrap">
       <div class="stage" id="stage">
-        <i class="st-rays"></i><i class="st-spot"></i><i class="st-floor"></i>
+        <i class="st-rays"></i><svg class="st-tower" viewBox="0 0 300 800" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M30 800L96 170M270 800L204 170M96 170L204 170M37 700H263M50 560H250M62 440H238M74 320H226M86 230H214M37 700L250 560M263 700L50 560M50 560L238 440M250 560L62 440M62 440L226 320M238 440L74 320M74 320L214 230M226 320L86 230"/><path d="M96 170L150 40L204 170M150 40V0"/><path d="M150 4L200 20L150 36" fill="currentColor"/></g></svg><i class="st-spot"></i><i class="st-floor"></i><div class="st-sparks" aria-hidden="true"><i style="--x:18%;--d:0s;--t:5.2s"></i><i style="--x:30%;--d:1.3s;--t:6.1s"></i><i style="--x:42%;--d:2.7s;--t:4.8s"></i><i style="--x:58%;--d:0.6s;--t:5.6s"></i><i style="--x:70%;--d:2.1s;--t:6.4s"></i><i style="--x:82%;--d:3.4s;--t:5s"></i><i style="--x:24%;--d:4.1s;--t:6.8s"></i><i style="--x:64%;--d:3.0s;--t:4.6s"></i><i style="--x:50%;--d:1.9s;--t:7s"></i><i style="--x:36%;--d:3.8s;--t:5.4s"></i><i style="--x:76%;--d:0.9s;--t:6s"></i><i style="--x:12%;--d:2.4s;--t:5.8s"></i></div>
         <div class="fig" id="fig"></div>
         <div class="st-name"><b id="avName">צופה של הנשיא</b><span id="avScore"></span></div>
       </div>
@@ -67,9 +67,10 @@
           <option value="new">מיון: הכי חדש</option>
           <option value="got">מיון: אחרון שהתקבל</option>
         </select>
-        <button class="btn toggle" id="allBtn" aria-pressed="false">📖 כל הקטלוג</button>
+        
       </div>
     </div>
+    <div class="seg" id="modeSeg"><button data-m="mine" class="on">🗄️ הפריטים שלי</button><button data-m="all">📖 כל הקטלוג</button><button data-m="sets">🏆 אוספים<em hidden></em></button></div>
     <div class="chips" id="cats"></div>
     <div class="rar-legend" id="rarLegend"></div>
     <div class="grid" id="grid"></div>
@@ -130,7 +131,8 @@
 <!-- overlays -->
 <div class="ov" id="ovOpen" hidden>
   <div class="op-bg"><i class="op-rays"></i></div>
-  <div class="op-crate" id="opCrate"><i class="op-glow"></i><div class="cube"><i class="f1"></i><i class="f2"></i><i class="f3"></i><i class="f4"></i><i class="f5"></i><i class="lid"></i></div></div>
+  <div class="op-crate" id="opCrate"></div>
+  <div class="multi" id="multi" hidden></div>
   <div class="reel-wrap" id="reelWrap" hidden><div class="reel" id="reel"></div><i class="reel-mark"></i><i class="reel-fade l"></i><i class="reel-fade r"></i></div>
   <div class="win" id="win" hidden></div>
   <i class="op-flash" id="opFlash"></i>
