@@ -478,3 +478,6 @@ h2{font-family:var(--disp);font-weight:700;font-size:clamp(48px,7vw,84px);line-h
 .ms.bonus.done{border-color:var(--yellow)}
 .ms.bonus .ms-r .cr{width:84px;height:92px}
 @media (max-width:640px){.ms{gap:10px;padding:10px}.ms-n{width:44px;height:44px;font-size:34px}.ms-b b{font-size:28px}.ms-r{width:78px}.ms-c{font-size:34px}.ms-top b{font-size:34px}.ms-top span{font-size:18px}.tabs button{font-size:19px;padding:8px 2px 3px}}
+
+.crt.is-new{border-color:var(--flag)}
+.newtag{position:absolute;top:0;right:0;background:var(--flag);color:#fff;font-family:var(--disp);font-size:22px;padding:2px 12px 0}

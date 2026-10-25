@@ -40,6 +40,7 @@ const CRATES=[
   {k:'archive', n:'ארגז הארכיון', d:'רק פריטים מ־2010 ומטה: אפי ומעלה בלבד.',price:800,
    w:[6,24,70,0,0,0], wood:'linear-gradient(135deg,#ffe28a,#b8790a)',trim:'#5a3a00',band:'#140a0b',cc:'#ffcc33'},
 ];
+CRATES.sort((a,b)=>(b.bag|0)-(a.bag|0));
 const CR=Object.fromEntries(CRATES.map(c=>[c.k,c]));
 const RANKS=[[0,"חניך"],[400,"חניך ותיק"],[1200,"שכב״גיסט"],[2500,"מדריך"],[4500,"מרכז"],[7500,"מחתרת"],[11000,"פנאט על"]];
 const rankOf=x=>{let r=RANKS[0][1];for(const [t,n] of RANKS)if(x>=t)r=n;return r};
@@ -374,7 +375,7 @@ function renderCrates(){
   if(S.daily!==today())d.innerHTML=`<div class="dbox"><span>יומי</span><div><b>הארגז היומי מחכה</b><p>ארגז מחסן חינם, פעם ביום.</p></div><button class="btn gold" id="dailyBtn">קבלו ארגז</button></div>`;
   else{const t=new Date();t.setHours(24,0,0,0);const m=Math.ceil((t-Date.now())/60000);d.innerHTML=`<div class="dbox" style="opacity:.75"><span>מחר</span><div><b>הארגז היומי נלקח</b><p>הארגז הבא עוד ${Math.floor(m/60)} שעות ו־${m%60} דקות.</p></div></div>`}
   $('#crateList').innerHTML=CRATES.map(c=>{const tot=c.w.reduce((a,b)=>a+b,0),own=S.crates[c.k]||0;
-    return `<div class="crt" style="--cc:${c.cc}">${own?`<span class="own">יש לכם ${own}</span>`:''}
+    return `<div class="crt${c.bag?' is-new':''}" style="--cc:${c.cc}">${c.bag?'<span class="newtag">חדש!</span>':''}${own?`<span class="own">יש לכם ${own}</span>`:''}
     <div class="crimg">${crateArt(c.k)}</div>
     <h3>${c.n}</h3><p>${c.d}</p>
     <div class="odds">${c.w.map((w,r)=>w?`<i class="r${r}" style="flex:${w}"></i>`:'').join('')}</div>
