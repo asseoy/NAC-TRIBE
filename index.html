@@ -1779,7 +1779,26 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
   .codes p{margin:0;font-size:1rem;color:#aaa;max-width:none}
   .codes p.ok{color:var(--yellow)}.codes p.bad{color:#ff6b6b}
   .codes.shake form{animation:cdShake .35s}
-  .code-end{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:1rem}
+  .code-prank{position:fixed;inset:0;z-index:310;background:#000;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;cursor:pointer;animation:cpBg .9s steps(1) 1}
+.code-prank.out{opacity:0;transition:opacity .3s}
+.code-prank .cp-band{height:22px;flex-shrink:0;animation:cpBand 1.2s linear infinite}
+.code-prank .cp-band.b{animation-direction:reverse}
+.cp-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:1rem;text-align:center;cursor:default;position:relative;z-index:2}
+.cp-stage img{width:min(46vh,70vw);height:auto;transform-origin:50% 85%;animation:cpRise .7s cubic-bezier(.2,1.6,.4,1) both,cpLaugh .32s ease-in-out .7s 9 alternate}
+.cp-t{font-family:var(--display);font-size:clamp(3rem,12vw,7.5rem);line-height:.9;color:var(--yellow);text-shadow:6px 6px 0 var(--flag);max-width:14ch;animation:cpSlam .45s cubic-bezier(.3,1.8,.5,1) .55s both}
+.cp-stage button{font-family:var(--display);font-size:1.6rem;background:var(--flag);color:#fff;border:2px solid #2a2a2a;padding:.3rem 1.8rem 0;cursor:pointer;animation:cpFade .3s 1.6s both}
+.cp-stage button:hover{background:var(--yellow);color:#000}
+.cp-ha{position:absolute;left:var(--x);top:var(--y);z-index:1;font-family:var(--display);font-style:normal;font-size:calc(2.2rem*var(--s));color:var(--flag);opacity:0;transform:rotate(var(--r));animation:cpHa 1.4s var(--d) ease-out infinite;pointer-events:none}
+.code-prank.shk .cp-stage{animation:cpShake .09s linear 9}
+@keyframes cpRise{from{transform:translateY(70vh) scale(.6)}to{transform:none}}
+@keyframes cpLaugh{from{transform:rotate(-5deg) translateY(0)}to{transform:rotate(5deg) translateY(-14px)}}
+@keyframes cpSlam{from{transform:scale(3) rotate(-8deg);opacity:0}to{transform:rotate(-3deg);opacity:1}}
+@keyframes cpFade{from{opacity:0}to{opacity:1}}
+@keyframes cpHa{0%{opacity:0;transform:rotate(var(--r)) scale(.4)}20%{opacity:1;transform:rotate(var(--r)) scale(1)}100%{opacity:0;transform:rotate(var(--r)) translateY(-60px) scale(1.1)}}
+@keyframes cpBand{to{background-position:200px 0}}
+@keyframes cpBg{0%{background:var(--flag)}15%{background:#000}30%{background:var(--flag)}45%{background:#000}}
+@keyframes cpShake{0%{transform:translate(6px,-4px)}50%{transform:translate(-6px,4px)}100%{transform:translate(0,0)}}
+.code-end{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:1rem}
   .code-end>div{background:#000;border:3px solid var(--yellow);box-shadow:10px 10px 0 var(--flag);padding:2rem 2.4rem 1.6rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1.2rem;animation:cdIn .3s ease-out}
   .code-end b{font-family:var(--display);font-size:clamp(3rem,10vw,5.5rem);line-height:.9;color:var(--yellow)}
   .code-end button{font-family:var(--display);font-size:1.6rem;background:var(--flag);color:#fff;border:0;padding:.3rem 1.6rem 0;cursor:pointer}
@@ -9374,8 +9393,27 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
 (()=>{
   const CODES=[
     // { h:'<sha256 of the code>', msg:'...', give:{ xp:0, lockerCoins:0, crates:{mahsan:0}, buddyCoins:0, buddyWeapons:[], buddySkins:[] } }
-    { h:'592fbed6f4ef4a643b0c5dec00a9a32f69a4027aedb972265cd9237b7b31d564', msg:'קוד אדמין: כל הכסף וכל הבגדים בלוקר, והכל פתוח בפוצצו את השיכוני!', give:{ lockerCoins:999999, lockerAll:1, buddyCoins:999999, buddyAll:1 }, admin:1 }
+    { h:'d07164a628596323ebcf8796dee0e5c164620e0922b52483bc805f54416ee73c', msg:'קוד אדמין: כל הכסף וכל הבגדים בלוקר, והכל פתוח בפוצצו את השיכוני!', give:{ lockerCoins:999999, lockerAll:1, buddyCoins:999999, buddyAll:1 }, admin:1 }
   ];
+  // prank codes: no reward, just the devil laughing at you (every time)
+  const PRANK=[{ h:'592fbed6f4ef4a643b0c5dec00a9a32f69a4027aedb972265cd9237b7b31d564', msg:'אכלתם תלקרדה יא אפסים' }];
+  function prank(m){
+    document.querySelector('.code-prank')?.remove();
+    const o=document.createElement('div');o.className='code-prank';
+    o.innerHTML='<div class="cp-band scarf"></div><div class="cp-stage"><img src="assets/devil.webp" alt="" width="452" height="462"><b class="cp-t"></b><button type="button">סגור</button></div><div class="cp-band scarf b"></div>';
+    o.querySelector('.cp-t').textContent=m;
+    // "חה" scattered around the devil
+    for(let i=0;i<14;i++){const h=document.createElement('i');h.className='cp-ha';h.textContent=i%3?'חה':'חה חה';
+      h.style.cssText=`--x:${(Math.random()*90+5).toFixed(1)}%;--y:${(Math.random()*80+8).toFixed(1)}%;--r:${(Math.random()*50-25).toFixed(0)}deg;--d:${(.5+i*.12).toFixed(2)}s;--s:${(.8+Math.random()*1.2).toFixed(2)}`;o.appendChild(h)}
+    const close=()=>{o.classList.add('out');setTimeout(()=>o.remove(),350)};
+    o.querySelector('button').onclick=close;o.addEventListener('click',e=>{if(e.target===o)close()});
+    document.body.appendChild(o);o.classList.add('shk');setTimeout(()=>o.classList.remove('shk'),1500);
+    // a devilish laugh, only if the site's sound is on
+    try{if(typeof soundOn!=='undefined'&&soundOn){const A=new (window.AudioContext||window.webkitAudioContext)();
+      [0,.22,.44,.66,.88].forEach((t,i)=>{const g=A.createGain(),v=A.createOscillator();v.type='sawtooth';v.frequency.setValueAtTime(260-i*18,A.currentTime+.9+t);v.frequency.exponentialRampToValueAtTime(140-i*10,A.currentTime+.9+t+.17);
+        g.gain.setValueAtTime(.0001,A.currentTime+.9+t);g.gain.exponentialRampToValueAtTime(.18,A.currentTime+.9+t+.02);g.gain.exponentialRampToValueAtTime(.0001,A.currentTime+.9+t+.19);v.connect(g).connect(A.destination);v.start(A.currentTime+.9+t);v.stop(A.currentTime+.9+t+.2)});
+      setTimeout(()=>A.close(),3000)}}catch(e){}
+  }
   // codes that were stopped: whoever used them gets this message once (the locker takes the clothes back)
   const ENDED=[{ h:'8f0f97e140e126a4404a09eb1e14a53b7c742701c4290a5d1702d14daec22ee8', msg:'דודו צוק נגמר לך' }];
   function endedNotice(m){
@@ -9409,6 +9447,7 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
     let h='';try{h=await sha(c)}catch(er){say('הדפדפן לא תומך בקודים, נסו דפדפן אחר','bad');return}
     const k=CODES.find(x=>x.h===h),used=store.get('codes',[]);
     const end=ENDED.find(x=>x.h===h);if(end){say(end.msg,'bad');return}
+    const pr=PRANK.find(x=>x.h===h);if(pr){say(pr.msg,'bad');inp.value='';prank(pr.msg);return}
     if(!k){say('הקוד לא נכון','bad');box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');if(typeof sound==='function')sound('bad');return}
     if(used.includes(h)&&!k.admin){say('כבר השתמשתם בקוד הזה','bad');return}
     give(k.give||{});if(!used.includes(h)){used.push(h);store.set('codes',used)}
