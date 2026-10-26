@@ -10079,5 +10079,259 @@ html.night .hunt-chalk{display:block}
   }};
 })();
 </script>
+<!-- ================= daily question + seasonal events + public leaderboard ================= -->
+<style>
+/* ---- daily question ---- */
+#daily{background:var(--chalk);padding-block:3rem}
+#daily .dq{max-width:760px;margin:0 auto;border:2px solid #2a2a2a;background:#000;color:#fff;box-shadow:8px 8px 0 var(--flag)}
+#daily .dq .scarf{height:10px}
+.dq-in{padding:1.4rem 1.6rem 1.5rem;display:flex;flex-direction:column;gap:1rem}
+.dq-top{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap}
+.dq-top img{width:56px;height:56px;object-fit:contain;flex-shrink:0}
+.dq-top h2{margin:0;font-family:var(--display);font-weight:700;font-size:2.4rem;line-height:1;color:var(--flag)}
+.dq-top small{display:block;color:#bdb6ae;font-size:.9rem}
+.dq-streak{margin-inline-start:auto;font-family:var(--display);font-size:1.5rem;line-height:1;color:var(--yellow);border:2px solid #2a2a2a;padding:.35rem .7rem .15rem;text-align:center}
+.dq-streak i{display:block;font-style:normal;font-family:var(--body);font-size:.75rem;color:#bdb6ae}
+.dq-q{margin:0;font-size:1.3rem;line-height:1.5;font-weight:700}
+.dq-opts{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.dq-opts button{font-family:var(--body);font-size:1.05rem;text-align:start;background:#141212;color:#fff;border:2px solid #2a2a2a;padding:.65rem .8rem;cursor:pointer;transition:transform .15s,border-color .15s}
+.dq-opts button:hover:not(:disabled){border-color:var(--yellow);transform:translateY(-2px)}
+.dq-opts button:disabled{cursor:default}
+.dq-opts button.ok{background:#1d3a14;border-color:#5E9B2E}
+.dq-opts button.no{background:#3d0c10;border-color:var(--flag)}
+.dq-res{margin:0;min-height:1.6em;font-size:1.05rem;color:#f3eadf}
+.dq-res b{color:var(--yellow)}
+@media (max-width:560px){.dq-opts{grid-template-columns:1fr}.dq-top h2{font-size:2rem}}
+
+/* ---- leaderboard ---- */
+#records{background:#0c0b0b;color:#fff}
+#records h2{color:#fff}
+.lb-games,.lb-lv{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.8rem}
+.lb-games button,.lb-lv button{font-family:var(--body);font-size:.95rem;background:transparent;color:#fff;border:1px solid #3a3532;padding:.3rem .7rem;cursor:pointer}
+.lb-games button[aria-pressed="true"],.lb-lv button[aria-pressed="true"]{background:var(--flag);border-color:var(--flag)}
+.lb-games button:hover,.lb-lv button:hover{border-color:var(--yellow)}
+.lb-board{max-width:640px;border:2px solid #2a2a2a;background:#000}
+.lb-board .scarf{height:8px}
+.lb-list{list-style:none;margin:0;padding:.4rem 0}
+.lb-list li{display:grid;grid-template-columns:3rem 1fr auto;align-items:center;gap:.6rem;padding:.45rem 1rem;border-bottom:1px solid #1e1c1b;font-variant-numeric:tabular-nums}
+.lb-list li:last-child{border-bottom:0}
+.lb-list .r{font-family:var(--display);font-size:1.6rem;line-height:1;color:#8d867e}
+.lb-list li:nth-child(1) .r{color:var(--yellow)}
+.lb-list li:nth-child(2) .r,.lb-list li:nth-child(3) .r{color:#F1EFEB}
+.lb-list .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-list .s{font-family:var(--display);font-size:1.4rem;line-height:1;color:var(--yellow)}
+.lb-list li.me{background:#2a0d10}
+.lb-list li.lb-empty{display:block;padding:1.2rem 1rem;color:#bdb6ae}
+.lb-me{margin:.9rem 0 0;color:#bdb6ae;font-size:.95rem}
+.lb-me button{font:inherit;background:none;border:0;color:var(--yellow);text-decoration:underline;cursor:pointer;padding:0}
+.lb-offer{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:330;width:min(440px,calc(100vw - 24px));background:#000;color:#fff;border:3px solid var(--yellow);box-shadow:8px 8px 0 var(--flag);padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.6rem;direction:rtl;animation:cdIn .3s ease-out}
+.lb-offer b{font-family:var(--display);font-size:1.8rem;line-height:1;color:var(--yellow)}
+.lb-offer p{margin:0;font-size:.95rem;color:#f3eadf}
+.lb-offer form{display:flex;gap:.4rem}
+.lb-offer input{flex:1;min-width:0;font-family:var(--body);font-size:1rem;padding:.45rem .6rem;background:#141212;color:#fff;border:2px solid #2a2a2a}
+.lb-offer input:focus{outline:none;border-color:var(--yellow)}
+.lb-offer button{font-family:var(--display);font-size:1.3rem;line-height:1;padding:.4rem .9rem .2rem;background:var(--flag);color:#fff;border:2px solid #000;cursor:pointer}
+.lb-offer .lb-no{background:none;border:0;color:#8d867e;font-family:var(--body);font-size:.85rem;align-self:flex-start;padding:0;text-decoration:underline}
+
+/* ---- seasons ---- */
+.season-bar{position:relative;background:#000;color:#fff;border-bottom:2px solid #2a2a2a;display:flex;align-items:center;justify-content:center;gap:1rem;padding-block:.6rem;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(40px,env(safe-area-inset-right,0px));flex-wrap:wrap;text-align:center}
+.season-bar b{font-family:var(--display);font-size:1.7rem;line-height:1;color:var(--yellow)}
+.season-bar span{font-size:.95rem;color:#f3eadf}
+.season-bar .sx{position:absolute;left:8px;top:50%;transform:translateY(-50%);background:none;border:1px solid #444;color:#fff;width:28px;height:28px;cursor:pointer}
+.season-bar svg{height:54px;width:auto;flex-shrink:0}
+.hk-fl{transform-origin:50% 100%;animation:hkFl .9s ease-in-out infinite alternate}
+.hk-fl:nth-of-type(2n){animation-duration:1.15s}
+@keyframes hkFl{from{transform:scale(.88,1) rotate(-4deg)}to{transform:scale(1.05,1.12) rotate(4deg)}}
+/* Purim: the devil dresses up as an angel */
+html.s-purim .m-devil .m-float,html.s-purim .sdv-btn,html.s-purim .peek{position:relative}
+html.s-purim .m-devil .m-float::before,html.s-purim .sdv-head::after{content:"";position:absolute;left:50%;top:-6%;width:46%;height:12%;transform:translateX(-50%);border:5px solid var(--yellow);border-radius:50%;z-index:3;pointer-events:none;animation:prHalo 1.6s ease-in-out infinite alternate}
+html.s-purim .sdv-head{position:relative}
+html.s-purim .sdv-head::after{left:38px;top:2px;width:34px;height:9px;border-width:3px}
+@keyframes prHalo{from{transform:translateX(-50%) translateY(0)}to{transform:translateX(-50%) translateY(-6px)}}
+.pr-conf{position:fixed;top:-20px;z-index:300;width:10px;height:14px;pointer-events:none;animation:prFall linear forwards}
+@keyframes prFall{to{transform:translateY(110vh) rotate(720deg)}}
+</style>
+<script>
+(()=>{
+  const $=s=>document.querySelector(s);
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  const ls={get(k,d){try{const v=localStorage.getItem('hanasi:'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('hanasi:'+k,JSON.stringify(v))}catch(e){}}};
+  const pad=n=>String(n).padStart(2,'0');
+  const dayStr=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  const today=new Date(),TODAY=dayStr(today);
+  const dayNum=s=>Math.round(new Date(s+'T12:00:00')/864e5);
+  const devilImg='assets/devil.webp';
+  const params=new URLSearchParams(location.search);
+
+  /* ================= 1. the devil's daily question ================= */
+  // a seeded shuffle so every visitor gets the same question on the same day
+  const rng=seed=>()=>{seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296};
+  const shuffle=(a,r)=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+  function pool(){
+    const P=[];
+    if(typeof QUIZ!=='undefined') QUIZ.forEach(z=>P.push({q:z.q,a:z.a,w:z.w,h:z.h}));
+    if(typeof LAYERS!=='undefined'){
+      const animals=[...new Set(LAYERS.map(l=>l[2]).filter(Boolean))];
+      LAYERS.filter(l=>l[2]&&!l[5]).forEach((l,i)=>{const r=rng(1000+i),w=shuffle(animals.filter(a=>a!==l[2]),r).slice(0,3);
+        P.push({q:`מה החיה של שכבת ${l[1]}?`,a:l[2],w,h:`מחזור ${l[0]}.`})});
+    }
+    if(typeof FAC!=='undefined'){
+      const typed=FAC.filter(f=>f.y&&['שער','תורן','מחסן','מנגנון','חופשי'].includes(f.t));
+      typed.forEach((f,i)=>{const r=rng(5000+i),others=shuffle(['שער','תורן','מחסן','מנגנון','חופשי'].filter(t=>t!==f.t),r).slice(0,3);
+        P.push({q:`איזה סוג מתקן היה ${f.n} (${f.y})?`,a:f.t,w:others,h:'אחד מחמשת המתקנים של המחנה.'})});
+      typed.filter(f=>f.t==='תורן'||f.t==='שער').forEach((f,i)=>{const r=rng(9000+i),ys=shuffle([-3,-2,-1,1,2,3],r).slice(0,3).map(d=>String(f.y+d));
+        P.push({q:`באיזו שנה נבנה ${f.n}?`,a:String(f.y),w:ys,h:`היה ${f.t==='תורן'?'התורן':'השער'} של המחנה.`})});
+    }
+    return shuffle(P,rng(20261026));
+  }
+  function daily(){
+    const P=pool();if(!P.length) return;
+    const n=dayNum(TODAY),z=P[((n%P.length)+P.length)%P.length],opts=shuffle([z.a,...z.w],rng(n));
+    const sec=document.createElement('section');sec.id='daily';
+    sec.innerHTML=`<div class="dq"><div class="scarf"></div><div class="dq-in">
+      <div class="dq-top"><img src="${devilImg}" alt="" width="452" height="462"><div><h2>השאלה היומית של השטן</h2><small>שאלה חדשה כל יום. ענו כל יום כדי לבנות רצף.</small></div>
+      <div class="dq-streak"><span id="dqStreak">0</span><i>ימים ברצף</i></div></div>
+      <p class="dq-q"></p><div class="dq-opts"></div><p class="dq-res" aria-live="polite"></p></div></div>`;
+    sec.querySelector('.dq-q').textContent=z.q;
+    const box=sec.querySelector('.dq-opts'),res=sec.querySelector('.dq-res'),st=sec.querySelector('#dqStreak');
+    const S=ls.get('daily',{last:'',streak:0,best:0,ans:{}});
+    const showStreak=()=>{let s=S.streak;if(S.last&&dayNum(TODAY)-dayNum(S.last)>1) s=0;st.textContent=s};
+    function lock(chosen){
+      [...box.children].forEach(b=>{b.disabled=true;if(b.dataset.v===z.a) b.classList.add('ok');else if(b.dataset.v===chosen) b.classList.add('no')});
+      const right=chosen===z.a;
+      res.innerHTML=(right?'<b>נכון!</b> ':'<b>לא.</b> התשובה: '+z.a.replace(/[<>&]/g,'')+'. ')+(right?'':'')+'רצף: '+S.streak+' ימים. שאלה חדשה מחר.';
+    }
+    opts.forEach(o=>{const b=document.createElement('button');b.type='button';b.textContent=o;b.dataset.v=o;b.onclick=()=>{
+      if(S.ans[TODAY]!==undefined) return;
+      const gap=S.last?dayNum(TODAY)-dayNum(S.last):99;
+      S.streak=gap===1?S.streak+1:gap===0?S.streak:1;S.best=Math.max(S.best||0,S.streak);S.last=TODAY;S.ans={[TODAY]:o};ls.set('daily',S);
+      const right=o===z.a;
+      if(right&&typeof addXP==='function'){const xp=15+Math.min(35,(S.streak-1)*5);addXP(xp);if(typeof toast==='function') toast(`השאלה היומית: +${xp} נקודות פנאט`)}
+      if(typeof sound==='function') try{sound(right?'win':'bad')}catch(e){}
+      showStreak();lock(o)};box.appendChild(b)});
+    showStreak();
+    if(S.ans[TODAY]!==undefined) lock(S.ans[TODAY]);
+    const games=document.getElementById('games');games.parentNode.insertBefore(sec,games);
+    window.__daily={q:z.q};
+  }
+
+  /* ================= 2. seasons ================= */
+  // Hanukkah: first candle on the evening of the start date. Purim: the day itself (we celebrate from 3 days before).
+  const HANUKKAH=['2026-12-04','2027-12-24','2028-12-12','2029-12-01','2030-12-20'];
+  const PURIM=['2027-03-23','2028-03-12','2029-03-01','2030-03-19'];
+  function season(){
+    const forced=params.get('season');const t=dayNum(TODAY);
+    if(forced==='hanuka') return {k:'hanuka',night:Math.min(8,Math.max(1,+params.get('night')||3))};
+    if(forced==='purim') return {k:'purim'};
+    if(forced==='summer') return {k:'summer'};
+    for(const s of HANUKKAH){const d=t-dayNum(s);if(d>=0&&d<8) return {k:'hanuka',night:d+1}}
+    for(const s of PURIM){const d=t-dayNum(s);if(d>=-3&&d<=1) return {k:'purim',days:-d}}
+    const m=today.getMonth();if(m===6||m===7) return {k:'summer'};
+    return null;
+  }
+  function hanukkiah(night){
+    // 8 candles + the shamash in the middle (taller); lit from right to left like the real thing
+    let s='<svg viewBox="0 0 230 120" aria-hidden="true">';
+    s+='<path d="M20 70 Q115 120 210 70" fill="none" stroke="#c9a227" stroke-width="5"/><rect x="111" y="40" width="8" height="70" fill="#c9a227"/><rect x="80" y="108" width="70" height="8" fill="#c9a227"/>';
+    const xs=[20,42,64,86,144,166,188,210];
+    xs.forEach((x,i)=>{const lit=(7-i)<night;s+=`<rect x="${x-4}" y="52" width="8" height="18" fill="${lit?'#F1EFEB':'#555'}"/>`;
+      if(lit) s+=`<path class="hk-fl" d="M${x} 36 C${x+6} 44 ${x+5} 50 ${x} 51 C${x-5} 50 ${x-6} 44 ${x} 36Z" fill="#F3E03B" stroke="#FD1D1D" stroke-width="1.5"/>`});
+    s+=`<rect x="111" y="22" width="8" height="18" fill="#F1EFEB"/><path class="hk-fl" d="M115 6 C121 14 120 20 115 21 C110 20 109 14 115 6Z" fill="#F3E03B" stroke="#FD1D1D" stroke-width="1.5"/></svg>`;
+    return s;
+  }
+  function seasons(){
+    const S=season();window.__season=S;if(!S) return;
+    document.documentElement.classList.add('s-'+S.k);
+    const key='season:'+S.k+':'+TODAY;if(ls.get(key,0)&&!params.get('season')) return;   // closed for today
+    const bar=document.createElement('div');bar.className='season-bar';
+    if(S.k==='hanuka') bar.innerHTML=hanukkiah(S.night)+`<div><b>חנוכה שמח! נר ${['ראשון','שני','שלישי','רביעי','חמישי','שישי','שביעי','שמיני'][S.night-1]}</b><br><span>השטן מבקש להזכיר: הוא לא נוגע בנרות. רק מסתכל.</span></div>`;
+    if(S.k==='purim') bar.innerHTML=`<div><b>פורים שמח!</b><br><span>השטן התחפש השנה למלאך. תסתכלו עליו. לא בטוח שזה עובד.</span></div>`;
+    if(S.k==='summer') bar.innerHTML=`<div><b>עונת מחנות!</b><br><span>מחנאות מעל שפיות. בדקו שהיתרים קשורים, ושלא שכחתם את הצעיף.</span></div>`;
+    const x=document.createElement('button');x.className='sx';x.type='button';x.setAttribute('aria-label','סגירה');x.textContent='✕';x.onclick=()=>{ls.set(key,1);bar.remove()};bar.appendChild(x);
+    const hero=document.getElementById('top');hero.parentNode.insertBefore(bar,hero);
+    if(S.k==='purim'&&!ls.get('purimConf:'+TODAY,0)){ls.set('purimConf:'+TODAY,1);
+      const cols=['#FD1D1D','#F3E03B','#F1EFEB','#000','#5E9B2E'];
+      for(let i=0;i<70;i++){const c=document.createElement('i');c.className='pr-conf';c.style.left=Math.random()*100+'vw';c.style.background=pick(cols);c.style.animationDuration=(2.2+Math.random()*2.5)+'s';c.style.animationDelay=(Math.random()*.8)+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),6000)}}
+  }
+
+  /* ================= 3. public leaderboard (a Google Sheet behind a small Apps Script) ================= */
+  const LB_URL='__LB_URL__';
+  const LV={easy:'קל',mid:'בינוני',hard:'מחנאות מעל שפיות'};
+  const BAD=['זונה','שרמוט','זין','כוס','מניאק','חרא','קוקסינל','הומו','לסבית','נאצי','היטלר','fuck','shit','bitch','dick','sex','porn'];
+  const dev=(()=>{let d=ls.get('dev','');if(!d){d=Math.random().toString(36).slice(2)+Date.now().toString(36);ls.set('dev',d)}return d})();
+  const games=()=>(typeof GAMES!=='undefined'?GAMES:[]).filter(g=>!g.multi);
+  let cache=null,cacheT=0;
+  async function fetchTop(force){
+    if(!LB_URL.startsWith('http')) throw 'nourl';
+    if(cache&&!force&&Date.now()-cacheT<60000) return cache;
+    const r=await fetch(LB_URL+'?a=top&t='+Date.now());const j=await r.json();if(!j.ok) throw 'bad';cache=j.top||{};cacheT=Date.now();return cache;
+  }
+  async function submit(g,l,s,name){
+    const u=LB_URL+'?a=add&g='+encodeURIComponent(g)+'&l='+encodeURIComponent(l)+'&s='+encodeURIComponent(s)+'&n='+encodeURIComponent(name)+'&d='+encodeURIComponent(dev);
+    const r=await fetch(u);const j=await r.json();cache=null;return j;
+  }
+  const okName=n=>{n=n.trim();return n.length>=2&&n.length<=15&&!BAD.some(w=>n.toLowerCase().includes(w))};
+  // offered after a new personal best
+  let offerT=0;
+  function offer(g,l,s){
+    if(!LB_URL.startsWith('http')) return;
+    const name=ls.get('lbName','');
+    if(ls.get('lbNever',0)) return;
+    if(name){submit(g,l,s,name).then(j=>{if(j.ok&&typeof toast==='function') toast('השיא שלכם עלה לטבלת השיאים של השבט')}).catch(()=>{});return}
+    clearTimeout(offerT);offerT=setTimeout(()=>{
+      document.querySelector('.lb-offer')?.remove();
+      const gm=games().find(x=>x.id===g),fmt=gm&&gm.fmt?gm.fmt:(v=>v);
+      const o=document.createElement('div');o.className='lb-offer';o.setAttribute('role','dialog');
+      o.innerHTML=`<b>שיא חדש!</b><p></p><form><input maxlength="15" placeholder="כינוי (לא שם מלא)" aria-label="כינוי"><button type="submit">העלו</button></form><button type="button" class="lb-no">לא עכשיו</button>`;
+      o.querySelector('p').textContent=`${fmt(s)} ב${gm?gm.title:g} (${LV[l]||l}). להעלות לטבלת השיאים של השבט?`;
+      const inp=o.querySelector('input');
+      o.querySelector('form').onsubmit=e=>{e.preventDefault();const n=inp.value.trim();
+        if(!okName(n)){inp.style.borderColor='var(--flag)';inp.value='';inp.placeholder='כינוי של 2–15 אותיות, בלי קללות';return}
+        ls.set('lbName',n);o.remove();submit(g,l,s,n).then(j=>{if(typeof toast==='function') toast(j.ok?'השיא עלה לטבלה!':'לא הצלחנו להעלות את השיא')}).catch(()=>{});renderBoard(true)};
+      o.querySelector('.lb-no').onclick=()=>o.remove();
+      document.body.appendChild(o);setTimeout(()=>{if(document.body.contains(o)) o.remove()},20000);
+    },1400);
+  }
+  // every new personal best in any game passes through best()
+  if(typeof best==='function'){const _best=best;best=function(k,v){const r=_best(k,v);
+    if(r===true&&v!=null&&v>0&&typeof k==='string'&&k.includes(':')){const [g,l]=k.split(':');if(games().some(x=>x.id===g)&&LV[l]) offer(g,l,v)}return r}}
+  let selG='pac',selL='mid';
+  async function renderBoard(force){
+    const list=$('#lbList'),me=$('#lbMe');if(!list) return;
+    list.innerHTML='<li class="lb-empty">טוען...</li>';
+    const gm=games().find(x=>x.id===selG),fmt=gm&&gm.fmt?gm.fmt:(v=>v);
+    try{
+      const top=await fetchTop(force),rows=(top[selG+':'+selL]||[]);
+      list.innerHTML=rows.length?'':'<li class="lb-empty">עוד אין שיאים ברמה הזו. תהיו הראשונים.</li>';
+      rows.forEach((r,i)=>{const li=document.createElement('li');if(r.d===dev.slice(0,6)) li.className='me';
+        li.innerHTML='<span class="r"></span><span class="n"></span><span class="s"></span>';li.querySelector('.r').textContent=i+1;li.querySelector('.n').textContent=r.n;li.querySelector('.s').textContent=fmt(r.s);list.appendChild(li)});
+    }catch(e){list.innerHTML='<li class="lb-empty">'+(e==='nourl'?'טבלת השיאים תיפתח בקרוב.':'לא הצלחנו לטעון את הטבלה. נסו שוב עוד מעט.')+'</li>'}
+    const name=ls.get('lbName','');
+    me.innerHTML='';const t=document.createElement('span');t.textContent=name?`הכינוי שלכם: ${name}. `:'עוד לא בחרתם כינוי. הוא נבחר כששוברים שיא. ';me.appendChild(t);
+    if(name){const b=document.createElement('button');b.type='button';b.textContent='שינוי כינוי';b.onclick=()=>{ls.set('lbName','');ls.set('lbNever',0);renderBoard()};me.appendChild(b)}
+    const yours=typeof best==='function'?best(selG+':'+selL):null;
+    if(yours!=null&&name){const b=document.createElement('button');b.type='button';b.textContent=' · העלו את השיא שלי ('+fmt(yours)+')';b.onclick=()=>submit(selG,selL,yours,name).then(j=>{if(typeof toast==='function') toast(j.ok?'עלה!':'לא הצלחנו');renderBoard(true)}).catch(()=>{});me.appendChild(b)}
+  }
+  function board(){
+    const sec=document.createElement('section');sec.id='records';
+    sec.innerHTML=`<div class="wrap"><h2>טבלת השיאים של השבט</h2><p class="lede">עשרת השיאים הכי גבוהים בכל משחק ורמה, מכל מי ששיחק באתר. שוברים שיא אישי, בוחרים כינוי, וזה עולה לכאן.</p>
+      <div class="lb-games" role="group" aria-label="משחק"></div><div class="lb-lv" role="group" aria-label="רמה"></div>
+      <div class="lb-board"><div class="scarf"></div><ol class="lb-list" id="lbList"></ol></div><p class="lb-me" id="lbMe"></p></div>`;
+    const gBox=sec.querySelector('.lb-games'),lBox=sec.querySelector('.lb-lv');
+    const draw=()=>{gBox.innerHTML='';games().forEach(g=>{const b=document.createElement('button');b.type='button';b.textContent=g.title.replace(/[⁦-⁩]/g,'');b.setAttribute('aria-pressed',g.id===selG);b.onclick=()=>{selG=g.id;draw();renderBoard()};gBox.appendChild(b)});
+      lBox.innerHTML='';Object.keys(LV).forEach(k=>{const b=document.createElement('button');b.type='button';b.textContent=LV[k];b.setAttribute('aria-pressed',k===selL);b.onclick=()=>{selL=k;draw();renderBoard()};lBox.appendChild(b)})};
+    draw();
+    const g=document.getElementById('games');g.parentNode.insertBefore(sec,g.nextSibling);
+    // load the table only when it scrolls into view
+    const io=new IntersectionObserver(es=>{if(es[0].isIntersecting){io.disconnect();renderBoard()}},{rootMargin:'200px'});io.observe(sec);
+    const nav=document.querySelector('#navLinks a[href="#games"]');if(nav){const a=document.createElement('a');a.className='l';a.href='#records';a.textContent='שיאים';nav.insertAdjacentElement('afterend',a)}
+  }
+
+  try{daily()}catch(e){console.error(e)}
+  try{seasons()}catch(e){console.error(e)}
+  try{board()}catch(e){console.error(e)}
+  window.__lb={fetchTop,submit,offer};
+})();
+</script>
 </body>
 </html>
