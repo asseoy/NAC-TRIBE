@@ -158,7 +158,7 @@ BD.ARENAS.padded = {
     for (const m of this.motes) { const mx = ax + (m[0] - .5) * G.W * .35 + Math.sin(t * .4 + m[2]) * 20, my = 120 + m[1] * (G.floor - 160) + Math.cos(t * .3 + m[2]) * 14; x.fillRect(mx, my, 2.5, 2.5); }
   },
   props(G) {
-    this.want = [['cube', .16], ['ball', .82], ['crate', .26], ['barrel', .72]];
+    this.want = [['cube', .16], ['ball', .82], ['crate', .26]];
     this.gone = {};
     for (const [k, fx] of this.want) this.spawn(G, k, fx, G.floor - 60);
   },

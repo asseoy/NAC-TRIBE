@@ -166,6 +166,8 @@ BD.audio = (() => {
     music(on, cfg) { if (cfg) M = Object.assign({ bpm: 116, root: 55, bass: [0, 0, 3, 0, 5, 0, 3, -2], wave: 'square', lead: null }, cfg); musicOn = on; if (on && ctx) musicT = Math.max(musicT, now() + .05); },
     /* weapon files add their own one-shot sounds: f({ tone, noise, rand }, ...args) */
     def(name, f) { lib[name] = (...a) => f({ tone, noise, rand: BD.rand }, ...a); },
+    /* pausing the game silences everything that is still sounding */
+    hold(on) { if (!ctx) return; if (on) ctx.suspend(); else ctx.resume(); },
     loop, stopLoops() { [...loops].forEach(h => h.stop()); }
   };
 })();

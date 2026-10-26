@@ -74,6 +74,9 @@ G.start = function (mode, opt = {}) {
   if (G.ph) { G.ph.ps = []; G.ph.links = []; G.ph.boxes = []; }
   BD.fx.clear();
   G.ph.gScale = S.gravity ?? 1; G.ph.gx = 0; G.gravT = 0;
+  // leftovers from the previous round must never carry over
+  G.gravTarget = null; G.tornadoOn = false; G.lock = false; G.finishing = false; G.overlay = null; G.grab = null; G.thrown = 0;
+  Object.assign(BD.fx.S, { stop: 0, shake: 0, flash: 0, slow: 1, slowT: 0, zoom: 1, zoomT: 0, tint: null });
   G.setArena(opt.arena || S.arena);
   G.dummy = new BD.Dummy(G.ph, G.W / 2, G.floor);
   G.dummy.maxHp = 700;
@@ -231,7 +234,7 @@ G.input = function () {
     if (e.pointerId !== pid) return; pid = null;
     set(e); const was = P.down; P.down = false;
     if (P.touch) P.over = false;
-    if (was && G.running && !G.paused && G.wpn && G.wpn.up) G.wpn.up(P);
+    if (was && G.running && G.wpn && G.wpn.up) G.wpn.up(P);
   };
   cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
   cv.addEventListener('pointerleave', e => { if (!P.down) P.over = false; });

@@ -2,7 +2,7 @@
    with a painted face, status effects and cartoon marks instead of injuries. */
 'use strict';
 BD.SKINS = {
-  crash: { name: 'בובת ריסוק', price: 0, body: '#f6c21c', dark: '#c79300', joint: '#232323', desc: 'הקלאסית הצהובה' },
+  crash: { name: 'השיכוני', price: 0, body: '#f6c21c', dark: '#c79300', joint: '#232323', desc: 'הקלאסית הצהובה' },
   tribe: { name: 'דאמי הנשיא', price: 500, body: '#d3202a', dark: '#8e0f16', joint: '#111', stripes: true, desc: 'אדום־שחור, בצבעי השבט' },
   chrome: { name: 'רובו־דאמי', price: 1200, body: '#c9d3dc', dark: '#7d8a96', joint: '#3a4652', metal: true, desc: 'עשוי מתכת, נשמע כמו פח' },
   zombie: { name: 'זומבי־דאמי', price: 2000, body: '#8fcf6a', dark: '#5a8f3c', joint: '#2d3b22', desc: 'כבר מת, אז לא אכפת לו' },
@@ -30,8 +30,8 @@ BD.Dummy = class {
     const ph = this.ph, y = floor - 128, G = 'dummy', P = (dx, dy, r, m, name) => { const p = ph.particle(x + dx, y + dy, r, m, { group: G, rest: .35, fr: .7, name }); p.dummy = this; return p; };
     const J = this.j = {
       head: P(0, -152, 31, 4, 'head'), neck: P(0, -114, 9, 1.5), chest: P(0, -84, 27, 6, 'chest'), pelvis: P(0, -6, 24, 6, 'pelvis'),
-      sL: P(-31, -98, 12, 1.5), sR: P(31, -98, 12, 1.5), eL: P(-42, -54, 10, 1.2), eR: P(42, -54, 10, 1.2), hL: P(-46, -12, 12, 1, 'hand'), hR: P(46, -12, 12, 1, 'hand'),
-      pL: P(-16, 8, 13, 2), pR: P(16, 8, 13, 2), kL: P(-18, 64, 12, 1.8), kR: P(18, 64, 12, 1.8), fL: P(-21, 120, 13, 1.6, 'foot'), fR: P(21, 120, 13, 1.6, 'foot')
+      sL: P(-40, -98, 12, 1.5), sR: P(40, -98, 12, 1.5), eL: P(-50, -54, 10, 1.2), eR: P(50, -54, 10, 1.2), hL: P(-55, -12, 12, 1, 'hand'), hR: P(55, -12, 12, 1, 'hand'),
+      pL: P(-20, 8, 13, 2), pR: P(20, 8, 13, 2), kL: P(-18, 64, 12, 1.8), kR: P(18, 64, 12, 1.8), fL: P(-21, 120, 13, 1.6, 'foot'), fR: P(21, 120, 13, 1.6, 'foot')
     };
     const L = (a, b, k = 1, kind = 'eq', len) => ph.link(J[a], J[b], { k, kind, len }), links = this.links = [];
     const add = (...a) => links.push(L(...a));
@@ -122,7 +122,7 @@ BD.Dummy = class {
       pull(J.chest, px + sway * .5, fy - 206, 300); pull(J.head, px + sway, fy - 280, 340); pull(J.neck, px + sway * .7, fy - 242, 150);
       pull(J.fL, px - 22, fy, 60); pull(J.fR, px + 22, fy, 60); pull(J.kL, px - 19, fy - 56, 80); pull(J.kR, px + 19, fy - 56, 80);
       const breath = Math.sin(performance.now() / 500) * 4;
-      pull(J.hL, px - 46, fy - 118 + breath, 40); pull(J.hR, px + 46, fy - 118 + breath, 40);
+      pull(J.hL, px - 56, fy - 118 + breath, 40); pull(J.hR, px + 56, fy - 118 + breath, 40);
       // damp the wobble so he settles instead of jittering
       for (const p of this.parts) { p.px = BD.lerp(p.px, p.x, .02 * s); p.py = BD.lerp(p.py, p.y, .02 * s); }
     }
@@ -153,13 +153,13 @@ BD.Dummy = class {
     limb(J.pL, J.kL, 26, bodyD); limb(J.kL, J.fL, 24, bodyD); this.foot(x, J.kL, J.fL, bodyD);
     limb(J.sL, J.eL, 22, bodyD); limb(J.eL, J.hL, 20, bodyD); this.hand(x, J.eL, J.hL, bodyD);
     joint(J.kL); joint(J.eL);
+    this.sleeve(x, J.sL, J.eL, true);
     // torso
     const tor = [J.sL, J.sR, J.pR, J.pL];
     x.fillStyle = '#141414'; x.beginPath(); this.blob(x, tor, 10); x.fill();
     x.fillStyle = body; x.beginPath(); this.blob(x, tor, 4); x.fill();
     if (S.band) { x.strokeStyle = S.band; x.lineWidth = 9; x.beginPath(); x.moveTo(BD.lerp(J.sL.x, J.pL.x, .62), BD.lerp(J.sL.y, J.pL.y, .62)); x.lineTo(BD.lerp(J.sR.x, J.pR.x, .62), BD.lerp(J.sR.y, J.pR.y, .62)); x.stroke(); }
-    // the crash-test target on the chest
-    this.target(x, J.chest.x, J.chest.y + 4, 13, Math.atan2(J.pelvis.y - J.chest.y, J.pelvis.x - J.chest.x) - Math.PI / 2);
+    this.shirt(x, tor);
     x.fillStyle = '#141414'; x.beginPath(); x.arc(J.pelvis.x, J.pelvis.y + 6, 7, 0, BD.TAU); x.fill();
     limb(J.neck, J.chest, 16, bodyD);
     if (S.stripes) { x.save(); x.beginPath(); this.blob(x, tor, 4); x.clip(); x.strokeStyle = '#141414'; x.lineWidth = 8; for (let i = 1; i < 4; i++) { const k = i / 4; x.beginPath(); x.moveTo(BD.lerp(J.sL.x, J.pL.x, k) - 10, BD.lerp(J.sL.y, J.pL.y, k)); x.lineTo(BD.lerp(J.sR.x, J.pR.x, k) + 10, BD.lerp(J.sR.y, J.pR.y, k)); x.stroke(); } x.restore(); }
@@ -167,13 +167,35 @@ BD.Dummy = class {
     // front limbs
     limb(J.pR, J.kR, 26); limb(J.kR, J.fR, 24); this.foot(x, J.kR, J.fR, body);
     limb(J.sR, J.eR, 22); limb(J.eR, J.hR, 20); this.hand(x, J.eR, J.hR, body);
-    joint(J.kR); joint(J.eR); joint(J.sR); joint(J.pR);
+    joint(J.kR); joint(J.eR); joint(J.pR);
+    this.sleeve(x, J.sR, J.eR, false);
     this.drawMarks(x);
     this.drawHead(x, t, body);
     if (this.frozen) this.drawIce(x, t);
     if (this.wet > .05) { x.globalAlpha = this.wet * .5; x.fillStyle = '#5fb8ff'; for (const p of this.parts) { x.beginPath(); x.arc(p.x + 4, p.y + p.r * .6, 3, 0, BD.TAU); x.fill(); } x.globalAlpha = 1; }
     if (this.dizzy > 0) for (let i = 0; i < 3; i++) { const a = t * 4 + i * BD.TAU / 3; BD.draw.star(x, J.head.x + Math.cos(a) * 42, J.head.y - 38 + Math.sin(a) * 12, 10, a, '#ffe14d'); }
     if (this.say) this.drawSay(x);
+  }
+  /* a yellow T-shirt with "שיכוני" printed on the chest */
+  shirt(x, tor) {
+    const J = this.j, col = this.frozen ? '#bfe6f5' : this.mixCol('#ffe14a', '#2a2522', this.soot * .85);
+    x.save(); x.beginPath(); this.blob(x, tor, 6); x.fillStyle = col; x.fill(); x.lineWidth = 3; x.strokeStyle = '#141414'; x.stroke();
+    x.clip();
+    // hem and a soft fold shadow
+    const ang = Math.atan2(J.pelvis.y - J.chest.y, J.pelvis.x - J.chest.x) - Math.PI / 2;
+    x.translate(J.chest.x, J.chest.y); x.rotate(ang);
+    x.fillStyle = 'rgba(160,110,0,.25)'; x.fillRect(14, -30, 22, 120);
+    x.fillStyle = '#d9a800'; x.fillRect(-60, 70, 120, 30);
+    x.fillStyle = '#141414'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    const sw = Math.hypot(J.sR.x - J.sL.x, J.sR.y - J.sL.y) * .82; x.font = '700 34px Karantina, sans-serif'; const tw = x.measureText('שיכוני').width;
+    if (tw > sw) x.font = '700 ' + Math.max(18, 34 * sw / tw) + 'px Karantina, sans-serif';
+    x.fillText('שיכוני', 0, 44);
+    x.restore();
+  }
+  sleeve(x, s, e, back) {
+    const mx = BD.lerp(s.x, e.x, .5), my = BD.lerp(s.y, e.y, .5);
+    x.lineCap = 'round'; x.strokeStyle = '#141414'; x.lineWidth = 33; x.beginPath(); x.moveTo(s.x, s.y); x.lineTo(mx, my); x.stroke();
+    x.strokeStyle = this.frozen ? '#bfe6f5' : this.mixCol(back ? '#e8c530' : '#ffe14a', '#2a2522', this.soot * .85); x.lineWidth = 27; x.stroke();
   }
   /* the tribe scarf: red and black stripes, a knot and two tails that trail behind */
   scarf(x, t) {

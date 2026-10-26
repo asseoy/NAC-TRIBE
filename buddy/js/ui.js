@@ -224,20 +224,20 @@
     celebrate(w.name, iconCanvas(w, 360), 'נפתח!');
   }
   function celebrate(name, canvas, stamp) {
+    openOv(`<div class="unl"><h2>${name}</h2><div class="cv"></div><div class="stamp">${stamp}</div><div class="row" style="justify-content:center"><button class="btn" data-x>יאללה!</button></div></div>`, '', true);
     BD.audio.play('unlock');
-    openOv(`<div class="unl"><h2>${name}</h2><div class="cv"></div><div class="stamp">${stamp}</div><div class="row" style="justify-content:center"><button class="btn" data-x>יאללה!</button></div></div>`);
     $('#ovBox .cv').appendChild(canvas);
     if (G.running) { BD.fx.confetti(G.W / 2, G.H * .4, 90); BD.fx.shake(.3); }
   }
 
   /* ---------- overlays ---------- */
-  function openOv(html, cls) {
+  function openOv(html, cls, loud) {
     const o = $('#ov'), b = $('#ovBox'); b.className = 'box ' + (cls || ''); b.innerHTML = html; o.hidden = false;
     b.querySelectorAll('[data-x]').forEach(x => x.onclick = () => { BD.audio.play('click'); closeOv(); });
-    if (G.running && G.mode !== 'demo') G.paused = true;
+    if (G.running && G.mode !== 'demo') { if (G.P.down && G.wpn && G.wpn.up) { G.P.down = false; G.wpn.up(G.P); } G.paused = true; if (!loud) BD.audio.hold(true); }
     hideTip();
   }
-  function closeOv() { $('#ov').hidden = true; if (G.running) G.paused = false; }
+  function closeOv() { $('#ov').hidden = true; if (G.running) G.paused = false; BD.audio.hold(false); }
   $('#ov').addEventListener('pointerdown', e => { if (e.target.id === 'ov' && !$('#ovBox').dataset.lock) closeOv(); });
   const X = '<button class="btn ghost x" data-x>סגירה</button>';
 
