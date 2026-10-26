@@ -384,6 +384,22 @@ addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(!$('#ovOpen').hidde
 
 /* ---------------- init ---------------- */
 S=load();save();
+/* code 2029 was stopped: take back the clothes it gave (unless code 1953, which also gives them, was used) */
+try{const used=JSON.parse(localStorage.getItem('hanasi:codes')||'[]');
+  if(used.includes('8f0f97e140e126a4404a09eb1e14a53b7c742701c4290a5d1702d14daec22ee8')&&!S.end2029){
+    S.end2029=1;
+    if(!used.includes('592fbed6f4ef4a643b0c5dec00a9a32f69a4027aedb972265cd9237b7b31d564')){
+      localStorage.removeItem('hanasi:grant');
+      // the code added the whole catalogue in one go: a burst of 'archive' items with the same time stamp
+      const by={};S.inv.forEach(x=>{if(x.o==='archive'){const k=Math.floor(x.t/3000);(by[k]=by[k]||[]).push(x)}});
+      const burst=new Set();Object.values(by).forEach(g=>{if(g.length>=20)g.forEach(x=>burst.add(x.u))});
+      S.inv=S.inv.filter(x=>!burst.has(x.u));
+    }
+    save();
+    setTimeout(()=>{const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:1rem';
+      o.innerHTML='<div style="background:#000;border:3px solid #F3E03B;box-shadow:10px 10px 0 #FD1D1D;padding:2rem 2.4rem 1.6rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1.2rem"><b style="font-family:Karantina,sans-serif;font-size:clamp(3rem,10vw,5.5rem);line-height:.9;color:#F3E03B">דודו צוק נגמר לך</b><button type="button" style="font-family:Karantina,sans-serif;font-size:1.6rem;background:#FD1D1D;color:#fff;border:0;padding:.3rem 1.6rem 0;cursor:pointer">הבנתי</button></div>';
+      o.querySelector('button').onclick=()=>o.remove();document.body.appendChild(o)},700);
+  }}catch(e){}
 /* a code on the main site can grant the whole collection */
 try{const g=JSON.parse(localStorage.getItem('hanasi:grant')||'null');if(g&&g.lockerAll){let n=0;ITEMS.forEach(it=>{if(!S.inv.some(x=>x.i===it.id)){S.inv.push(newInst(it,'archive'));n++}});localStorage.removeItem('hanasi:grant');save();if(n)setTimeout(()=>toast(`קיבלתם את כל הבגדים: ${n} פריטים חדשים באוסף`,'gold'),900)}}catch(e){}
 if(S.fresh){delete S.fresh;save();setTimeout(()=>toast('ברוכים הבאים ללוקר! קיבלתם 2 ארגזים במתנה','gold'),600)}
