@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>פוצצו את השיכוני – שבט הנשיא</title>
+<meta name="description" content="פוצצו את השיכוני: השיכוני בחולצה הצהובה, חדר מרופד ו־51 כלים להרוס אותה. פיזיקה אמיתית, קומבואים, מטבעות ונשקים לפתוח.">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="../apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karantina:wght@400;700&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/buddy.css?v=1">
+</head>
+<body>
+<div id="app">
+  <div id="stageWrap"><canvas id="stage" aria-label="זירת המשחק"></canvas>
+    <div id="combo" aria-live="polite"><b></b><span>קומבו</span><i></i></div>
+    <div id="banner"></div>
+    <button id="finBtn" hidden>מכת גמר!</button>
+    <button id="c4Btn" hidden>פוצץ</button>
+  </div>
+
+  <header id="hud" hidden>
+    <button class="hb" id="menuBtn" aria-label="תפריט"><svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg></button>
+    <div class="coins" id="coins"><i class="cn"></i><b>0</b></div>
+    <div class="info" id="info"></div>
+    <div class="hp" title="בריאות הבובה"><div id="hpFill"></div></div>
+    <div class="tools">
+      <button class="hb" id="slowBtn" aria-pressed="false" title="הילוך איטי"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M12 8v5l3 2" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M9 2h6v2H9z"/></svg></button>
+      <button class="hb" id="gravBtn" title="כבידה"><svg viewBox="0 0 24 24"><path d="M12 3v13M6 11l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.8"/><path d="M4 20h16v2H4z"/></svg><em id="gravVal">1</em></button>
+      <button class="hb" id="sndBtn" title="צליל"><svg viewBox="0 0 24 24"><path d="M3 9h4l5-4v14l-5-4H3z"/><path class="w" d="M15 8c2 2 2 6 0 8M18 5c4 4 4 10 0 14" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+      <button class="hb" id="fsBtn" title="מסך מלא"><svg viewBox="0 0 24 24"><path d="M3 3h7v3H6v4H3zM14 3h7v7h-3V6h-4zM3 14h3v4h4v3H3zM18 14h3v7h-7v-3h4z"/></svg></button>
+    </div>
+  </header>
+
+  <nav id="dock" hidden>
+    <div class="cats" id="cats" role="tablist"></div>
+    <div class="list" id="wlist"></div>
+  </nav>
+  <div id="tip" hidden></div>
+
+  <!-- loading -->
+  <section id="load" class="screen on">
+    <div class="ld"><canvas id="ldIcon" width="160" height="160"></canvas><h1>פוצצו את השיכוני</h1><div class="bar"><div id="ldBar"></div></div><p id="ldTxt">טוען...</p></div>
+  </section>
+
+  <!-- title -->
+  <section id="title" class="screen">
+    <a class="back" href="../#games">→ לאתר השבט</a>
+    <div class="tcoins"><i class="cn"></i><b id="tCoins">0</b></div>
+    <div class="logo"><small>שבט הנשיא מציג</small><h1>פוצצו את השיכוני</h1><p>51 כלים · פיזיקה אמיתית · בלי רחמים</p></div>
+    <div class="modes">
+      <button data-mode="sandbox"><b>ארגז חול</b><span>כל מה שפתחתם, בלי הגבלות</span></button>
+      <button data-mode="challenge"><b>אתגרים</b><span id="chCount">18 משימות</span></button>
+      <button data-mode="survival"><b>הישרדות</b><span id="svBest">הבובה מתחזקת בכל סיבוב</span></button>
+      <button data-mode="chaos"><b>כאוס</b><span>הכל קורה לבד, כל הנשקים</span></button>
+    </div>
+    <div class="sub">
+      <button data-open="shop">חנות</button><button data-open="ach">הישגים</button><button data-open="settings">הגדרות</button>
+    </div>
+  </section>
+
+  <!-- overlays -->
+  <section id="ov" class="ov" hidden><div class="box" id="ovBox"></div></section>
+  <div id="toasts"></div>
+</div>
+<script src="js/core.js?v=1"></script>
+<script src="js/physics.js?v=1"></script>
+<script src="js/fx.js?v=1"></script>
+<script src="js/dummy.js?v=1"></script>
+<script src="js/arenas.js?v=1"></script>
+<script src="js/game.js?v=1"></script>
+<script src="js/kit.js?v=1"></script>
+<script src="js/modes.js?v=1"></script>
+<script src="js/w-melee.js?v=1"></script>
+<script src="js/w-boom.js?v=1"></script>
+<script src="js/w-guns.js?v=1"></script>
+<script src="js/w-elem.js?v=1"></script>
+<script src="js/w-crazy.js?v=1"></script>
+<script src="js/ui.js?v=1"></script>
+</body>
+</html>
