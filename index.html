@@ -9382,7 +9382,7 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
     const o=document.createElement('div');o.className='code-end';o.innerHTML='<div><b></b><button type="button">הבנתי</button></div>';
     o.querySelector('b').textContent=m;o.querySelector('button').onclick=()=>o.remove();document.body.appendChild(o);
   }
-c.trim().toLowerCase().replace(/\s+/g,'');
+  const norm=c=>c.trim().toLowerCase().replace(/\s+/g,'');
   const sha=async t=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
   const edit=(key,fresh,f)=>{let s=null;try{s=JSON.parse(localStorage.getItem(key))}catch(e){}if(!s||typeof s!=='object')s=fresh();f(s);try{localStorage.setItem(key,JSON.stringify(s))}catch(e){}};
   function give(g){
