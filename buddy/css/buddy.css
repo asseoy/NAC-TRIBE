@@ -98,7 +98,7 @@ body.hand #stage{cursor:none}
 .screen.on{display:flex}
 #load{background:#000;align-items:center;justify-content:center}
 .ld{display:flex;flex-direction:column;align-items:center;gap:10px}
-.ld h1{font:700 72px/.9 var(--display);color:var(--yellow)}
+.ld h1{font:700 60px/.9 var(--display);text-align:center;color:var(--yellow)}
 .ld .bar{width:260px;height:14px;border:2px solid var(--line);background:#111}
 #ldBar{height:100%;width:0;background:var(--flag);transition:width .2s}
 .ld p{font-size:14px;color:var(--muted)}
@@ -109,7 +109,7 @@ body.hand #stage{cursor:none}
 #title .tcoins{position:absolute;top:14px;left:16px}
 .logo{text-align:center;animation:logoIn .7s cubic-bezier(.2,1.6,.4,1) both}
 .logo small{font:700 24px/1 var(--display);color:#fff;background:var(--red);padding:4px 12px 0}
-.logo h1{font:700 clamp(84px,16vw,190px)/.8 var(--display);color:var(--yellow);text-shadow:7px 7px 0 var(--red),10px 10px 0 #000;margin-top:10px;animation:logoWob 3s ease-in-out infinite}
+.logo h1{font:700 clamp(62px,11.5vw,150px)/.85 var(--display);color:var(--yellow);text-shadow:7px 7px 0 var(--red),10px 10px 0 #000;margin-top:10px;animation:logoWob 3s ease-in-out infinite}
 .logo p{font-size:clamp(15px,2vw,19px);color:#e6e0d8;margin-top:6px}
 @keyframes logoIn{0%{transform:scale(.3) rotate(-12deg);opacity:0}100%{transform:none;opacity:1}}
 @keyframes logoWob{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg) scale(1.02)}}
@@ -187,5 +187,5 @@ body.hand #stage{cursor:none}
   .wc{width:58px;height:62px}.wc canvas{width:40px;height:40px;margin-left:-20px}.wc b{font-size:14px}.wc .pr{top:14px;font-size:14px}
   .hb{width:36px;height:36px}.hp{width:60px}.coins{height:36px;font-size:21px}
   #combo{top:50px}#combo b{font-size:56px}
-  #title{justify-content:flex-start}.logo h1{font-size:84px}.modes b{font-size:30px}.modes span{display:none}
+  #title{justify-content:flex-start}.logo h1{font-size:64px}.modes b{font-size:30px}.modes span{display:none}
 }
