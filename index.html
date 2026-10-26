@@ -9416,5 +9416,245 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
   });
 })();
 </script>
+<!-- ================= שאלו את השטן (tribe Q&A bot, answers only from the site's own data) ================= -->
+<style>
+.sdv-btn{position:fixed;right:34px;bottom:14px;z-index:155;display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;background:#000;color:#fff;border:2px solid #2a2a2a;cursor:pointer;font-family:var(--display);font-size:1.45rem;line-height:1;transition:transform .15s,border-color .15s;-webkit-tap-highlight-color:transparent}
+.sdv-btn:hover{transform:translateY(-3px);border-color:var(--yellow)}
+.sdv-btn img{width:46px;height:46px;object-fit:contain;transform-origin:50% 90%}
+.sdv-btn:hover img{animation:sdvWig .5s}
+.sdv-btn .sdv-say{position:absolute;bottom:calc(100% + 8px);right:0;white-space:nowrap;background:var(--yellow);color:#000;padding:4px 10px;font-size:1.2rem;border:2px solid #000;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s;pointer-events:none}
+.sdv-btn.talk .sdv-say{opacity:1;transform:none}
+body.arena-open .sdv-btn,body.arena-open .sdv-panel,body.sdv-on .sdv-btn{display:none}
+@keyframes sdvWig{0%,100%{transform:rotate(0)}25%{transform:rotate(-9deg)}75%{transform:rotate(9deg)}}
+
+.sdv-panel{position:fixed;right:34px;bottom:14px;z-index:160;width:min(390px,calc(100vw - 48px));height:min(580px,calc(100dvh - 28px));display:flex;flex-direction:column;background:var(--chalk);color:var(--text);border:2px solid #2a2a2a;box-shadow:0 18px 40px rgba(0,0,0,.35);direction:rtl}
+.sdv-panel[hidden]{display:none}
+.sdv-head{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#000;color:#fff}
+.sdv-head img{width:52px;height:52px;object-fit:contain;flex-shrink:0}
+.sdv-head h3{margin:0;font-family:var(--display);font-weight:700;font-size:1.9rem;line-height:1;color:var(--flag)}
+.sdv-head p{margin:2px 0 0;font-size:.85rem;line-height:1.3;color:#cfc9c0}
+.sdv-head .sdv-x{margin-inline-start:auto;align-self:flex-start;background:none;border:2px solid #2a2a2a;color:#fff;width:34px;height:34px;font-size:1.2rem;line-height:1;cursor:pointer}
+.sdv-head .sdv-x:hover{border-color:var(--yellow);color:var(--yellow)}
+.sdv-panel .scarf{height:8px;flex-shrink:0}
+.sdv-log{flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:10px;font-size:1rem;line-height:1.55}
+.sdv-m{max-width:88%;padding:8px 12px;border:1px solid var(--line);white-space:pre-line;overflow-wrap:anywhere}
+.sdv-m.d{align-self:flex-start;background:#000;color:#fff;border-color:#2a2a2a}
+.sdv-m.d b{color:var(--yellow);font-weight:700}
+.sdv-m.u{align-self:flex-end;background:transparent}
+.sdv-m.dots{letter-spacing:.3em;color:var(--yellow)}
+.sdv-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 8px}
+.sdv-chips button{font-family:var(--body);font-size:.85rem;line-height:1.3;padding:4px 9px;background:transparent;border:1px solid var(--line);color:var(--text);cursor:pointer;transition:border-color .15s,transform .15s}
+.sdv-chips button:hover{border-color:var(--red);transform:translateY(-2px)}
+.sdv-form{display:flex;gap:6px;padding:8px 10px;border-top:2px solid #2a2a2a;background:#000}
+.sdv-form input{flex:1;min-width:0;font-family:var(--body);font-size:1rem;padding:8px 10px;border:2px solid #2a2a2a;background:#141212;color:#fff}
+.sdv-form input:focus{outline:none;border-color:var(--yellow)}
+.sdv-form button{font-family:var(--display);font-size:1.4rem;line-height:1;padding:0 16px;background:var(--red);color:#fff;border:2px solid #000;cursor:pointer}
+.sdv-form button:hover{background:var(--flag)}
+@media (max-width:640px){
+  .sdv-btn{right:30px;bottom:10px;font-size:1.25rem;padding:4px 10px 4px 4px}
+  .sdv-btn img{width:38px;height:38px}
+  .sdv-panel{right:26px;left:4px;bottom:4px;width:auto;height:calc(100dvh - 8px)}
+}
+</style>
+<button class="sdv-btn" id="sdvBtn" type="button" aria-label="שאלו את השטן של הנשיא"><span class="sdv-say" id="sdvSay">יש שאלות?</span><img src="assets/devil.webp" alt="" width="452" height="462">שאלו את השטן</button>
+<div class="sdv-panel" id="sdvPanel" hidden role="dialog" aria-label="שאלו את השטן">
+  <div class="sdv-head"><img src="assets/devil.webp" alt="" width="452" height="462"><div><h3>השטן של הנשיא</h3><p>יודע כל מה שיש במאגר של השבט. מה שלא כתוב שם, הוא לא ממציא.</p></div><button class="sdv-x" id="sdvX" type="button" aria-label="סגירה">✕</button></div>
+  <div class="scarf"></div>
+  <div class="sdv-log" id="sdvLog" aria-live="polite"></div>
+  <div class="sdv-chips" id="sdvChips"></div>
+  <form class="sdv-form" id="sdvForm" autocomplete="off"><input id="sdvIn" type="text" maxlength="200" placeholder="שאלו משהו על השבט" aria-label="שאלה לשטן"><button type="submit">שאל</button></form>
+</div>
+<script>
+(()=>{
+  if(typeof LAYERS==='undefined'||typeof FAC==='undefined') return;
+  const $=id=>document.getElementById(id);
+  const btn=$('sdvBtn'),panel=$('sdvPanel'),log=$('sdvLog'),chips=$('sdvChips'),form=$('sdvForm'),inp=$('sdvIn');
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const B=s=>'<b>'+esc(s)+'</b>';
+
+  /* ---------- text matching ---------- */
+  const norm=s=>' '+String(s).toLowerCase().replace(/[־\-–—]/g,' ').replace(/[֑-ׇ]/g,'').replace(/[׳'`’״"]/g,'').replace(/[^א-תa-z0-9]+/g,' ').replace(/\s+/g,' ').trim()+' ';
+  const toks=s=>norm(s).trim().split(' ').filter(Boolean);
+  const PFX=/^[והבלמשכ]{1,3}$/;
+  const tokEq=(q,e)=>{if(q===e) return true;const alts=[e];if(e.length>2&&e[0]==='ה') alts.push(e.slice(1));    return alts.some(a=>q===a||(q.length>a.length&&q.endsWith(a)&&PFX.test(q.slice(0,q.length-a.length))))};
+  // does the token list q contain entity tokens e in order? returns start index or -1
+  const findSeq=(q,e)=>{if(!e.length) return -1;for(let i=0;i+e.length<=q.length;i++){let ok=true;for(let j=0;j<e.length;j++) if(!tokEq(q[i+j],e[j])){ok=false;break}if(ok) return i}return -1};
+  const has=(n,re)=>re.test(n);
+
+  /* ---------- knowledge from the site's own data ---------- */
+  const yearsOf=n=>LAYERS.filter(l=>l[4]===n);
+  const LAYER_ENT=[];LAYERS.forEach(l=>{LAYER_ENT.push({l,t:toks(l[1])});if(l[1]!==l[4]&&!l[4].includes('/')) LAYER_ENT.push({l,t:toks(l[4]),base:1});
+    if(l[4].includes('/')) l[4].split('/').forEach(p=>LAYER_ENT.push({l,t:toks(p)}))});
+  // layer names that are also ordinary words or facility types: only count them after the word "שכבה/שכבת/מחזור"
+  const AMBIG=new Set(['אדום','תורן','עוז','אתגר','עצמה','להב','יובל','סערה','כפיר','גולן','דקל','אלמוג','רותם','איתן','עומר','ראם','לביא','שמשון','מדוזה','ארד','תבור','סהר','ברקת']);
+  const FAC_ENT=[];FAC.forEach(f=>{if(!f.y) return;const t=toks(f.n);FAC_ENT.push({f,t,k:f.n});if(t[0]==='the'&&t.length>1) FAC_ENT.push({f,t:t.slice(1),k:f.n});
+    // "פגסוס הראשון" / "פגסוס השני" also answer to plain "פגסוס"
+    if(t.length>1&&/^ה(ראשון|שני|ראשונה|שנייה|שניה|שלישי)$/.test(t[t.length-1])) FAC_ENT.push({f,t:t.slice(0,-1),k:t.slice(0,-1).join(' ')})});
+  const STOP=new Set(['מה','מי','זה','זאת','זו','היא','הוא','היה','הייתה','ספר','תספר','לי','על','את','שכבת','שכבה','מחזור','בבקשה','נו','יש','לך','מידע']);
+  const ANIMALS=[...new Set(LAYERS.map(l=>l[2]).filter(Boolean))].map(a=>({a,t:toks(a)}));
+  const TYPES={'שער':'שער','שערים':'שער','תורן':'תורן','תורנים':'תורן','מחסן':'מחסן','מחסנים':'מחסן','מנגנון':'מנגנון','מנגנונים':'מנגנון','חופשי':'חופשי','חופשיים':'חופשי'};
+  const TYPE_INFO={
+    'שער':'השער הוא המתקן שעוברים דרכו או מתחתיו בכניסה למחנה. הרבה פעמים ראש ענק או קשת, עם רמפות וגשרים.',
+    'תורן':'התורן הוא המתקן הגבוה של המחנה, הרבה פעמים יצור או דמות ענקית עם תצפית למעלה. מאז 1991 אסור לעבור 6 מטר.',
+    'מחסן':'המחסן הוא מבנה סגור, כמו בית, שבו שומרים את הציוד. הרבה פעמים הוא בנוי בתור דמות או מבנה מפורסם.',
+    'מנגנון':'המנגנון הוא מתקן עם חלק שזז: גלגלים, נדנדה, משהו שמסתובב.',
+    'חופשי':'המתקן החופשי הוא מה שהשכבה רוצה. אין חוקים חוץ מחוקי הבנייה.'};
+  const typeName=t=>({'שער':'השער','תורן':'התורן','מחסן':'המחסן','מנגנון':'המנגנון','חופשי':'המתקן החופשי'}[t]||'');
+  const layerOfYear=y=>LAYERS.filter(l=>l[0]===y);
+  const facOfYear=y=>FAC.filter(f=>f.y===y);
+  const order=['שער','תורן','מחסן','מנגנון','חופשי'];
+  const facList=y=>{const fs=facOfYear(y).slice().sort((a,b)=>(order.indexOf(a.t)+1||9)-(order.indexOf(b.t)+1||9));
+    return fs.map(f=>(typeName(f.t)?typeName(f.t)+' ':'')+B(f.n)).join(', ')};
+  const layerLine=l=>{const fut=l[0]>THIS_YEAR,now=l[0]===THIS_YEAR;
+    return 'שכבת '+B(l[1])+(fut?', שעדיין בשבט ומסיימת ב־'+l[0]:now?', שסיימה השנה ('+l[0]+')':', מחזור '+l[0])+(l[2]?'. החיה שלה: '+B(l[2])+'.':'.')};
+
+  /* ---------- hand-written facts (from the site's "על השבט" + the tribe's archive) ---------- */
+  const nL=LAYERS.filter(l=>l[0]<=THIS_YEAR).length,nF=FAC.filter(f=>f.y).length;
+  const FAQ=[
+    [/צבע/, 'אדום ושחור, מאז שכבת הוריקאן ב־1993. לפני זה: עד 1978 כל שכבה עם צבע משלה, ב־1978 החולצה הראשונה בצהוב ושחור, ומ־1978 עד 1993 כחול לבן, בהשראת שבט צהלה.'],
+    [/ ה?ערכ/, 'שלושת ערכי השבט: '+B('משפחתיות')+', '+B('מקצוענות')+' ו'+B('מצוינות')+'. השבט הוא משפחה, המחנאות ברמה הכי גבוהה, ושואפים תמיד למקום הראשון.'],
+    [/אדום עולה/, B('אדום עולה!')+' קריאת השבט. ואם שאלתם, כן, אני גם אדום וגם עולה. מהגיהנום.'],
+    [/מחסן מערכת/, B('מחסן מערכת')+' הוא סימון של מחסן במאגר. כך סומנו: '+FAC.filter(f=>f.k.includes('מחסן מערכת')).map(f=>B(f.n)+' ('+f.y+')').join(', ')+'.'],
+    [/מוטו|סלוגן|שפיות/, B('מחנאות מעל שפיות')+'. המוטו שבראש כל מסמך של השבט. וגם "אדום עולה", "הנשיא חוגג" (זוועה, 1978) ו"הנשיא זה הכי אחי" (סטיקר, 2003).'],
+    [/ויצמן|על שם מי|למה נקרא|שם השבט|מה השם/, 'השבט נקרא על שם '+B('חיים ויצמן')+', הנשיא הראשון של מדינת ישראל, שמת ב־1952. השבט הוקם שנה אחרי.'],
+    [/הוקם|הקמה|נוסד|מתי קם|בן כמה|כמה שנים קיים/, 'שבט הנשיא הוקם ב־'+B('1953')+' כשלוחה של שבט קהילה. כלומר '+(THIS_YEAR-1953)+' שנה של מחנאות מעל שפיות.'],
+    [/צעיף/, 'הצעיף: '+B('אדום עם ארבעה פסים שחורים')+'. הצעיף הראשון היה של שכבת טיראן ב־2000. הצעיף של השבט הומצא בשכבת סיני, וכעבור כמה שנים הועתק כ"מקורי".'],
+    [/סמל|לוגו/, 'הסמל המשולש הומצא ב־1997: מסגרת שחורה עם קו צהוב ופס שמחלק אותו לשניים. בחצי השמאלי '+B('שושנת הצופים')+' בירוק, אחוזה ביד, ובחצי הימני "שבט הנשיא" באותיות שחורות מרובעות, על רקע אדום.'],
+    [/חיית השבט|החיה של השבט|חיה של השבט|השור/, 'חיית השבט היא '+B('השור')+'. במקור זו הייתה החיה של שכבת אורן (2010), והיא הפכה לחיה של כל השבט. למה? אף אחד לא יודע. גם לא אני.'],
+    [/הכי גבוה|גבוה ביותר|שיא|גובה/, 'המתקן הכי גבוה בתולדות השבט: '+B('המגדלור')+', 14 מטר, ב־1990. אחריו בקבוק הזכוכית, 13.5 מטר, באותה שנה. שניהם בשיטת חלון על חלון. היום מותר עד 6 מטר.'],
+    [/6 מטר|שישה מטר|הגבל|קרס|ביג בן/, 'ב־1991 '+B('הביג בן')+', 10 מטר, קרס במחנה הקיץ כשעמדו עליו שכב"גיסטים. מאז יש בכל ההנהגה הגבלת בנייה ל־'+B('6 מטר')+', ושיטת חלון על חלון הופסקה.'],
+    [/חלון על חלון/, 'פעם הותר לבנות חלון על חלון, והיו אפילו מתקנים של חלון על חלון על חלון. ככה נבנו המגדלור ובקבוק הזכוכית. השיטה הופסקה ב־1991, אחרי שהביג בן קרס.'],
+    [/יוטה|ציפוי|מצפים| בד /, 'עד 1996 ציפו את המתקנים ב'+B('יוטה')+' חומה, ומשם הצבע החום של המחנה. כשרצו צבע, טבלו את היוטה בדליים במגרש. מאז מצפים בבד.'],
+    [/רעות|תל ברוך/, 'שבט '+B('רעות')+' הוקם ב־2017 בתל ברוך צפון, והוא בעצם שלוחה של הנשיא. השכב"ג של הנשיא הדריך בו ובנה אותו.'],
+    [/קהילה/, 'הנשיא הוקם ב־1953 כשלוחה של שבט '+B('קהילה')+'.'],
+    [/צהלה/, 'שכבת זוועה (1978) לקחה השראה משבט '+B('צהלה')+' וקבעה לשבט צבע קבוע: כחול לבן. עד הוריקאן ב־1993.'],
+    [/בית דני/, B('בית דני')+'? השבט היריב. אצלם בפוקר יושב מדריך ירוק, ובפקמן הרוח הירוקה שלהם מהירה יותר. כמוני, רק בלי סטייל.'],
+    [/שיכון/, 'ב־2017 שכבת ארד החליפה את החיה שלה מאריה לדוב, כי האריה מזוהה עם '+B('השיכון')+'. מעבר לזה, אין לי מה להגיד. אני שטן, לא עיתונאי.'],
+    [/פסקריה/, B('הפסקריה')+' נקראה על שמו של מרכז עבר בשם פסקר.'],
+    [/כוכבים/, 'מסורת הכוכבים הומצאה על ידי מרכז בוגר משכבת '+B('יובל')+'.'],
+    [/חאקי/, 'החאקי הוותיק ביותר היה בכלל '+B('מדי טייס מ־1983')+'. השם הראשון נרשם עליו ב־2010, הוא אבד ב־2019 ושוחזר. החאקי המקורי הוותיק ביותר שנשאר עובר בירושה כבר יותר מ־18 שנה, מ־2003.'],
+    [/פיל|מסעד|אכל/, 'מתחילת שנות ה־2000 השכב"ג היה יוצא פעם בשבוע לאכול במסעדת '+B('הפיל')+' בצומת הפיל, עד שהמסעדה נסגרה.'],
+    [/מנהר|ביוב|השבע/, 'מתחת למבנה השבט עוברות '+B('מנהרות ביוב וחשמל')+'. בעבר נערכו בהן טקסים והשבעות. אני גר קצת יותר עמוק.'],
+    [/נשרף|שריפה| אש /, 'מבנה השבט '+B('נשרף')+' בעבר ונבנה מחדש. ולא, זה לא הייתי אני.'],
+    [/פינת חי|גג/, 'בשנות ה־70 הייתה לשבט '+B('פינת חי על הגג')+'.'],
+    [/פסטיבל|אביב/, 'השנה היחידה שבה הנשיא זכה ב'+B('פסטיבל אביב')+' היא 2004, שכבת עוצמה. ב־2005 שכבת אורן, בכיתה ז׳, הופיעה עם "סיפור של עכבר". ושכבת נחשון (2009) הושעתה מהפסטיבל כעונש על מכות בחנוכה.'],
+    [/טריפל|דאבל|פרס/, 'ב־1992 שכבת ח׳ לקחה '+B('טריפל')+': מקום ראשון במחנאות, בפעילות ובספארי. ב־2010 אורן לקחו '+B('דאבל אדום')+' בעזרת "מחתרת פעילות".'],
+    [/מחתרת/, B('מחתרת פעילות')+' הומצאה בידי שכבת אורן (2010): צוות שהכין תיקי מתקן, פעילויות והפעלות לכל שכבה. ב־2013 היתה השנה היחידה שבה מרכזים צעירים יכלו להציע את עצמם למחתרת.'],
+    [/שיר|ג׳ינגל|גינגל|ראפ/, 'שירי השבט: "אדום עולה", "הנשיא זה משפחה", "נשיא מסוכן", "ברוכים הבאים לגיהנום" (השיר האהוב עליי), "מי מזיע לידי" ושיר שכבת סיני. יש נגן בפינה של האתר, ומשחק "נחשו את הג׳ינגל".'],
+    [/חנוכיון|חנוכה/, 'ה'+B('חנוכיון')+' נבנה בשבט בדצמבר ומודלק בלילה: תורן, מנגנון (לפעמים עם אש), שער, חופשי וכתובות אש. היו בו אריה ועקרב מפתילות בוערות, ונום וקרנג׳, קינג קונג, מצרים וקרקס. ואת הדרקון שמדליק את החנוכייה כבר ראיתם במשחקים.'],
+    [/פורימון|פורים/, 'ה'+B('פורימון')+' הוא יריד באביב שבונים בשבט מסנדות: מגלשות ענק עם בד, ספינת פיראטים, גלגל ענק, טרמפולינה ודוכנים, עם שערים בנושאים כמו מלחמת הכוכבים, מלך האריות ומריו.'],
+    [/מחנה קיץ|סוגי מתקנים|איזה מתקנים בונים|סוג/, 'במחנה הקיץ כל שכבה בונה חמישה מתקנים: '+B('שער')+', '+B('תורן')+', '+B('מחסן')+', '+B('מנגנון')+' ו'+B('חופשי')+'. השלד מסנדות קשורות בחבל, ומעליו בד. מאז 2004 בערך הסגנון הוא יצורים ענקיים בפאות משולשות, עם ראשים גדולים ושיניים.'],
+    [/סנד|בוס|יתר|בזנט|קשיר|חלון|בסיס|בניה|בנייה|לבנות/, 'בנייה מחנאית בקצרה: השלד מ'+B('סנדות')+' שנקשרות בקשירה מרובעת בכל זווית ישרה. '+B('חלון')+' = לפחות 2 רגליים ו־2 רוחביות: עד 6 מטר גובה, רגליים במרחק 2 עד 4 מטר, הרוחבית הראשונה עד 2 מטר מהרצפה. איקסים על כל מישור, '+B('יתרים')+' לבזנטים ולעצים, ו'+B('בוסים')+' דקים לראשים ולגפיים.'],
+    [/כמה שכבות/, 'עד היום סיימו בשבט '+B(String(nL))+' שכבות, מלהב הראשונה (1967) ועד רותם השנייה ('+THIS_YEAR+'). ועוד כמה שעדיין בשבט, עד פולג (2030).'],
+    [/כמה מתקנים/, 'במאגר של האתר יש '+B(String(nF))+' מתקנים, ממגדל אייפל של 1978 ועד מחנה '+THIS_YEAR+'.'],
+    [/פעמיים|שמות שחזרו|חזרו/, 'שמות שכבה שהיו פעמיים: '+B(TWICE.join(', '))+'. באתר הן "הראשונה" ו"השנייה".'],
+    [/ג׳וחה|גוחה/, B('ג׳וחה')+' (1971) זה ראשי תיבות של "ג׳ון וחניכיו". ג׳ון, מדריך חמישייה בשכבה, המציא את השם בעצמו.'],
+    [/אתר|מי בנה|מי יצר|מי עשה/, 'את האתר בנה '+B('איתן אסיאו')+', מתוך המאגר של שבט הנשיא. מצאתם טעות או עובדה חסרה? עדכנו את המאגר.'],
+    [/משחק|ארקייד|פוקר|שש בש|פקמן|לוקר|שיכוני/, 'באתר יש 17 משחקים: ארקייד הפלנגה, בלוק הנשיא, '+B('פקמן הנשיא')+', '+B('שש בש')+', '+B('פוקר')+' (שם אני הדילר, ואני מנצח), טורניר לשניים עד ארבעה, ועוד. יש גם את הלוקר עם ארגזים, ואת "פוצצו את השיכוני".'],
+    [/ ה?קוד(ים)? /,'קודים? תחפשו לבד. השטן לא מלשין.'],
+    [/פנאט|דרג|נקוד/, 'כל משחק באתר נותן '+B('נקודות פנאט')+', והדרגה שלכם מופיעה בסרגל העליון. ברמה הקשה, "מחנאות מעל שפיות", הנקודות כפולות.'],
+  ];
+  const FACTS=[
+    'השבט נקרא על שם חיים ויצמן, הנשיא הראשון, והוקם ב־1953.','מתחת למבנה השבט יש מנהרות ביוב וחשמל, ופעם עשו בהן השבעות.','בשנות ה־70 הייתה לשבט פינת חי על הגג.',
+    'החאקי הוותיק ביותר בשבט היה מדי טייס מ־1983.','ב־1990 נבנה המגדלור, 14 מטר. עד היום שיא השבט.','עד 1996 ציפו מתקנים ביוטה וטבלו אותה בדליי צבע במגרש.',
+    'השור הוא חיית השבט כי הוא היה החיה של אורן. למה? אף אחד לא יודע.','ג׳וחה זה ראשי תיבות של ג׳ון וחניכיו.','ב־2021 האסגרדיאן תוכנן כמתקן חופשי, וברגע האמת הפך לשער.',
+    'הפסקריה נקראה על שם מרכז עבר בשם פסקר.','הנשיא זכה בפסטיבל אביב פעם אחת בלבד: 2004, שכבת עוצמה.','ב־1992 שכבת ח׳ לקחה טריפל: מחנאות, פעילות וספארי.'];
+  const JOKES=['ניסיתי לבנות תורן של 7 מטר. המהנדס אמר לי "לך לעזאזל". אמרתי לו: אני גר שם.','למה אני לא בונה חנוכיון? כי אצלי הכל כבר בוער.',
+    'כמה שכב"גיסטים צריך כדי להחליף נורה? אחד שיקשור, וארבעה שיגידו שהקשירה לא מרובעת.','מה ההבדל ביני לבין בית דני? אני לפחות מפחיד.','בגיהנום יש מזגן. שיקרו לכם.'];
+  const OPEN=['','','','חה חה! ','תקשיב טוב, פנאט: ','קל מדי. ','אפילו בגיהנום יודעים את זה: '];
+
+  /* ---------- the brain ---------- */
+  let quiz=null;
+  function answer(raw){
+    const n=norm(raw),q=toks(raw);
+    if(!q.length) return 'נו? תשאל משהו.';
+    // a quiz question is waiting for an answer
+    if(quiz){const z=quiz;quiz=null;const want=norm(z.a).trim();
+      if(n.includes(' '+want+' ')||(want.length>3&&n.includes(want))||toks(z.a).every(t=>q.some(x=>tokEq(x,t)))) return pick(['נכון! ','בול. ','אוף, צדקת. '])+'התשובה: '+B(z.a)+'. עוד אחת? כתבו "חידון".';
+      if(!has(n,/חידון|שאלה|עובדה|בדיחה/)) return pick(['טעות! ','לא. ממש לא. ','חה חה, לא. '])+'התשובה: '+B(z.a)+'. רוצים עוד? כתבו "חידון".'}
+    // memorial layer: no devil jokes here
+    if(has(n,/ברקת|רועי|7 באוקטובר|שבעה באוקטובר/)){const l=LAYERS.find(x=>x[5]);if(l) return 'שכבת '+B(l[1])+' (מחזור '+l[0]+', החיה: '+esc(l[2])+') קרויה על שם '+B('סמ״ר רועי ברקת ז״ל')+', שנפל בגבורה בקרב ב־7 באוקטובר. יהי זכרו ברוך.'}
+    if(has(n,/^ (שלום|היי|הי|אהלן|מה קורה|מה נשמע|יו|בוקר טוב|ערב טוב)/)) return pick(['אהלן, פנאט. מה רוצים לדעת על השבט?','שלום שלום. שאלו אותי על שכבה, מתקן או שנה.','מה קורה? אני פה, מתחת לאתר, בין המנהרות.']);
+    if(has(n,/מי אתה|מה אתה|מי זה השטן|איך קוראים לך/)) return 'אני '+B('השטן של הנשיא')+'. הקמע של השבט, הדילר בפוקר, ומי שמציץ מהצד כשאתם משחקים. אני יודע מה שיש במאגר של השבט: שכבות, מתקנים, היסטוריה, סמלים ומסורות.';
+    if(has(n,/ אתה ai | בינה מלאכותית|צאט|רובוט|אמיתי/)) return 'אני לא בינה מלאכותית, אני שטן. אני עונה רק ממה שכתוב במאגר של השבט, אז אני לא ממציא דברים. מה שלא כתוב, לא אדע.';
+    if(has(n,/תודה|תודות|אחלה|מלך|גבר|אלוף/)) return pick(['בשמחה. תחזרו כשתרצו, אני לא הולך לשום מקום.','אין על מה. תגידו לחברים שהשטן נחמד.','נו, די, אני מסמיק. כלומר, יותר מתמיד.']);
+    if(has(n,/מטומטם|טיפש|דפוק|סתום|שונא|מעצבן|מגעיל|חרא/)) return pick(['עלבונות? אני עשוי מאש, חמוד. תשאל משהו על השבט.','שמעתי יותר גרוע מבית דני. נו, שאלה?']);
+    if(has(n,/בדיחה|תצחיק|משהו מצחיק/)) return pick(JOKES);
+    if(has(n,/חידון|תשאל אותי|שאלה עליי|תבחן/)){if(typeof QUIZ==='undefined'||!QUIZ.length) return 'אין לי חידון כרגע.';quiz=pick(QUIZ);return 'שאלה מהשטן: '+B(quiz.q)+'\nרמז: '+esc(quiz.h)}
+    if(has(n,/עובדה|תספר לי משהו|ספר לי משהו|משהו מעניין/)) return 'עובדה: '+pick(FACTS);
+
+    const wantLayer=has(n,/ שכב| מחזור/),wantFac=has(n,/מתקן|שער|תורן|מחסן|מנגנון|חופשי|נבנה|בנו/);
+    // entities
+    let fac=null,facLen=0,facKey='';FAC_ENT.forEach(e=>{if(e.t.join('').length>=3&&findSeq(q,e.t)>=0&&e.t.join(' ').length>facLen){fac=e.f;facKey=e.k;facLen=e.t.join(' ').length}});
+    const core=q.filter(t=>!STOP.has(t)).join(' ');
+    let lay=null,layLen=0;LAYER_ENT.forEach(e=>{const i=findSeq(q,e.t);if(i<0) return;
+      const after=i>0&&/שכב|מחזור/.test(q[i-1]);if(AMBIG.has(e.l[4])&&!after&&!has(n,/ חי(ה|ת) | החיה | שכב| מחזור/)&&core!==e.t.join(' ')) return;const L=e.t.join(' ').length+(after?5:0);if(L>layLen){lay=e.l;layLen=L}});
+    let ani=null,aniLen=0;ANIMALS.forEach(e=>{if(findSeq(q,e.t)>=0&&e.a.length>aniLen){ani=e.a;aniLen=e.a.length}});
+    const ym=n.match(/(?:^|[^0-9])(19[0-9]\d|20[0-3]\d)(?![0-9])/),year=ym?+ym[1]:0;
+    let type='';q.forEach(t=>{for(const k in TYPES) if(tokEq(t,k)) type=TYPES[k]});
+
+    if(ani&&has(n,/ חי(ה|ת) | החיה /)&&!wantFac&&!year&&!lay){const ls=LAYERS.filter(l=>l[2]===ani);return 'ה'+esc(ani)+' היא החיה של '+ls.map(l=>'שכבת '+B(l[1])+' ('+l[0]+')').join(', ')+'.'+(ani==='שור'?'\nוהשור גם חיית השבט כולו.':'')}
+    // a layer name with "שכבת" before it wins over a facility of the same name
+    if(lay&&fac&&!(wantLayer&&!wantFac)&&facLen>=layLen) lay=null;
+    if(fac&&!(lay&&wantLayer)){
+      const same=FAC_ENT.filter(e=>e.k===facKey).map(e=>e.f).filter((f,i,a)=>a.indexOf(f)===i),l=same.length===1&&layerOfYear(fac.y)[0];
+      return same.map(f=>B(f.n)+' נבנה ב־'+f.y+(typeName(f.t)?' בתור '+typeName(f.t):'')+(f.k?' ('+esc(f.k)+')':'')+'.').join('\n')+
+        (l?'\nזה היה המחנה של שכבת '+B(l[1])+'.':'')+(fac.tall?'\nואחד המתקנים הכי גבוהים שנבנו אי פעם בשבט.':'');
+    }
+    if(lay){
+      const all=yearsOf(lay[4]);
+      return all.map(l=>{let s=layerLine(l);if(l[3]) s+='\n'+esc(l[3]);const f=l[0]<=THIS_YEAR&&facList(l[0]);if(f) s+='\nבמחנה הקיץ שלה נבנו: '+f+'.';return s}).join('\n\n');
+    }
+    if(ani&&!year&&!has(n,/מסעד|צומת/)){
+      const ls=LAYERS.filter(l=>l[2]===ani);
+      return (ls.length===1?'ה'+esc(ani)+' היא החיה של ':'ה'+esc(ani)+' היא החיה של כמה שכבות: ')+ls.map(l=>'שכבת '+B(l[1])+' ('+l[0]+')').join(', ')+'.'+(ani==='שור'?'\nוהשור גם חיית השבט כולו.':'');
+    }
+    if(year){
+      if(year<1953) return year<1952?'ב־'+year+' עוד לא היה שבט. רק אני, והרבה אש.':'ב־1952 מת חיים ויצמן, הנשיא הראשון. שנה אחרי הוקם השבט שנקרא על שמו.';
+      if(type){const fs=facOfYear(year).filter(f=>f.t===type);
+        if(fs.length) return typeName(type)+' של '+year+': '+fs.map(f=>B(f.n)+(f.k?' ('+esc(f.k)+')':'')).join(', ')+'.';
+        if(facOfYear(year).length) return 'אין במאגר '+typeName(type).replace(/^ה/,'')+' מסומן מ־'+year+'. מה שכן נבנה: '+facList(year)+'.'}
+      const ls=layerOfYear(year),ev=EVENTS_BASE.filter(e=>e[0]===year).map(e=>esc(e[1])),f=facList(year);
+      if(!ls.length&&!ev.length&&!f) return 'על '+year+' אין לי כלום במאגר. אולי שכבה לא מתועדת. גם לשטן יש חורים בזיכרון.';
+      let s='';if(ls.length) s+=ls.map(layerLine).join('\n');
+      if(ev.length) s+=(s?'\n':'')+'מה קרה: '+ev.join('. ')+'.';
+      if(f) s+=(s?'\n':'')+'במחנה הקיץ נבנו: '+f+'.';
+      return s;
+    }
+    // FAQ: first rule whose pattern matches
+    for(const [re,a] of FAQ) if(re.test(n)) return a;
+    if(type){const ex=FAC.filter(f=>f.t===type&&f.y).slice(-3).reverse().map(f=>B(f.n)+' ('+f.y+')').join(', ');return TYPE_INFO[type]+(ex?'\nהאחרונים: '+ex+'.':'')}
+    if(ani) return 'ה'+esc(ani)+': '+LAYERS.filter(l=>l[2]===ani).map(l=>'שכבת '+B(l[1])+' ('+l[0]+')').join(', ')+'.';
+    return pick(['את זה אפילו בגיהנום לא יודעים.','אין לי מושג, וזה לא קורה לי הרבה.','זה לא כתוב במאגר, ואני לא ממציא.'])+
+      '\nאני יודע על שכבות, מתקנים, שנים, סמלים ומסורות של השבט. דברים כמו מתי יש פעולה, תשאלו את המדריכים.';
+  }
+
+  /* ---------- UI ---------- */
+  const SUG=['מה החיה של שכבת אורן?','מה התורן של 2013?','מה המתקן הכי גבוה?','מה קרה ב־1991?','מי זה בית דני?','חידון','ספר לי עובדה','בדיחה'];
+  const add=(cls,html)=>{const m=document.createElement('div');m.className='sdv-m '+cls;if(cls==='u') m.textContent=html;else m.innerHTML=html;log.appendChild(m);log.scrollTop=log.scrollHeight;return m};
+  const renderChips=()=>{chips.innerHTML='';SUG.slice().sort(()=>Math.random()-.5).slice(0,4).forEach(s=>{const b=document.createElement('button');b.type='button';b.textContent=s;b.onclick=()=>ask(s);chips.appendChild(b)})};
+  let busy=false;
+  function ask(text){
+    text=String(text).trim();if(!text||busy) return;busy=true;add('u',text);inp.value='';
+    const dots=add('d dots','...');let a;try{a=answer(text)}catch(e){a='משהו נשרף לי בראש. נסו לשאול אחרת.'}
+    const delay=Math.min(1400,450+a.length*4);
+    setTimeout(()=>{dots.remove();add('d',(/^(נכון|בול|אוף|טעות|לא\.|חה חה)/.test(a)?'':pick(OPEN))+a);busy=false;renderChips()},delay);
+  }
+  let greeted=false;
+  const open=()=>{panel.hidden=false;document.body.classList.add('sdv-on');
+    if(!greeted){greeted=true;add('d','חה חה! אני '+B('השטן של הנשיא')+'.\nתשאלו אותי על שכבות, מתקנים, שנים והיסטוריה של השבט. אפשר גם "חידון" או "בדיחה".');renderChips()}
+    setTimeout(()=>inp.focus({preventScroll:true}),50)};
+  const close=()=>{panel.hidden=true;document.body.classList.remove('sdv-on');btn.focus({preventScroll:true})};
+  btn.addEventListener('click',open);$('sdvX').addEventListener('click',close);
+  panel.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();close()}});
+  form.addEventListener('submit',e=>{e.preventDefault();ask(inp.value)});
+  // the button says something once in a while
+  const lines=['יש שאלות?','שאלו אותי על השבט','אני יודע הכל. כמעט.','חה חה!'];
+  setTimeout(function talk(){if(panel.hidden&&!document.hidden){$('sdvSay').textContent=pick(lines);btn.classList.add('talk');setTimeout(()=>btn.classList.remove('talk'),2600)}setTimeout(talk,25000+Math.random()*20000)},6000);
+  window.__sdv={answer};
+})();
+</script>
+
 </body>
 </html>
