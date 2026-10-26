@@ -367,6 +367,8 @@
   }
 
   /* ---------- start ---------- */
+  // a code on the main site unlocks everything: weapons, dummies and upgrades
+  if (S().grantAll) { const s = S(); s.owned = BD.WL.map(w => w.id).filter(i => i !== 'hand'); s.skins = Object.keys(BD.SKINS); s.up = { hit: 3, boom: 3, coin: 3 }; delete s.grantAll; BD.save.write(); }
   wire();
   loading().then(showTitle).catch(e => { console.error(e); $('#ldTxt').textContent = 'שגיאה בטעינה: ' + e.message; });
   if (location.hash.includes('test')) window.__BD = { BD, G, play, showTitle, shop, missions, settings, pauseMenu, closeOv };
