@@ -5754,10 +5754,11 @@ function pacPlay(stage,lvl,ctl){
     /* ---------- state ---------- */
     let M,G,dots,dotsLeft,score,lives,stageN,area,state,stT,pac,ghosts,frightT,frightDur,modeI,modeT,eatK,fruit,fruitShown,popups,lastDotT,since,useGlobal,globalDots,extra,recBefore,recToast,itemsGot,freezeT,last=0,clock=0,wakaAlt=0,shake=0,hidePac=false,eatenGhost=null;
     const area0=pmArea(firstStage);
-    const pct=s=>({pac:Math.min(1,.8+.03*(s-1))*(s>20?.96:1),ghost:Math.min(.97,.74+.028*(s-1)),fright:.5+.01*Math.min(10,s),tunnel:.42});
+    const pct=s=>({pac:Math.min(1,.8+.03*(s-1))*(s>20?.96:1),ghost:Math.min(.92,.74+.024*(s-1)),fright:.5+.01*Math.min(10,s),tunnel:.42});
     const sched=s=>s<5?[7,20,7,20,5,20,5,1e9]:s<13?[5,20,5,20,5,60,1,1e9]:[5,25,4,30,3,80,1,1e9];
 
     function newGame(){
+      continuing=false;
       score=0;lives=DF.lives;extra=false;itemsGot=[];recBefore=ctl.getBest()||0;recToast=false;
       elBest.textContent=fmt(recBefore);
       loadStage(firstStage,true);
@@ -5870,7 +5871,7 @@ function pacPlay(stage,lvl,ctl){
       if(M.tun[Math.floor(g.y)*PM_W+(((Math.floor(g.x)%PM_W)+PM_W)%PM_W)])return BASE*p.tunnel;
       if(g.fright)return BASE*p.fright;
       let v=p.ghost*DF.gm;
-      if(area.insane)v*=1.04;
+      if(area.insane)v*=1.02;
       if(g.i===0){const n=elroyN();if(dotsLeft<=n/2)v+=.1;else if(dotsLeft<=n)v+=.05}
       if(g.i===2&&area.name==='בית דני')v+=.06;
       return BASE*v;
@@ -5907,6 +5908,8 @@ function pacPlay(stage,lvl,ctl){
       lastDotT+=dt;since+=dt;
       const inHouse=ghosts.filter(g=>g.mode==='house').sort((a,b)=>a.i-b.i);
       if(!inHouse.length)return;
+      // a hard cap, so nobody waits in the house forever (after a death the dot counters restart)
+      for(const h of inHouse){h.ht=(h.ht||0)+dt;if(h.ht>[0,2,6,10][h.i]*DF.rel+2){h.mode='leave';h.ht=0;return}}
       const g=inHouse[0];
       if(useGlobal){const need=[0,7,17,32][g.i];if(globalDots>=need*DF.rel){g.mode='leave';if(g.i===3)useGlobal=false;return}}
       else if(g.dots>=lim(g.i)){g.mode='leave';return}
@@ -6164,7 +6167,7 @@ function pacPlay(stage,lvl,ctl){
     raf=requestAnimationFrame(frame);
     if(window.__PM_TEST__)window.__pm={get s(){return {state,stageN,score,lives,dotsLeft,pac,ghosts,frightT,modeI}},
       clearNow(){dotsLeft=0;dots.fill(0);stageClear()},go(s){loadStage(s,false);state='play'},
-      kill(){die()},maze:()=>M,dots:()=>dots,want(d){pac.want=d},power(){power()},setLives(n){lives=n}};
+      kill(){die()},maze:()=>M,dots:()=>dots,want(d){pac.want=d},tick(n){for(let i=0;i<n;i++)step(1/120)},stopLoop(){cancelAnimationFrame(raf)},power(){power()},setLives(n){lives=n}};
   }
   showStart();
   return teardown;
