@@ -1779,6 +1779,12 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
   .codes p{margin:0;font-size:1rem;color:#aaa;max-width:none}
   .codes p.ok{color:var(--yellow)}.codes p.bad{color:#ff6b6b}
   .codes.shake form{animation:cdShake .35s}
+  .code-end{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:1rem}
+  .code-end>div{background:#000;border:3px solid var(--yellow);box-shadow:10px 10px 0 var(--flag);padding:2rem 2.4rem 1.6rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1.2rem;animation:cdIn .3s ease-out}
+  .code-end b{font-family:var(--display);font-size:clamp(3rem,10vw,5.5rem);line-height:.9;color:var(--yellow)}
+  .code-end button{font-family:var(--display);font-size:1.6rem;background:var(--flag);color:#fff;border:0;padding:.3rem 1.6rem 0;cursor:pointer}
+  .code-end button:hover{background:var(--yellow);color:#000}
+  @keyframes cdIn{0%{transform:scale(.6);opacity:0}}
   @keyframes cdShake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
   @media (max-width:640px){footer{padding-bottom:230px}.codes{flex-direction:column;align-items:stretch;text-align:center}.codes form{justify-content:center}.codes input{flex:1;width:auto;min-width:0}}
   </style>
@@ -9368,10 +9374,15 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
 (()=>{
   const CODES=[
     // { h:'<sha256 of the code>', msg:'...', give:{ xp:0, lockerCoins:0, crates:{mahsan:0}, buddyCoins:0, buddyWeapons:[], buddySkins:[] } }
-    { h:'592fbed6f4ef4a643b0c5dec00a9a32f69a4027aedb972265cd9237b7b31d564', msg:'קוד 1953: כל הכסף וכל הבגדים בלוקר, והכל פתוח בפוצצו את השיכוני!', give:{ lockerCoins:999999, lockerAll:1, buddyCoins:999999, buddyAll:1 } },
-    { h:'8f0f97e140e126a4404a09eb1e14a53b7c742701c4290a5d1702d14daec22ee8', msg:'קוד 2029: כל הבגדים בלוקר!', give:{ lockerAll:1 } }
+    { h:'592fbed6f4ef4a643b0c5dec00a9a32f69a4027aedb972265cd9237b7b31d564', msg:'קוד 1953: כל הכסף וכל הבגדים בלוקר, והכל פתוח בפוצצו את השיכוני!', give:{ lockerCoins:999999, lockerAll:1, buddyCoins:999999, buddyAll:1 } }
   ];
-  const norm=c=>c.trim().toLowerCase().replace(/\s+/g,'');
+  // codes that were stopped: whoever used them gets this message once (the locker takes the clothes back)
+  const ENDED=[{ h:'8f0f97e140e126a4404a09eb1e14a53b7c742701c4290a5d1702d14daec22ee8', msg:'דודו צוק נגמר לך' }];
+  function endedNotice(m){
+    const o=document.createElement('div');o.className='code-end';o.innerHTML='<div><b></b><button type="button">הבנתי</button></div>';
+    o.querySelector('b').textContent=m;o.querySelector('button').onclick=()=>o.remove();document.body.appendChild(o);
+  }
+c.trim().toLowerCase().replace(/\s+/g,'');
   const sha=async t=>{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
   const edit=(key,fresh,f)=>{let s=null;try{s=JSON.parse(localStorage.getItem(key))}catch(e){}if(!s||typeof s!=='object')s=fresh();f(s);try{localStorage.setItem(key,JSON.stringify(s))}catch(e){}};
   function give(g){
@@ -9389,12 +9400,15 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
   }
   const form=document.getElementById('codeForm'),inp=document.getElementById('codeIn'),msg=document.getElementById('codeMsg'),box=document.getElementById('codes');
   if(!form)return;
+  {const used=store.get('codes',[]),seen=store.get('codesEnded',[]);
+   for(const x of ENDED)if(used.includes(x.h)&&!seen.includes(x.h)){seen.push(x.h);store.set('codesEnded',seen);setTimeout(()=>endedNotice(x.msg),900)}}
   const say=(t,cls)=>{msg.textContent=t;msg.className=cls||''};
   form.addEventListener('submit',async e=>{
     e.preventDefault();
     const c=norm(inp.value);if(!c){inp.focus();return}
     let h='';try{h=await sha(c)}catch(er){say('הדפדפן לא תומך בקודים, נסו דפדפן אחר','bad');return}
     const k=CODES.find(x=>x.h===h),used=store.get('codes',[]);
+    const end=ENDED.find(x=>x.h===h);if(end){say(end.msg,'bad');return}
     if(!k){say('הקוד לא נכון','bad');box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');if(typeof sound==='function')sound('bad');return}
     if(used.includes(h)){say('כבר השתמשתם בקוד הזה','bad');return}
     give(k.give||{});used.push(h);store.set('codes',used);
