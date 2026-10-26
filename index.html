@@ -1446,6 +1446,7 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
   <div class="nav-links" id="navLinks">
     <a class="l play" href="#games">משחקים</a>
     <a class="l" href="locker/?v=6">הלוקר</a>
+    <a class="l" href="buddy/">פוצצו את השיכוני</a>
       <a class="l" href="#spirit">הרוח</a>
     <a class="l" href="#about">על השבט</a>
     <a class="l" href="#timeline">ציר הזמן</a>
@@ -1527,6 +1528,26 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
     .lk-ban:hover .lk-go{background:var(--yellow);color:#000}
     .lk-new{position:absolute;top:0;left:0;background:var(--yellow);color:#000;font-family:var(--display);font-size:1.4rem;padding:.1rem .8rem 0}
     @media (max-width:640px){.lk-ban{flex-direction:column;align-items:stretch;padding:14px}.lk-fan{width:100%;height:150px}.lk-fan img{width:96px;height:122px;margin:-61px 0 0 -48px}.lk-mid{align-items:center;text-align:center}}
+    </style>
+    <a class="bd-ban" href="buddy/" aria-label="פוצצו את השיכוני – 51 כלים להרוס את השיכוני">
+      <div class="bd-art" aria-hidden="true"><img src="buddy/thumb.webp" alt="" loading="lazy"></div>
+      <div class="bd-mid"><span class="bd-new">חדש!</span><b>פוצצו את השיכוני</b><small>השיכוני בחולצה הצהובה, חדר מרופד ו־51 כלים: מחבטים, פיצוצים, נשקים, איתני הטבע ופסנתר שנופל מהתקרה. פיזיקה אמיתית, קומבואים ומטבעות.</small><i>זורקים, מפוצצים, מקפיאים, מחשמלים</i><span class="bd-go">לרסק ←</span></div>
+    </a>
+    <style>
+    .bd-ban{position:relative;display:flex;align-items:center;gap:22px;margin:-14px 0 34px;min-height:200px;padding:18px 24px;overflow:hidden;text-decoration:none;color:#fff;background:#111;border:2px solid #2a2a2a;transition:transform .15s,border-color .15s}
+    .bd-ban:hover{transform:translateY(-4px);border-color:var(--yellow)}
+    .bd-art{flex:none;width:300px;height:180px;border:3px solid #000;overflow:hidden;background:#2b2620}
+    .bd-art img{width:100%;height:100%;object-fit:cover;transition:transform .25s ease-out}
+    .bd-ban:hover .bd-art img{transform:scale(1.06) rotate(-1deg)}
+    .bd-mid{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0}
+    .bd-mid>*{max-width:100%}
+    .bd-mid b{font-family:var(--display);font-weight:700;font-size:clamp(46px,6.5vw,80px);line-height:.85;color:var(--yellow)}
+    .bd-mid small{font-size:1rem;color:#bdb6ae}
+    .bd-mid i{font-style:normal;font-family:var(--display);font-size:1.4rem;color:#fff;border:1px solid #444;padding:.05rem .7rem}
+    .bd-go{margin-top:6px;font-family:var(--display);font-size:1.7rem;background:var(--flag);color:#fff;padding:.2rem 1.2rem 0}
+    .bd-ban:hover .bd-go{background:var(--yellow);color:#000}
+    .bd-new{position:absolute;top:0;left:0;background:var(--yellow);color:#000;font-family:var(--display);font-size:1.4rem;padding:.1rem .8rem 0}
+    @media (max-width:640px){.bd-ban{flex-direction:column;align-items:stretch;padding:14px}.bd-art{width:100%;height:170px}.bd-mid{align-items:center;text-align:center}}
     </style>
     <div class="arcade-head">
       <div>
@@ -5758,7 +5779,7 @@ function pacPlay(stage,lvl,ctl){
     const sched=s=>s<5?[7,20,7,20,5,20,5,1e9]:s<13?[5,20,5,20,5,60,1,1e9]:[5,25,4,30,3,80,1,1e9];
 
     function newGame(){
-      continuing=false;
+      continuing=false;btnPause.textContent='השהיה';
       score=0;lives=DF.lives;extra=false;itemsGot=[];recBefore=ctl.getBest()||0;recToast=false;
       elBest.textContent=fmt(recBefore);
       loadStage(firstStage,true);
@@ -5899,10 +5920,19 @@ function pacPlay(stage,lvl,ctl){
         if(g.mode==='eyes'&&(tx===13||tx===14)&&ty===11){g.x=14;g.y=11.5;g.mode='enter';g.halt=true;return}
         const opts=PM_ORDER.filter(d=>d!==PM_OPP[g.dir]&&open(tx+PM_DIRS[d][0],ty+PM_DIRS[d][1]));
         if(!opts.length){g.dir=PM_OPP[g.dir];return}
+        if(g.mode==='eyes'){const H=homeMap();let bestD=1e9;for(const d of opts){const v=H[(ty+PM_DIRS[d][1])*PM_W+(((tx+PM_DIRS[d][0])%PM_W)+PM_W)%PM_W];if(v>=0&&v<bestD){bestD=v;g.dir=d}}return}
         if(g.fright&&g.mode==='active'){g.dir=opts[Math.floor(Math.random()*opts.length)];return}
         const [gx,gy]=target(g);let bestD=1e9;
         for(const d of opts){const nx=tx+PM_DIRS[d][0],ny=ty+PM_DIRS[d][1],dd=(nx-gx)**2+(ny-gy)**2;if(dd<bestD){bestD=dd;g.dir=d}}
       });
+    }
+    /* steps from every tile to the door; the eyes follow it, since aiming straight at the door can circle a block forever */
+    function homeMap(){
+      if(M.home)return M.home;
+      const H=new Int16Array(PM_W*PM_H).fill(-1),q=[11*PM_W+13,11*PM_W+14];H[q[0]]=H[q[1]]=0;
+      for(let k=0;k<q.length;k++){const x=q[k]%PM_W,y=(q[k]-x)/PM_W;
+        for(const [dx,dy] of Object.values(PM_DIRS)){const nx=(x+dx+PM_W)%PM_W,ny=y+dy,j=ny*PM_W+nx;if(open(nx,ny)&&H[j]<0){H[j]=H[q[k]]+1;q.push(j)}}}
+      return M.home=H;
     }
     function releaseGhosts(dt){
       lastDotT+=dt;since+=dt;
