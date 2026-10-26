@@ -9374,7 +9374,7 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
 (()=>{
   const CODES=[
     // { h:'<sha256 of the code>', msg:'...', give:{ xp:0, lockerCoins:0, crates:{mahsan:0}, buddyCoins:0, buddyWeapons:[], buddySkins:[] } }
-    { h:'592fbed6f4ef4a643b0c5dec00a9a32f69a4027aedb972265cd9237b7b31d564', msg:'קוד 1953: כל הכסף וכל הבגדים בלוקר, והכל פתוח בפוצצו את השיכוני!', give:{ lockerCoins:999999, lockerAll:1, buddyCoins:999999, buddyAll:1 } }
+    { h:'592fbed6f4ef4a643b0c5dec00a9a32f69a4027aedb972265cd9237b7b31d564', msg:'קוד אדמין: כל הכסף וכל הבגדים בלוקר, והכל פתוח בפוצצו את השיכוני!', give:{ lockerCoins:999999, lockerAll:1, buddyCoins:999999, buddyAll:1 }, admin:1 }
   ];
   // codes that were stopped: whoever used them gets this message once (the locker takes the clothes back)
   const ENDED=[{ h:'8f0f97e140e126a4404a09eb1e14a53b7c742701c4290a5d1702d14daec22ee8', msg:'דודו צוק נגמר לך' }];
@@ -9410,8 +9410,8 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
     const k=CODES.find(x=>x.h===h),used=store.get('codes',[]);
     const end=ENDED.find(x=>x.h===h);if(end){say(end.msg,'bad');return}
     if(!k){say('הקוד לא נכון','bad');box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');if(typeof sound==='function')sound('bad');return}
-    if(used.includes(h)){say('כבר השתמשתם בקוד הזה','bad');return}
-    give(k.give||{});used.push(h);store.set('codes',used);
+    if(used.includes(h)&&!k.admin){say('כבר השתמשתם בקוד הזה','bad');return}
+    give(k.give||{});if(!used.includes(h)){used.push(h);store.set('codes',used)}
     say(k.msg||'הקוד הופעל!','ok');inp.value='';if(typeof sound==='function')sound('win');if(typeof toast==='function')toast(k.msg||'הקוד הופעל!');
   });
 })();
