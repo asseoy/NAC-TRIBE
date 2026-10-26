@@ -384,6 +384,8 @@ addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(!$('#ovOpen').hidde
 
 /* ---------------- init ---------------- */
 S=load();save();
+/* a code on the main site can grant the whole collection */
+try{const g=JSON.parse(localStorage.getItem('hanasi:grant')||'null');if(g&&g.lockerAll){let n=0;ITEMS.forEach(it=>{if(!S.inv.some(x=>x.i===it.id)){S.inv.push(newInst(it,'archive'));n++}});localStorage.removeItem('hanasi:grant');save();if(n)setTimeout(()=>toast(`קיבלתם את כל הבגדים: ${n} פריטים חדשים באוסף`,'gold'),900)}}catch(e){}
 if(S.fresh){delete S.fresh;save();setTimeout(()=>toast('ברוכים הבאים ללוקר! קיבלתם 2 ארגזים במתנה','gold'),600)}
 syncXP();wallet();
 let v0='crates';try{v0=sessionStorage.getItem('lk:v')||'crates'}catch(e){}go(v0);
