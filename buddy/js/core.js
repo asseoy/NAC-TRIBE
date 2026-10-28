@@ -14,7 +14,7 @@ BD.save = (() => {
   const fresh = () => ({ coins: 120, owned: ['bat', 'glove', 'grenade', 'pistol', 'fire', 'anvil'], fav: [], recent: [],
     arenas: ['padded'], arena: 'padded', skins: ['crash'], skin: 'crash', up: { hit: 0, boom: 0, coin: 0 }, gravity: 1,
     ach: {}, ch: {}, surv: { best: 0 }, stats: { hits: 0, dmg: 0, used: {}, ceil: 0, ko: 0, fin: 0, best: 0, earned: 0, sp: {}, time: 0 },
-    vol: { sfx: .8, music: .4 }, muted: false, seen: false, shake: 1 });
+    vol: { sfx: .8, music: .4 }, muted: false, seen: false, shake2: 0 });
   let s;
   try { s = Object.assign(fresh(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { s = fresh(); }
   s.stats = Object.assign(fresh().stats, s.stats || {});

@@ -330,14 +330,14 @@
       <div class="setr"><label>אפקטים</label><input type="range" min="0" max="1" step=".05" value="${s.vol.sfx}" data-k="sfx"></div>
       <div class="setr"><label>מוזיקה</label><input type="range" min="0" max="1" step=".05" value="${s.vol.music}" data-k="music"></div>
       <div class="setr"><label>כבידה</label><input type="range" min="0" max="2" step=".1" value="${s.gravity ?? 1}" data-k="grav"><b id="gv" style="font:700 26px var(--display);min-width:3ch">${s.gravity ?? 1}</b></div>
-      <div class="setr"><label>רעידות מסך</label><span class="shk">${[['כבוי', 0], ['עדין', 1], ['חזק', 2]].map(([n, v]) => `<button class="btn${(s.shake ?? 1) === v ? '' : ' ghost'}" data-sh="${v}">${n}</button>`).join('')}</span></div>
+      <div class="setr"><label>רעידות מסך</label><span class="shk">${[['כבוי', 0], ['עדין', 1], ['חזק', 2]].map(([n, v]) => `<button class="btn${(s.shake2 ?? 0) === v ? '' : ' ghost'}" data-sh="${v}">${n}</button>`).join('')}</span></div>
       <div class="row"><button class="btn ghost" data-a="mute">${s.muted ? 'להפעיל צליל' : 'להשתיק הכל'}</button><button class="btn ghost" data-a="ach">הישגים</button><button class="btn ghost" data-a="reset">איפוס התקדמות</button>${X}</div>`);
     $('#ovBox').querySelectorAll('input').forEach(i => i.oninput = () => {
       const v = +i.value; if (i.dataset.k === 'grav') { s.gravity = v; $('#gv').textContent = v; } else s.vol[i.dataset.k] = v;
       BD.audio.apply(); BD.save.write();
     });
     bindOv();
-    $('#ovBox').querySelectorAll('[data-sh]').forEach(b => b.onclick = () => { s.shake = +b.dataset.sh; BD.save.write(); if (s.shake) { BD.fx.S.shake = 0; BD.fx.shake(.6); } settings(); });
+    $('#ovBox').querySelectorAll('[data-sh]').forEach(b => b.onclick = () => { s.shake2 = +b.dataset.sh; BD.save.write(); if (s.shake2) { BD.fx.S.shake = 0; BD.fx.shake(.6); } settings(); });
     $('#ovBox [data-a=mute]').onclick = () => { s.muted = !s.muted; BD.audio.apply(); BD.save.write(); sndIcon(); settings(); };
     $('#ovBox [data-a=reset]').onclick = function () {
       if (!this.dataset.sure) { this.dataset.sure = 1; this.textContent = 'בטוח? לחצו שוב'; this.classList.remove('ghost'); return; }

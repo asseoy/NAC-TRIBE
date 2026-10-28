@@ -156,7 +156,7 @@ G.frame = function (rdt) {
 G.draw = function () {
   const x = G.ctx, fx = BD.fx, S = fx.S, A = G.arena;
   const s = G.scale, z = S.zoom;
-  const sh = S.shake * S.shake * ((BD.save.d.shake ?? 1) === 2 ? 26 : 18), tt = G.t || 0;
+  const sh = S.shake * S.shake * ((BD.save.d.shake2 ?? 0) === 2 ? 26 : 18), tt = G.t || 0;
   const shx = (Math.sin(tt * 47) * .7 + Math.sin(tt * 83) * .3) * sh, shy = (Math.cos(tt * 53) * .7 + Math.sin(tt * 71) * .3) * sh;
   const zx = BD.clamp(S.zx, 0, G.W), zy = BD.clamp(S.zy, 0, G.H);
   const k = s * z, ox = s * zx * (1 - z) + shx * s, oy = s * zy * (1 - z) + shy * s;

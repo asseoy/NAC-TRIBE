@@ -45,12 +45,13 @@ BD.fx = (() => {
     text(x, y, t, col = '#fff', size = 34, life = 1.1, vy = -90) { TEXT.push({ x, y, t, col, size, life, max: life, vy, s: 0 }); if (TEXT.length > 30) TEXT.shift(); },
     stain(x, y, r, col, a = .55) { STAINS.push({ x, y, r, col, a }); if (STAINS.length > 120) STAINS.shift(); },
     // screen shake and white flashes follow the player's setting (off / gentle / strong), gentle by default
-    shake(a) { const m = BD.save.d.shake ?? 1; if (!m) return; S.shake = m === 2 ? Math.min(1.6, S.shake + a) : Math.min(.55, S.shake + a * .3); },
-    shakeTo(a) { const m = BD.save.d.shake ?? 1; if (m) S.shake = Math.max(S.shake, m === 2 ? a : a * .3); },
-    flash(a, col = '#fff') { const m = BD.save.d.shake ?? 1; S.flash = Math.max(S.flash, m === 2 ? a : Math.min(a * .5, m ? .3 : .15)); S.flashCol = col; },
+    // screen shake, camera punches and white flashes follow the player's setting: off (default) / gentle / strong
+    shake(a) { const m = BD.save.d.shake2 ?? 0; if (!m) return; S.shake = m === 2 ? Math.min(1.6, S.shake + a) : Math.min(.3, S.shake + a * .15); },
+    shakeTo(a) { const m = BD.save.d.shake2 ?? 0; if (m) S.shake = Math.max(S.shake, m === 2 ? a : Math.min(.3, a * .15)); },
+    flash(a, col = '#fff') { const m = BD.save.d.shake2 ?? 0; S.flash = Math.max(S.flash, m === 2 ? a : Math.min(a * .4, m ? .25 : .12)); S.flashCol = col; },
     hitstop(t) { S.stop = Math.max(S.stop, t); },
     slowmo(t, k = .25) { S.slowT = Math.max(S.slowT, t); S.slowK = k; },
-    zoom(z, t, x, y) { S.zoom = z; S.zoomT = t; S.zx = x; S.zy = y; },
+    zoom(z, t, x, y) { const m = BD.save.d.shake2 ?? 0; if (!m) return; S.zoom = m === 2 ? z : 1 + (z - 1) * .35; S.zoomT = t; S.zx = x; S.zy = y; },
     explosion(x, y, R, col = '#ffb000') {
       api.glowAt(x, y, R * 2.6, '#fff3c4', .18); api.glowAt(x, y, R * 2, col, .45);
       api.ring(x, y, R * 1.6, '#fff', .45, 20); api.ring(x, y, R * 1.1, col, .6, 10);
