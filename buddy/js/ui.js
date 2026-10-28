@@ -370,6 +370,10 @@
 
   /* ---------- start ---------- */
   // a code on the main site unlocks everything: weapons, dummies and upgrades
+  // code 6767 was deleted: its coins, weapons, skins and upgrades go back to the starting set
+  try { const used = JSON.parse(localStorage.getItem('hanasi:codes') || '[]'), s = S();
+    if (used.includes('d07164a628596323ebcf8796dee0e5c164620e0922b52483bc805f54416ee73c') && !s.rev6767) { s.rev6767 = 1; delete s.grantAll; s.coins = Math.max(0, (+s.coins || 0) - 999999);
+      s.owned = ['bat', 'glove', 'grenade', 'pistol', 'fire', 'anvil']; s.skins = ['crash']; s.skin = 'crash'; s.up = { hit: 0, boom: 0, coin: 0 }; BD.save.write(); } } catch (e) {}
   if (S().grantAll) { const s = S(); s.owned = BD.WL.map(w => w.id).filter(i => i !== 'hand'); s.skins = Object.keys(BD.SKINS); s.up = { hit: 3, boom: 3, coin: 3 }; delete s.grantAll; BD.save.write(); }
   wire();
   loading().then(showTitle).catch(e => { console.error(e); $('#ldTxt').textContent = 'שגיאה בטעינה: ' + e.message; });
