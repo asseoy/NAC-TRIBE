@@ -400,6 +400,15 @@ try{const used=JSON.parse(localStorage.getItem('hanasi:codes')||'[]');
       o.innerHTML='<div style="background:#000;border:3px solid #F3E03B;box-shadow:10px 10px 0 #FD1D1D;padding:2rem 2.4rem 1.6rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1.2rem"><b style="font-family:Karantina,sans-serif;font-size:clamp(3rem,10vw,5.5rem);line-height:.9;color:#F3E03B">דודו צוק נגמר לך</b><button type="button" style="font-family:Karantina,sans-serif;font-size:1.6rem;background:#FD1D1D;color:#fff;border:0;padding:.3rem 1.6rem 0;cursor:pointer">הבנתי</button></div>';
       o.querySelector('button').onclick=()=>o.remove();document.body.appendChild(o)},700);
   }}catch(e){}
+/* code 6767 was deleted: take back its 999,999 coins and the whole-collection grant it added (items that came in one burst after it went live) */
+try{const used=JSON.parse(localStorage.getItem('hanasi:codes')||'[]');
+  if(used.includes('d07164a628596323ebcf8796dee0e5c164620e0922b52483bc805f54416ee73c')&&!S.rev6767){
+    S.rev6767=1;S.coins=Math.max(0,(+S.coins||0)-999999);
+    try{const g=JSON.parse(localStorage.getItem('hanasi:grant')||'null');if(g&&g.lockerAll)localStorage.removeItem('hanasi:grant')}catch(e){}
+    const cut=Date.parse('2026-10-26T18:00:00Z'),by={};S.inv.forEach(x=>{if(x.o==='archive'&&x.t>=cut){const k=Math.floor(x.t/3000);(by[k]=by[k]||[]).push(x)}});
+    const burst=new Set();Object.values(by).forEach(g=>{if(g.length>=20)g.forEach(x=>burst.add(x.u))});
+    S.inv=S.inv.filter(x=>!burst.has(x.u));save();
+  }}catch(e){}
 /* a code on the main site can grant the whole collection */
 try{const g=JSON.parse(localStorage.getItem('hanasi:grant')||'null');if(g&&g.lockerAll){let n=0;ITEMS.forEach(it=>{if(!S.inv.some(x=>x.i===it.id)){S.inv.push(newInst(it,'archive'));n++}});localStorage.removeItem('hanasi:grant');save();if(n)setTimeout(()=>toast(`קיבלתם את כל הבגדים: ${n} פריטים חדשים באוסף`,'gold'),900)}}catch(e){}
 if(S.fresh){delete S.fresh;save();setTimeout(()=>toast('ברוכים הבאים ללוקר! קיבלתם 2 ארגזים במתנה','gold'),600)}
