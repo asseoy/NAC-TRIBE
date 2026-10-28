@@ -409,8 +409,8 @@ try{const used=JSON.parse(localStorage.getItem('hanasi:codes')||'[]');
     const burst=new Set();Object.values(by).forEach(g=>{if(g.length>=20)g.forEach(x=>burst.add(x.u))});
     S.inv=S.inv.filter(x=>!burst.has(x.u));save();
   }
-  // whoever used 6767 also loses every clothes pack a code ever gave (any burst of 20+ items, also from before 6767), with an apology
-  if(used.includes('d07164a628596323ebcf8796dee0e5c164620e0922b52483bc805f54416ee73c')&&!S.rev6767b){
+  // whoever used 6767 or the old admin code 1953 loses every clothes pack a code ever gave (any burst of 20+ items, also from before 6767), with an apology
+  if((used.includes('d07164a628596323ebcf8796dee0e5c164620e0922b52483bc805f54416ee73c')||used.includes('592fbed6f4ef4a643b0c5dec00a9a32f69a4027aedb972265cd9237b7b31d564'))&&!S.rev6767b){
     S.rev6767b=1;
     try{localStorage.removeItem('hanasi:grant')}catch(e){}
     // the old admin code 1953 also gave 999,999: take every such million back
