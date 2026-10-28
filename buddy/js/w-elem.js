@@ -380,7 +380,7 @@
       e.update = function (dt) {
         this.t += dt; const on = this.t < this.shakeT, k = on ? BD.clamp(this.t / .3, 0, 1) : 0;
         if (on) {
-          BD.fx.S.shake = Math.max(BD.fx.S.shake, .5 * k);
+          BD.fx.shakeTo(.5 * k);
           lp.set(.4 + k * .8);
           // a wave front runs across the floor and kicks what it passes
           this.wx += this.dir * 1300 * dt;

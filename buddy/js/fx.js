@@ -44,8 +44,10 @@ BD.fx = (() => {
     ring(x, y, R, col = '#fff', life = .45, w = 14) { RINGS.push({ x, y, R, col, life, max: life, w }); },
     text(x, y, t, col = '#fff', size = 34, life = 1.1, vy = -90) { TEXT.push({ x, y, t, col, size, life, max: life, vy, s: 0 }); if (TEXT.length > 30) TEXT.shift(); },
     stain(x, y, r, col, a = .55) { STAINS.push({ x, y, r, col, a }); if (STAINS.length > 120) STAINS.shift(); },
-    shake(a) { S.shake = Math.min(1.6, S.shake + a); },
-    flash(a, col = '#fff') { S.flash = Math.max(S.flash, a); S.flashCol = col; },
+    // screen shake and white flashes follow the player's setting (off / gentle / strong), gentle by default
+    shake(a) { const m = BD.save.d.shake ?? 1; if (!m) return; S.shake = m === 2 ? Math.min(1.6, S.shake + a) : Math.min(.55, S.shake + a * .3); },
+    shakeTo(a) { const m = BD.save.d.shake ?? 1; if (m) S.shake = Math.max(S.shake, m === 2 ? a : a * .3); },
+    flash(a, col = '#fff') { const m = BD.save.d.shake ?? 1; S.flash = Math.max(S.flash, m === 2 ? a : Math.min(a * .5, m ? .3 : .15)); S.flashCol = col; },
     hitstop(t) { S.stop = Math.max(S.stop, t); },
     slowmo(t, k = .25) { S.slowT = Math.max(S.slowT, t); S.slowK = k; },
     zoom(z, t, x, y) { S.zoom = z; S.zoomT = t; S.zx = x; S.zy = y; },
