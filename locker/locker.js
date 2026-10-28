@@ -413,6 +413,8 @@ try{const used=JSON.parse(localStorage.getItem('hanasi:codes')||'[]');
   if(used.includes('d07164a628596323ebcf8796dee0e5c164620e0922b52483bc805f54416ee73c')&&!S.rev6767b){
     S.rev6767b=1;
     try{localStorage.removeItem('hanasi:grant')}catch(e){}
+    // the old admin code 1953 also gave 999,999: take every such million back
+    while((+S.coins||0)>=500000)S.coins=Math.max(0,S.coins-999999);
     const by={};S.inv.forEach(x=>{if(x.o==='archive'){const k=Math.floor(x.t/3000);(by[k]=by[k]||[]).push(x)}});
     const burst=new Set();Object.values(by).forEach(g=>{if(g.length>=20)g.forEach(x=>burst.add(x.u))});
     S.inv=S.inv.filter(x=>!burst.has(x.u));save();
