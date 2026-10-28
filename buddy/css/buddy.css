@@ -189,3 +189,5 @@ body.hand #stage{cursor:none}
   #combo{top:50px}#combo b{font-size:56px}
   #title{justify-content:flex-start}.logo h1{font-size:64px}.modes b{font-size:30px}.modes span{display:none}
 }
+
+.setr .shk{display:flex;gap:.4rem;flex-wrap:wrap}.setr .shk .btn{padding:.35rem .9rem;font-size:1.1rem}
