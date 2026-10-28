@@ -9463,7 +9463,7 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
 (()=>{
   const CODES=[
     // { h:'<sha256 of the code>', msg:'...', give:{ xp:0, lockerCoins:0, crates:{mahsan:0}, buddyCoins:0, buddyWeapons:[], buddySkins:[] } }
-    { h:'d07164a628596323ebcf8796dee0e5c164620e0922b52483bc805f54416ee73c', msg:'קוד אדמין: כל הכסף וכל הבגדים בלוקר, והכל פתוח בפוצצו את השיכוני!', give:{ lockerCoins:999999, lockerAll:1, buddyCoins:999999, buddyAll:1 }, admin:1 }
+    { h:'8f0f97e140e126a4404a09eb1e14a53b7c742701c4290a5d1702d14daec22ee8', key:'2029b', msg:'קיבלתם 10,000 אסימונים ללוקר!', give:{ lockerCoins:10000 } }
   ];
   // prank codes: no reward, just the devil laughing at you (every time)
   const PRANK=[{ h:'592fbed6f4ef4a643b0c5dec00a9a32f69a4027aedb972265cd9237b7b31d564', msg:'אכלתם תלקרדה יא אפסים' }];
@@ -9485,7 +9485,7 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
       setTimeout(()=>A.close(),3000)}}catch(e){}
   }
   // codes that were stopped: whoever used them gets this message once (the locker takes the clothes back)
-  const ENDED=[{ h:'8f0f97e140e126a4404a09eb1e14a53b7c742701c4290a5d1702d14daec22ee8', msg:'דודו צוק נגמר לך' }];
+  const ENDED=[{ h:'d07164a628596323ebcf8796dee0e5c164620e0922b52483bc805f54416ee73c', msg:'קוד האדמין בוטל' }];
   function endedNotice(m){
     const o=document.createElement('div');o.className='code-end';o.innerHTML='<div><b></b><button type="button">הבנתי</button></div>';
     o.querySelector('b').textContent=m;o.querySelector('button').onclick=()=>o.remove();document.body.appendChild(o);
@@ -9519,8 +9519,9 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
     const end=ENDED.find(x=>x.h===h);if(end){say(end.msg,'bad');return}
     const pr=PRANK.find(x=>x.h===h);if(pr){say(pr.msg,'bad');inp.value='';prank(pr.msg);return}
     if(!k){say('הקוד לא נכון','bad');box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');if(typeof sound==='function')sound('bad');return}
-    if(used.includes(h)&&!k.admin){say('כבר השתמשתם בקוד הזה','bad');return}
-    give(k.give||{});if(!used.includes(h)){used.push(h);store.set('codes',used)}
+    const id=k.key||h;
+    if(used.includes(id)&&!k.admin){say('כבר השתמשתם בקוד הזה','bad');return}
+    give(k.give||{});if(!used.includes(id)){used.push(id);store.set('codes',used)}
     say(k.msg||'הקוד הופעל!','ok');inp.value='';if(typeof sound==='function')sound('win');if(typeof toast==='function')toast(k.msg||'הקוד הופעל!');
   });
 })();
@@ -9835,7 +9836,6 @@ body.arena-open .sdv-btn,body.arena-open .sdv-panel,body.sdv-on .sdv-btn{display
     'בשישי הקרוב מישהו ישאל אותך "איפה הצעיף שלך?". תתכוננו.',
     'הכדור שלי אומר: תנצחו את בית דני. הכדור שלי גם שקרן, אבל בואו נאמין לו.',
     'במחנה הבא תישנו שלוש שעות בלילה, ותגידו שזה היה השבוע הכי טוב בחיים.',
-    'השנה תמצאו משהו שמוחבא באתר. או שלא. חה חה.',
     'אני רואה שור. השור רואה אותך. אל תזוזו.',
     'מחר "אדום עולה" יתקע לכם בראש כל היום. סליחה מראש.',
     'תפסידו לי בפוקר. זו לא נבואה, זו סטטיסטיקה.',
@@ -9918,8 +9918,6 @@ body.arena-open .sdv-btn,body.arena-open .sdv-panel,body.sdv-on .sdv-btn{display
     const n=norm(raw),q=toks(raw);
     if(!q.length) return 'נו? תשאל משהו.';
     if(quiz){const r=judge(raw,q,n);if(r!==null) return r}
-    // the admin-code treasure hunt has the last step here
-    if(window.__hunt){const h=window.__hunt.chat(q,n,kw);if(h) return h}
     const core0=q.filter(t=>!STOP.has(t));
     // a riddle is waiting
     if(riddle){const r=riddle;
@@ -10085,70 +10083,6 @@ body.arena-open .sdv-btn,body.arena-open .sdv-panel,body.sdv-on .sdv-btn{display
 })();
 </script>
 
-<!-- ================= treasure hunt for the admin code (night mode -> devil x6 -> layer 2005 -> tallest record -> bull x3 -> devil chat) ================= -->
-<style>
-.hunt-chalk{display:none;margin:.6rem 0 0;font-family:var(--display);font-size:1.5rem;letter-spacing:.04em;color:rgba(241,239,235,.22);transform:rotate(-2deg)}
-html.night .hunt-chalk{display:block}
-.hunt-map{position:fixed;inset:0;z-index:320;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:1rem}
-.hunt-map>div{position:relative;max-width:520px;width:100%;background:var(--chalk);color:var(--text);border:3px solid #000;box-shadow:10px 10px 0 var(--flag);padding:1.6rem 1.6rem 1.3rem;display:flex;flex-direction:column;gap:1rem;direction:rtl;animation:cdIn .3s ease-out}
-.hunt-map .scarf{height:10px;margin:-1.6rem -1.6rem 0}
-.hunt-map h3{margin:0;font-family:var(--display);font-weight:700;font-size:2.6rem;line-height:1;color:var(--red)}
-.hunt-map p{margin:0;white-space:pre-line;font-size:1.1rem;line-height:1.6}
-.hunt-digits{display:flex;gap:.5rem;justify-content:center;direction:ltr}
-.hunt-digits span{width:3.2rem;height:3.8rem;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:2.8rem;line-height:1;background:#000;color:#555;border:2px solid #2a2a2a}
-.hunt-digits span.on{color:var(--yellow);border-color:var(--yellow)}
-.hunt-digits span.new{animation:huntPop .5s cubic-bezier(.3,1.8,.5,1)}
-.hunt-map button{align-self:center;font-family:var(--display);font-size:1.5rem;background:#000;color:#fff;border:2px solid #000;padding:.25rem 1.8rem 0;cursor:pointer}
-.hunt-map button:hover{background:var(--yellow);color:#000}
-@keyframes huntPop{from{transform:scale(2.4);opacity:0}to{transform:none;opacity:1}}
-</style>
-<script>
-(()=>{
-  const T=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob('eyJjaGFsayI6ICLXkdec15nXnNeUINeU16nXmNefINee16rXoteV16jXqC4g15LXoteVINeR15Ug16nXqSDXpNei157XmdedLiIsICJoaW50MCI6ICLXnteY157XldefPyDXkNeV15zXmS4g15HXnNeZ15zXlCDXqNeV15DXmdedINeT15HXqNeZ150g16nXkdeZ15XXnSDXnNeQINeo15XXkNeZ150uIiwgInRpdGxlIjogItee16TXqiDXlNee15jXnteV158g16nXnCDXlNep15jXnyIsICJzMSI6ICLXntem15DXqtedINeQ16og15TXntek15QuINen15XXkyDXlNeQ15PXnteZ158g15HXoNeV15kg157XkNeo15HXoiDXodek16jXldeqLCDXldeb15wg16HXpNeo15Qg157XldeX15HXkNeqINeR157Xp9eV150g15DXl9eoINeR15DXqteoLlxu15TXqNee15Yg15TXqNeQ16nXldefOiDXntem15DXlSDXkNeqINeU16nXm9eR15Qg16nXlNeX15nXlCDXqdec15Qg15TXmdeQINee15fXkdeYINeW15HXldeR15nXnSwg15XXnNeX16bXlSDXotec15nXlC4iLCAiczIiOiAi15TXodek16jXlCDXlNeo15DXqdeV16DXlDogNi4g15vXnteVINee16HXpNeoINeU16jXktec15nXmdedINep15wg15bXkdeV15EuXG7XlNeo157XliDXlNep16DXmTog15TXnteq16fXnyDXlNeb15kg15LXkdeV15Qg16nXoNeR16DXlCDXkNeZINek16LXnSDXkdep15HXmC4g157XpteQ15Ug15DXqiDXlNep15nXkCDXqdec15Ug15XXnNeX16bXlSDXotec15nXlS4iLCAiczMiOiAi15TXodek16jXlCDXlNep16DXmdeZ15Q6IDcuXG7XlNeo157XliDXlNep15zXmdep15k6INeU16nXldeoINeZ15XXk9eiINee16nXlNeVLiDXnNeX16bXlSDXotec15nXlSDXqdec15XXqSDXpNei157XmdedLCDXnteU16guIiwgInM0IjogIteU16HXpNeo15Qg15TXqdec15nXqdeZ16o6IDYuXG7XlNeo157XliDXlNeQ15fXqNeV1586INec15vXlSDXnNep15jXnyDXkdem17PXkNeYINeV16rXkteZ15PXlSDXnNeVINeQ16og15TXnteV15jXlSDXqdecINeU16nXkdeYLiIsICJzNSI6ICLXl9eUINeX15QhINee16bXkNeq150g15DXldeq15kuINeU16HXpNeo15Qg15TXqNeR15nXoteZ16o6IDcuXG7Xoteb16nXmdeVINeZ16kg15zXm9edINeQ16og15vXnCDXkNeo15HXoiDXlNeh16TXqNeV16ouINeq15vXoNeZ16HXlSDXkNeV16rXnyDXkdeq15nXkdeqINeU16fXldeT15nXnSDXkdeq15fXqteZ16og15TXkNeq16guINeV16nXp9eYLCDXkNecINeq15LXnNeVINec15DXoyDXkNeX15MuIiwgImRvbmUiOiAi15vXkdeoINee16bXkNeq150g15TXm9ecLiDXkNeo15HXoiDXlNeh16TXqNeV16og15DXptec15vXnS4iLCAiZGlnaXRzIjogWzYsIDcsIDYsIDddfQ=='),c=>c.charCodeAt(0))));
-  const KEY='hanasi:hunt';
-  const get=()=>{try{return +localStorage.getItem(KEY)||0}catch(e){return 0}};
-  const set=v=>{try{localStorage.setItem(KEY,String(v))}catch(e){}};
-  // the chalk line, only visible in night mode
-  const hero=document.querySelector('.hero h1');
-  if(hero){const c=document.createElement('p');c.className='hunt-chalk';c.setAttribute('aria-hidden','true');c.textContent=T.chalk;hero.insertAdjacentElement('afterend',c)}
-  function show(stage,newDigit){
-    document.querySelector('.hunt-map')?.remove();
-    const found=Math.max(0,Math.min(4,stage-1));
-    const o=document.createElement('div');o.className='hunt-map';
-    o.innerHTML='<div role="dialog" aria-modal="true"><div class="scarf"></div><h3></h3><div class="hunt-digits"></div><p></p><button type="button">הבנתי</button></div>';
-    o.querySelector('h3').textContent=T.title;
-    o.querySelector('p').textContent=T['s'+Math.min(stage,5)];
-    const dg=o.querySelector('.hunt-digits');
-    for(let i=0;i<4;i++){const s=document.createElement('span');s.textContent=i<found?T.digits[i]:'?';if(i<found) s.className='on'+(newDigit&&i===found-1?' new':'');dg.appendChild(s)}
-    const close=()=>o.remove();o.querySelector('button').onclick=close;o.addEventListener('click',e=>{if(e.target===o) close()});
-    document.addEventListener('keydown',function k(e){if(e.key==='Escape'){close();document.removeEventListener('keydown',k)}});
-    document.body.appendChild(o);o.querySelector('button').focus({preventScroll:true});
-    if(newDigit&&typeof sound==='function') try{sound('win')}catch(e){}
-  }
-  const advance=(from)=>{if(get()!==from) return false;set(from+1);show(from+1,from>=1);return true};
-  // taps within a short time on an element
-  function taps(sel,need,ms,fn){let n=0,t0=0;document.addEventListener('click',e=>{if(!e.target.closest(sel)) return;const now=Date.now();if(now-t0>ms){n=0;t0=now}if(++n>=need){n=0;fn()}},true)}
-  // 1. the devil mascot, six taps, at night
-  taps('.m-devil',6,4000,()=>{if(!document.documentElement.classList.contains('night')) return;if(get()===0) advance(0);else show(get(),false)});
-  // 2. the layer whose animal is a fly swatter (רותם, 2005)
-  document.addEventListener('click',e=>{const l=e.target.closest('.layer');if(!l||get()!==1) return;const y=l.querySelector('.y');if(y&&/^2005/.test(y.textContent.trim())) advance(1)},true);
-  // 3. the tallest record (המגדלור)
-  document.addEventListener('click',e=>{const r=e.target.closest('.rec');if(!r||get()!==2) return;const h=r.querySelector('h3');if(h&&h.textContent.includes('המגדלור')) advance(2)},true);
-  // 4. the bull, three quick taps
-  taps('.m-bull',3,2500,()=>{if(get()===3) advance(3)});
-  // 5. the devil chat: the bot asks us first (window.__hunt.chat)
-  window.__hunt={chat(q,n,kw){
-    const st=get();
-    if(st===4&&kw(q,'מחנאות מעל שפיות')>=.75){set(5);setTimeout(()=>show(5,true),1600);return T.s5}
-    if(/ (מטמון|אוצר|מפה|המפה|סוד|הסוד|קוד אדמין|הקוד של האדמין|אדמין) /.test(n)){
-      if(st===0) return T.hint0;
-      if(st>=5) return T.done;
-      return T['s'+st];
-    }
-    return null;
-  }};
-})();
-</script>
 <!-- ================= daily question + seasonal events + public leaderboard ================= -->
 <style>
 /* ---- daily question ---- */
