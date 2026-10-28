@@ -408,6 +408,17 @@ try{const used=JSON.parse(localStorage.getItem('hanasi:codes')||'[]');
     const cut=Date.parse('2026-10-26T18:00:00Z'),by={};S.inv.forEach(x=>{if(x.o==='archive'&&x.t>=cut){const k=Math.floor(x.t/3000);(by[k]=by[k]||[]).push(x)}});
     const burst=new Set();Object.values(by).forEach(g=>{if(g.length>=20)g.forEach(x=>burst.add(x.u))});
     S.inv=S.inv.filter(x=>!burst.has(x.u));save();
+  }
+  // whoever used 6767 also loses every clothes pack a code ever gave (any burst of 20+ items, also from before 6767), with an apology
+  if(used.includes('d07164a628596323ebcf8796dee0e5c164620e0922b52483bc805f54416ee73c')&&!S.rev6767b){
+    S.rev6767b=1;
+    try{localStorage.removeItem('hanasi:grant')}catch(e){}
+    const by={};S.inv.forEach(x=>{if(x.o==='archive'){const k=Math.floor(x.t/3000);(by[k]=by[k]||[]).push(x)}});
+    const burst=new Set();Object.values(by).forEach(g=>{if(g.length>=20)g.forEach(x=>burst.add(x.u))});
+    S.inv=S.inv.filter(x=>!burst.has(x.u));save();
+    setTimeout(()=>{const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:1rem';
+      o.innerHTML='<div style="max-width:520px;background:#000;border:3px solid #F3E03B;box-shadow:10px 10px 0 #FD1D1D;padding:2rem 2.2rem 1.6rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1rem;direction:rtl"><b style="font-family:Karantina,sans-serif;font-size:clamp(2.6rem,9vw,4.4rem);line-height:.95;color:#F3E03B">סליחה שמחקתי לכם את הבגדים</b><p style="margin:0;color:#F1EFEB;font-size:1.15rem;line-height:1.6">בא לי שיהיה לכם ריגוש בפתיחת החבילות. כל בגד שתוציאו מעכשיו מארגז יהיה באמת שלכם.</p><button type="button" style="font-family:Karantina,sans-serif;font-size:1.6rem;background:#FD1D1D;color:#fff;border:0;padding:.3rem 1.6rem 0;cursor:pointer">יאללה לארגזים</button></div>';
+      o.querySelector('button').onclick=()=>o.remove();document.body.appendChild(o)},800);
   }}catch(e){}
 /* a code on the main site can grant the whole collection */
 try{const g=JSON.parse(localStorage.getItem('hanasi:grant')||'null');if(g&&g.lockerAll){let n=0;ITEMS.forEach(it=>{if(!S.inv.some(x=>x.i===it.id)){S.inv.push(newInst(it,'archive'));n++}});localStorage.removeItem('hanasi:grant');save();if(n)setTimeout(()=>toast(`קיבלתם את כל הבגדים: ${n} פריטים חדשים באוסף`,'gold'),900)}}catch(e){}
