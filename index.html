@@ -189,7 +189,8 @@ h3{font-family:var(--display);font-size:2.1rem;line-height:1;margin:0 0 .4rem;fo
 .art-pm{background:#0e0d0e}
 .art-pm canvas{display:block;width:100%;height:100%}
 .pm-game{--psb:max(240px,min(560px,calc(100vw - 2.6rem),calc((100vh - 235px)*.848)))}
-@supports (height:100dvh){.pm-game{--psb:max(240px,min(560px,calc(100vw - 2.6rem),calc((100dvh - 235px)*.848)))}}
+@supports (height:100dvh){.pm-game{--psb:max(240px,min(560px,calc(100vw - 2.6rem),calc((100dvh - 235px)*.848)))}
+@supports (height:100svh){.pm-game{--psb:max(240px,min(560px,calc(100vw - 2.6rem),calc((100svh - 235px)*.848)))}}}
 .pm-game.has-pad{--psb:max(240px,min(560px,calc(100vw - 2.6rem),calc((100vh - 300px)*.848)))}
 @supports (height:100dvh){.pm-game.has-pad{--psb:max(240px,min(560px,calc(100vw - 2.6rem),calc((100dvh - 300px)*.848)))}}
 .pm-board{aspect-ratio:28/33;background:#0b0a0b}
@@ -2131,7 +2132,7 @@ function drawSnakeArt(cv){
   drawCord(ctx,[[w*.27,h*.36],[w*.6,h*.36],[w*.6,h*.72],[w*.95,h*.72]],15);
 }
 LOGO_IMG.addEventListener('load',()=>{document.querySelectorAll('#cabinets canvas.snake-art').forEach(drawSnakeArt);document.querySelectorAll('#cabinets canvas.blk-art').forEach(c=>{if(typeof drawBlkArt==='function')drawBlkArt(c)});document.querySelectorAll('#cabinets canvas.sb-art').forEach(c=>{if(typeof drawSbArt==='function')drawSbArt(c)});document.querySelectorAll('#cabinets canvas.pk-art').forEach(c=>{if(typeof drawPkArt==='function')drawPkArt(c)});document.querySelectorAll('#cabinets canvas.pm-art').forEach(c=>{if(typeof drawPmArt==='function')drawPmArt(c)})});
-{let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{document.querySelectorAll('#cabinets canvas.snake-art').forEach(drawSnakeArt);document.querySelectorAll('#cabinets canvas.blk-art').forEach(drawBlkArt);document.querySelectorAll('#cabinets canvas.sb-art').forEach(drawSbArt);document.querySelectorAll('#cabinets canvas.pk-art').forEach(drawPkArt);document.querySelectorAll('#cabinets canvas.pm-art').forEach(drawPmArt)},150)})}
+{let rt,rw=innerWidth;window.addEventListener('resize',()=>{if(innerWidth===rw||document.body.classList.contains('arena-open'))return;rw=innerWidth;clearTimeout(rt);rt=setTimeout(()=>{document.querySelectorAll('#cabinets canvas.snake-art').forEach(drawSnakeArt);document.querySelectorAll('#cabinets canvas.blk-art').forEach(drawBlkArt);document.querySelectorAll('#cabinets canvas.sb-art').forEach(drawSbArt);document.querySelectorAll('#cabinets canvas.pk-art').forEach(drawPkArt);document.querySelectorAll('#cabinets canvas.pm-art').forEach(drawPmArt)},150)})}
 
 /* ================= GAME: BLOCK HANASI =================
    Block-Blast style: an 8×8 field, three shapes at a time, drag a shape onto
@@ -5773,9 +5774,11 @@ const PMS={
     if(kind==='fright'){const ph=(t*7)%1;f=220+ph*520;v=.018}
     else if(kind==='eyes'){const ph=(t*11)%1;f=900+ph*700;v=.012}
     else{const rate=1.6+prog*1.6,ph=Math.abs(((t*rate)%2)-1);f=360+prog*140+ph*(260+prog*120)}
-    this.siren.o.frequency.setTargetAtTime(f,a.currentTime,.012);this.siren.g.gain.setTargetAtTime(v,a.currentTime,.05);
+    // update the sound at most ~30 times a second, and clear old automation so it never piles up
+    const now=a.currentTime;if(now-(this.siren.t||0)<.033&&Math.abs(v-(this.siren.v||0))<.001)return;this.siren.t=now;this.siren.v=v;
+    const fq=this.siren.o.frequency,gn=this.siren.g.gain;fq.cancelScheduledValues(now);gn.cancelScheduledValues(now);fq.setTargetAtTime(f,now,.012);gn.setTargetAtTime(v,now,.05);
   },
-  sirenOff(){if(this.siren){try{this.siren.g.gain.setTargetAtTime(0,actx.currentTime,.02)}catch(e){}}},
+  sirenOff(){if(this.siren&&this.siren.v!==0){try{const now=actx.currentTime,gn=this.siren.g.gain;gn.cancelScheduledValues(now);gn.setTargetAtTime(0,now,.02);this.siren.v=0}catch(e){}}},
   kill(){if(this.siren){try{this.siren.o.stop()}catch(e){}this.siren=null}}
 };
 
@@ -5860,7 +5863,7 @@ function pacPlay(stage,lvl,ctl){
     const btnPause=stage.querySelector('#pmPause'),btnSnd=stage.querySelector('#pmSnd');
     let ctx=null,S=0,ts=0,dpr=1,wallCv=null,wallWhite=null,darkCv=null;
     function fit(){
-      const w=cv.clientWidth;if(!w)return;S=w;ts=S/PM_W;dpr=Math.min(2,window.devicePixelRatio||1);
+      const w=cv.clientWidth;if(!w)return;const nd=Math.min(2,window.devicePixelRatio||1);if(ctx&&w===S&&nd===dpr)return;S=w;ts=S/PM_W;dpr=nd;
       cv.width=Math.round(S*dpr);cv.height=Math.round(ts*33*dpr);ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
       darkCv=null;if(M)buildWalls();
     }
@@ -9287,7 +9290,7 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
         if(ready&&mp.classList.contains('on')) player.playVideo();else if(!started&&!off.get()) play(0)},60);
     }};
   // shrink the player while a game is open, and tell the game's top bar how much room the player takes
-  const room=()=>requestAnimationFrame(()=>{if(mp.classList.contains('on')) document.body.style.setProperty('--mpw',Math.ceil(mp.getBoundingClientRect().right)+'px')});
+  let mpw='';const room=()=>requestAnimationFrame(()=>{if(mp.classList.contains('on')){const v=Math.ceil(mp.getBoundingClientRect().right)+'px';if(v!==mpw){mpw=v;document.body.style.setProperty('--mpw',v)}}});
   if(arena) new MutationObserver(()=>{document.body.classList.toggle('arena-open',arena.classList.contains('open'));room()}).observe(arena,{attributes:true,attributeFilter:['class']});
   addEventListener('resize',room);
 })();
