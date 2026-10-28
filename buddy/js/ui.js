@@ -374,6 +374,9 @@
   try { const used = JSON.parse(localStorage.getItem('hanasi:codes') || '[]'), s = S();
     if (used.includes('d07164a628596323ebcf8796dee0e5c164620e0922b52483bc805f54416ee73c') && !s.rev6767) { s.rev6767 = 1; delete s.grantAll; s.coins = Math.max(0, (+s.coins || 0) - 999999);
       s.owned = ['bat', 'glove', 'grenade', 'pistol', 'fire', 'anvil']; s.skins = ['crash']; s.skin = 'crash'; s.up = { hit: 0, boom: 0, coin: 0 }; BD.save.write(); } } catch (e) {}
+  // the old admin code 1953 also gave 999,999 coins: whoever used 6767 loses every such million
+  try { const used = JSON.parse(localStorage.getItem('hanasi:codes') || '[]'), s = S();
+    if (used.includes('d07164a628596323ebcf8796dee0e5c164620e0922b52483bc805f54416ee73c') && !s.rev6767b) { s.rev6767b = 1; while ((+s.coins || 0) >= 500000) s.coins = Math.max(0, s.coins - 999999); BD.save.write(); } } catch (e) {}
   if (S().grantAll) { const s = S(); s.owned = BD.WL.map(w => w.id).filter(i => i !== 'hand'); s.skins = Object.keys(BD.SKINS); s.up = { hit: 3, boom: 3, coin: 3 }; delete s.grantAll; BD.save.write(); }
   wire();
   loading().then(showTitle).catch(e => { console.error(e); $('#ldTxt').textContent = 'שגיאה בטעינה: ' + e.message; });
