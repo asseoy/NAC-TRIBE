@@ -9463,10 +9463,12 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
 (()=>{
   const CODES=[
     // { h:'<sha256 of the code>', msg:'...', give:{ xp:0, lockerCoins:0, crates:{mahsan:0}, buddyCoins:0, buddyWeapons:[], buddySkins:[] } }
-    { h:'8f0f97e140e126a4404a09eb1e14a53b7c742701c4290a5d1702d14daec22ee8', key:'2029b', msg:'קיבלתם 10,000 אסימונים ללוקר!', give:{ lockerCoins:10000 } }
+    { h:'8f0f97e140e126a4404a09eb1e14a53b7c742701c4290a5d1702d14daec22ee8', key:'2029b', msg:'קיבלתם 10,000 אסימונים ללוקר!', give:{ lockerCoins:10000 } },
+    { h:'0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', key:'1111', msg:'קיבלתם 100,000 אסימונים ללוקר!', give:{ lockerCoins:100000 } }
   ];
   // prank codes: no reward, just the devil laughing at you (every time)
-  const PRANK=[{ h:'592fbed6f4ef4a643b0c5dec00a9a32f69a4027aedb972265cd9237b7b31d564', msg:'אכלתם תלקרדה יא אפסים' }];
+  const PRANK=[{ h:'592fbed6f4ef4a643b0c5dec00a9a32f69a4027aedb972265cd9237b7b31d564', msg:'אכלתם תלקרדה יא אפסים' },
+                 { h:'6ae9e4d22c4670b9140fc378214b3274fb3f64d16058717f974515000680b24c', msg:'מה נראה לכם יא אפסים?' }];
   function prank(m){
     document.querySelector('.code-prank')?.remove();
     const o=document.createElement('div');o.className='code-prank';
