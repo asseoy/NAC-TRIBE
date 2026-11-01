@@ -9,6 +9,10 @@
 <meta property="og:description" content="ההיסטוריה, השכבות, המתקנים ושבעה עשר משחקים לפנאטים של שבט הנשיא.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#000000">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="שבט הנשיא">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 90'%3E%3Cpolygon points='50,4 96,86 4,86' fill='%23FD1D1D' stroke='%23000' stroke-width='6'/%3E%3Cpolygon points='50,20 82,78 18,78' fill='none' stroke='%23F3E03B' stroke-width='4'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1456,6 +1460,7 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
     <a class="l" href="#symbols">סמלים</a>
     <a class="l" href="#trad">מסורות</a>
     <a class="l" href="#archive">המאגר</a>
+    <a class="l a2hs-l" href="#" id="a2hsNav" hidden>הוספה למסך הבית</a>
   </div>
   <div class="nav-tools">
     <span class="rankpill" title="נקודות פנאט מכל המשחקים"><span class="mark" style="color:var(--flag)"></span><b id="rankName">חניך</b><span id="xpNum">0</span></span>
@@ -1464,6 +1469,7 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
     <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="navLinks" aria-label="תפריט"><i></i><i></i><i></i></button>
   </div>
 </nav>
+<div class="a2hs-bar" id="a2hsBar" hidden><span>שבט הנשיא במסך הבית שלכם</span><button class="a2hs-add" type="button" id="a2hsAdd">הוספה למסך הבית</button><button class="a2hs-x" type="button" id="a2hsX" aria-label="סגירה">✕</button></div>
 
 <header class="hero" id="top">
   <div class="hero-grid">
@@ -10337,6 +10343,65 @@ html.s-purim .sdv-head::after{left:38px;top:2px;width:34px;height:9px;border-wid
   try{seasons()}catch(e){console.error(e)}
   try{board()}catch(e){console.error(e)}
   window.__lb={fetchTop,submit,offer};
+})();
+</script>
+<style>
+.a2hs-bar[hidden],.a2hs-l[hidden],.a2hs-ov[hidden]{display:none}
+.a2hs-bar{display:flex;align-items:center;gap:.6rem;background:var(--yellow);color:#000;padding:.35rem 1rem;font-family:var(--display);font-size:1.25rem;line-height:1.15;border-bottom:3px solid #000}
+.a2hs-bar span{flex:1}
+.a2hs-bar button{font-family:var(--display);cursor:pointer;border:0}
+.a2hs-add{background:#000;color:#fff;font-size:1.2rem;padding:.1rem .7rem;white-space:nowrap}
+.a2hs-x{background:none;color:#000;font-size:1.2rem;padding:.1rem .3rem}
+@media (min-width:961px){.a2hs-bar,.a2hs-l{display:none}}
+.a2hs-ov{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:1rem}
+.a2hs-box{background:var(--chalk);color:var(--text);width:100%;max-width:420px;max-height:90vh;overflow:auto;padding:1.2rem;border:3px solid #000;box-shadow:6px 6px 0 var(--flag)}
+.a2hs-box h3{font-family:var(--display);font-size:2.1rem;line-height:1.05;margin:0 0 .7rem}
+.a2hs-box ol{margin:0 0 .8rem;padding:0 1.3rem 0 0;font-size:1.08rem;line-height:1.45}
+.a2hs-box li{margin-bottom:.45rem}
+.a2hs-box p{margin:0 0 .8rem;line-height:1.4}
+.a2hs-box .a2hs-note{font-size:.95rem;color:var(--muted);border-right:4px solid var(--flag);padding-right:.6rem}
+.a2hs-box svg{width:1.15em;height:1.15em;vertical-align:-.2em}
+.a2hs-btns{display:flex;gap:.6rem;flex-wrap:wrap}
+.a2hs-btns .bigbtn{font-size:1.5rem}
+</style>
+<div class="a2hs-ov" id="a2hsOv" hidden role="dialog" aria-modal="true" aria-labelledby="a2hsT"><div class="a2hs-box"><h3 id="a2hsT"></h3><div id="a2hsBody"></div><div class="a2hs-btns"><button class="bigbtn ghost" type="button" id="a2hsCopy" hidden>העתקת הקישור</button><button class="bigbtn" type="button" id="a2hsClose">הבנתי</button></div></div></div>
+<script>
+/* add to home screen: native prompt where the browser allows it, written steps everywhere else */
+(()=>{
+  const ua=navigator.userAgent,ios=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),android=/Android/.test(ua);
+  const inApp=/FBAN|FBAV|FB_IAB|Instagram|WhatsApp|Line\/|TikTok|musical_ly|Snapchat|; wv\)/.test(ua);
+  const installed=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
+  if(!(ios||android)||installed())return;
+  const $i=id=>document.getElementById(id),bar=$i('a2hsBar'),navL=$i('a2hsNav'),ov=$i('a2hsOv'),copy=$i('a2hsCopy'),close=$i('a2hsClose');
+  const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+  const SHARE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-label="שיתוף"><path d="M12 15V3M8 7l4-4 4 4M7 11H5v10h14V11h-2"/></svg>';
+  let deferred=null,lastFocus=null;
+  const hide=()=>{bar.hidden=true;navL.hidden=true};
+  navL.hidden=false;
+  if(ls.get('hanasi:a2hsOff')!=='1')bar.hidden=false;
+  addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e});
+  addEventListener('appinstalled',()=>{hide();deferred=null;if(typeof toast==='function')toast('האתר נוסף למסך הבית')});
+  function help(){
+    const [title,body]=inApp?['קודם פותחים בדפדפן',`<p>מתוך האפליקציה הזאת אי אפשר להוסיף אתר למסך הבית. פתחו את הקישור ב־${ios?'Safari':'Chrome'} ולחצו שם שוב על הכפתור.</p>`]
+      :ios?['הוספה למסך הבית',`<ol><li>לחצו על כפתור השיתוף ${SHARE} בסרגל של הדפדפן. אם הוא לא מופיע, לחצו קודם על ⋯.</li><li>גללו ובחרו <b>הוספה למסך הבית</b>.</li><li>לחצו על <b>הוספה</b>.</li></ol><p class="a2hs-note">באייפון, הנקודות באייקון נספרות בנפרד מהדפדפן ומתחילות מאפס.</p>`]
+      :['הוספה למסך הבית','<ol><li>פתחו את תפריט הדפדפן <b>⋮</b>.</li><li>בחרו <b>הוספה למסך הבית</b> או <b>התקנת אפליקציה</b>.</li><li>אשרו את ההוספה.</li></ol>'];
+    $i('a2hsT').textContent=title;$i('a2hsBody').innerHTML=body;copy.hidden=!inApp;
+    lastFocus=document.activeElement;ov.hidden=false;close.focus();
+  }
+  const shut=()=>{ov.hidden=true;if(lastFocus&&lastFocus.focus)lastFocus.focus()};
+  async function add(e){
+    e.preventDefault();
+    if(!deferred)return help();
+    const d=deferred;deferred=null;d.prompt();
+    const c=await d.userChoice.catch(()=>null);
+    if(c&&c.outcome==='accepted')hide();
+  }
+  $i('a2hsAdd').onclick=add;navL.onclick=add;
+  $i('a2hsX').onclick=()=>{bar.hidden=true;ls.set('hanasi:a2hsOff','1')};
+  close.onclick=shut;
+  ov.addEventListener('click',e=>{if(e.target===ov)shut()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!ov.hidden)shut()});
+  copy.onclick=async()=>{let ok=false;try{await navigator.clipboard.writeText(location.href.split('#')[0]);ok=true}catch(e){}if(typeof toast==='function')toast(ok?'הקישור הועתק':'לא הצלחנו להעתיק, העתיקו מהכתובת למעלה')};
 })();
 </script>
 </body>
