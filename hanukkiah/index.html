@@ -1,5 +1,6 @@
 <!doctype html><html lang="he"><head><meta charset=utf8>
 <title>חנוכיון בית דני · הדרקון המדליק</title>
+<link rel="icon" href="../apple-touch-icon.png">
 <meta name="description" content="מודל תלת־ממד של חנוכיון בית דני: דרקון שנע על מסילה ומדליק את נרות החנוכייה. בחרו ערב והפעילו את המופע.">
 <meta property="og:title" content="חנוכיון בית דני · הדרקון המדליק">
 <meta property="og:description" content="מודל תלת־ממד: דרקון שנע על מסילה ומדליק את נרות החנוכייה. בחרו ערב והפעילו את המופע.">
@@ -78,6 +79,8 @@ button{cursor:pointer}
   .btn{height:38px;padding:0 12px;font-size:14px}
   .views .lbl{min-width:0}
   .nights .lbl{display:none}
+  .nights{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;overflow:visible}
+  .nights .chip{min-width:0;width:100%;padding-inline:0;justify-content:center}
   .dock.min .collapsible{display:none}
   .toggleDock{display:inline-flex}
 }
