@@ -1973,7 +1973,7 @@ $('#sndBtn').onclick=()=>{soundOn=!soundOn;store.set('sound',soundOn);renderSoun
 renderSound();
 function rankOf(xp){let r=RANKS[0][1];for(const [m,n] of RANKS) if(xp>=m) r=n;return r}
 function renderXP(){const xp=store.get('xp',0);$('#xpNum').textContent=xp.toLocaleString('he-IL');$('#rankName').textContent=rankOf(xp)}
-function addXP(n){n=Math.max(0,Math.round(n));if(!n)return;const before=rankOf(store.get('xp',0));const xp=store.get('xp',0)+n;store.set('xp',xp);renderXP();const after=rankOf(xp);if(after!==before){setTimeout(()=>{toast(`עליתם דרגה: ${after}!`);sound('win')},900)}}
+function addXP(n){n=Math.max(0,Math.round(n));if(!n)return;const before=rankOf(store.get('xp',0));const xp=store.get('xp',0)+n;store.set('xp',xp);renderXP();const after=rankOf(xp);if(after!==before){setTimeout(()=>{{const nk=window.tribeNick&&tribeNick();toast(nk?`${nk}, דרגה חדשה: ${after}!`:`עליתם דרגה: ${after}!`)};sound('win')},900)}}
 function best(key,val){const b=store.get('best:'+key,null);if(val==null) return b;if(b==null||val>b){store.set('best:'+key,val);renderCabinets();return true}return false}
 renderXP();
 const LOGO_IMG=new Image();LOGO_IMG.src=LOGO_SRC;
@@ -4692,7 +4692,7 @@ function pokerPlay(stage,lvl,ctl){
       <button class="bigbtn ps-go">${okSave?'טורניר חדש':'לשולחן'}</button>
       <div class="pk-online${hashCode?' hi':''}">
         <h5>אונליין מול חברים</h5>
-        <label class="pk-name"><span>השם שלכם</span><input maxlength="12" autocomplete="nickname" placeholder="למשל: נועם" value="${pkEsc(store.get('pk:name',''))}"></label>
+        <label class="pk-name"><span>השם שלכם</span><input maxlength="12" autocomplete="nickname" placeholder="למשל: נועם" value="${pkEsc(store.get('pk:name',store.get('name','')))}"></label>
         <div class="pk-on-row"><button class="bigbtn pk-hostb">פתחו שולחן</button>
           <span class="pk-join"><input inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="קוד" aria-label="קוד השולחן" value="${hashCode}"><button class="bigbtn ghost pk-joinb">הצטרפו</button></span></div>
         <p class="pk-on-msg" aria-live="polite">${opts&&opts.msg?pkEsc(opts.msg):'עד 8 שחקנים. מי שפותח שולחן מקבל קוד וקישור לשלוח לחברים.'}</p>
@@ -5435,7 +5435,7 @@ function pokerPlay(stage,lvl,ctl){
     stage.innerHTML=`<div class="ps ps-start panel pk-start pk-lobby pk-joinscr">
       <h4 class="ps-title">הוזמנתם לפוקר הנשיא!</h4>
       <div class="pk-code"><small>קוד השולחן</small><b dir="ltr">${code}</b></div>
-      <label class="pk-name"><span>השם שלכם</span><input maxlength="12" autocomplete="nickname" placeholder="למשל: נועם" value="${pkEsc(store.get('pk:name',''))}"></label>
+      <label class="pk-name"><span>השם שלכם</span><input maxlength="12" autocomplete="nickname" placeholder="למשל: נועם" value="${pkEsc(store.get('pk:name',store.get('name','')))}"></label>
       <button class="bigbtn ps-go pk-joinb">הצטרפו לשולחן</button>
       <p class="pk-on-msg" aria-live="polite">${opts&&opts.msg?pkEsc(opts.msg):'כתבו שם ולחצו הצטרפו. המשחק מתחיל כשהמארח לוחץ התחילו.'}</p>
       <button class="bigbtn ghost pk-solo">לא עכשיו, שחקו מול המחשב</button>
@@ -6416,6 +6416,7 @@ function leveled(play,opts){
       tag(){return `<span class="lvtag lv-${ctl.lvl}">${LEVELS[ctl.lvl]}</span><button class="lvbtn" data-lvmenu>החלפת רמה</button>`},
       wire(root){root.querySelectorAll('[data-lvmenu]').forEach(b=>b.onclick=ctl.menu)},
       result(root,{num,title,text,extra='',again='שוב',onAgain,focus=true}){
+        {const nk=window.tribeNick&&tribeNick();if(nk&&title==='שיא חדש!')title=`שיא חדש, ${nk}!`}
         root.innerHTML=`<div class="result panel${ctl.lvl==='hard'?' hardres':''}"><span class="lvtag lv-${ctl.lvl}">${LEVELS[ctl.lvl]}</span><div class="num">${num}</div><h4>${title}</h4><p>${text}</p>${extra}
           <div class="row"><button class="bigbtn" data-act="again">${again}</button><button class="bigbtn ghost" data-lvmenu>החלפת רמה</button><button class="bigbtn ghost" data-act="close">לכל המשחקים</button></div></div>`;
         root.querySelector('[data-act=again]').onclick=onAgain||(()=>ctl.go(ctl.lvl));
@@ -9871,7 +9872,7 @@ body.arena-open .sdv-btn,body.arena-open .sdv-panel,body.sdv-on .sdv-btn{display
   }
   let greeted=false;
   const open=()=>{panel.hidden=false;document.body.classList.add('sdv-on');
-    if(!greeted){greeted=true;add('d','חה חה! אני '+B('השטן של הנשיא')+'.\nתשאלו אותי על שכבות, מתקנים, שנים, היסטוריה של השבט ומתי יש פעולה. יש גם בדיחות, חידות, חידון, נבואות ואבן נייר ומספריים.');renderChips()}
+    if(!greeted){greeted=true;add('d','חה חה! '+((window.tribeNick&&tribeNick())?B(tribeNick())+', ':'')+'אני '+B('השטן של הנשיא')+'.\nתשאלו אותי על שכבות, מתקנים, שנים, היסטוריה של השבט ומתי יש פעולה. יש גם בדיחות, חידות, חידון, נבואות ואבן נייר ומספריים.');renderChips()}
     setTimeout(()=>inp.focus({preventScroll:true}),50)};
   const close=()=>{panel.hidden=true;document.body.classList.remove('sdv-on');btn.focus({preventScroll:true})};
   btn.addEventListener('click',open);$('sdvX').addEventListener('click',close);
@@ -10088,7 +10089,7 @@ html.s-purim .sdv-head::after{left:38px;top:2px;width:34px;height:9px;border-wid
       const o=document.createElement('div');o.className='lb-offer';o.setAttribute('role','dialog');
       o.innerHTML=`<b>שיא חדש!</b><p></p><form><input maxlength="15" placeholder="כינוי (לא שם מלא)" aria-label="כינוי"><button type="submit">העלו</button></form><button type="button" class="lb-no">לא עכשיו</button>`;
       o.querySelector('p').textContent=`${fmt(s)} ב${gm?gm.title:g} (${LV[l]||l}). להעלות לטבלת השיאים של השבט?`;
-      const inp=o.querySelector('input');
+      const inp=o.querySelector('input');inp.value=(window.tribeNick&&tribeNick())||'';
       o.querySelector('form').onsubmit=e=>{e.preventDefault();const n=inp.value.trim();
         if(!okName(n)){inp.style.borderColor='var(--flag)';inp.value='';inp.placeholder='כינוי של 2–15 אותיות, בלי קללות';return}
         ls.set('lbName',n);o.remove();submit(g,l,s,n).then(j=>{if(typeof toast==='function') toast(j.ok?'השיא עלה לטבלה!':'לא הצלחנו להעלות את השיא')}).catch(()=>{});renderBoard(true)};
@@ -10409,6 +10410,74 @@ button,a{-webkit-tap-highlight-color:transparent}
     }).observe(arena,{attributes:true,attributeFilter:['class']});
     addEventListener('popstate',()=>{if(pushed&&arena.classList.contains('open')){byBack=true;$i('arenaClose').click()}});
   }
+})();
+</script>
+<style>
+.nk-ov[hidden],.nk-del[hidden]{display:none}
+.nk-ov{position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.74);display:flex;align-items:flex-start;justify-content:center;padding:clamp(1rem,11vh,6rem) 1rem 1rem;overflow:auto}
+.nk-box{position:relative;width:100%;max-width:400px;background:var(--chalk);color:#1a1a1a;border:3px solid #000;box-shadow:7px 7px 0 var(--flag);padding:1.1rem 1.15rem 1.15rem;animation:nkIn .34s cubic-bezier(.2,1,.3,1.2)}
+@keyframes nkIn{from{opacity:0;transform:translateY(26px) rotate(-1.5deg)}to{opacity:1;transform:none}}
+.nk-box img{position:absolute;top:-42px;left:12px;width:84px;height:auto}
+.nk-box h3{font-family:var(--display);font-size:2.9rem;line-height:1;margin:0 0 .25rem;color:#000;padding-left:5.2rem}
+.nk-box p{margin:0 0 .75rem;font-size:1rem;line-height:1.4;color:#4b4640}
+.nk-box input{display:block;width:100%;box-sizing:border-box;border:3px solid #000;background:#fff;color:#000;font-family:var(--display);font-size:2rem;line-height:1.1;padding:.3rem .7rem;border-radius:0;outline:0}
+.nk-box input:focus{border-color:var(--flag)}
+.nk-err{min-height:1.5em;margin:.3rem 0 .35rem;color:var(--red);font-size:.98rem;font-weight:700}
+.nk-btns{display:flex;gap:.55rem;flex-wrap:wrap}
+.nk-btns button{font-family:var(--display);font-size:1.65rem;line-height:1;min-height:48px;padding:.1rem 1rem .2rem;border:0;cursor:pointer;touch-action:manipulation}
+.nk-go{flex:1;background:var(--flag);color:#fff}
+.nk-no{background:#000;color:#fff}
+.nk-del{background:none!important;color:#4b4640!important;text-decoration:underline;font-size:1.25rem!important;min-height:44px!important}
+.nk-go:active,.nk-no:active{transform:scale(.97)}
+#plNick{color:#fff;font-weight:400;max-width:7.5em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#plNick:empty{display:none}
+#plNick:not(:empty)::after{content:" ·";color:#777}
+.rankpill{cursor:pointer}
+@media (min-width:961px){#plNickNav{display:none}}
+@media (max-width:420px){#plNick{max-width:4.6em}}
+@media (max-width:360px){.nk-box h3{font-size:2.35rem;padding-left:4.6rem}}
+@media (max-width:960px){.toast{bottom:calc(78px + env(safe-area-inset-bottom))!important;max-width:88vw;text-align:center;z-index:145}}
+</style>
+<script>
+/* visitor nickname: kept only in this browser; greets, and fills in the poker and leaderboard name */
+(()=>{
+  const KEY='name',SKIP='nameSkip',$i=id=>document.getElementById(id);
+  const clean=s=>String(s||'').replace(/[^\p{L}\p{N} '׳"״_-]/gu,'').replace(/\s+/g,' ').trim().slice(0,12);
+  const getName=()=>clean(store.get(KEY,''));
+  window.tribeNick=getName;
+  // basic filter: catches common words, not everything
+  const squeeze=s=>s.toLowerCase().replace(/[^\p{L}\p{N}]/gu,'').replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ');
+  const ANY=['זונה','שרמוט','מניאק','קוקסינל','נאצי','היטלר','ערבוש','כוסית','כוסאמ','כוסאח','בנזונה','מזדיי','לזיינ','תזדיי','fuck','shit','bitch','nigg','hitler','nazi','cunt','whore'];
+  const WORD=['כוס','זינ','חרא','הומו','מפגר','אידיוט','מטומטמ','דביל','פאק','אפס'];
+  const bad=s=>{const q=squeeze(s);return ANY.some(w=>q.includes(w))||WORD.includes(q)||s.split(/[ _-]+/).some(p=>WORD.includes(squeeze(p)))};
+  const check=s=>{const n=clean(s);if(n.length<2)return 'כינוי של 2 עד 12 אותיות או מספרים.';if(bad(n))return 'בחרו כינוי אחר, בלי קללות.';return ''};
+  // top bar
+  const pill=document.querySelector('.rankpill'),tag=document.createElement('span');tag.id='plNick';
+  if(pill){pill.insertBefore(tag,$i('rankName'));pill.setAttribute('role','button');pill.tabIndex=0;pill.addEventListener('click',()=>open());pill.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}})}
+  const paint=()=>{const n=getName();tag.textContent=n;if(pill)pill.title=n?'החלפת הכינוי':'בחירת כינוי';if(nav)nav.textContent=n?'הכינוי: '+n:'בחירת כינוי'};
+  const links=$i('navLinks');let nav=null;
+  if(links){nav=document.createElement('a');nav.className='l';nav.id='plNickNav';nav.href='#';links.appendChild(nav);nav.addEventListener('click',e=>{e.preventDefault();open()})}
+  // the box
+  const ov=document.createElement('div');ov.className='nk-ov';ov.hidden=true;ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');ov.setAttribute('aria-labelledby','nkT');
+  ov.innerHTML=`<form class="nk-box" novalidate><img src="assets/devil.webp" alt="" width="452" height="462"><h3 id="nkT">איך לקרוא לך?</h3><p>עדיף כינוי ולא שם מלא. הוא נשמר רק במכשיר הזה.</p><label class="sr" for="nkIn">כינוי</label><input id="nkIn" maxlength="12" autocomplete="nickname" enterkeyhint="done" spellcheck="false" placeholder="הכינוי שלך"><div class="nk-err" id="nkErr" aria-live="polite"></div><div class="nk-btns"><button class="nk-go" type="submit">יאללה</button><button class="nk-no" type="button" id="nkNo">אחר כך</button></div><button class="nk-del" type="button" id="nkDel" hidden>מחיקת הכינוי</button></form>`;
+  document.body.appendChild(ov);
+  const inp=$i('nkIn'),err=$i('nkErr'),del=$i('nkDel');let last=null,promptT=0;
+  function open(auto){clearInterval(promptT);last=document.activeElement;const n=getName();inp.value=n||clean(store.get('pk:name',''));err.textContent='';del.hidden=!n;$i('nkNo').textContent=n?'ביטול':'אחר כך';ov.hidden=false;if(!auto)inp.focus({preventScroll:true})}
+  function close(){ov.hidden=true;store.set(SKIP,1);if(last&&last.focus)last.focus({preventScroll:true})}
+  ov.querySelector('form').addEventListener('submit',e=>{e.preventDefault();const m=check(inp.value);if(m){err.textContent=m;inp.focus();return}const n=clean(inp.value),isNew=n!==getName();store.set(KEY,n);store.set('pk:name',n);paint();close();if(isNew&&typeof toast==='function')toast(`נעים מאוד, ${n}!`);if(isNew&&typeof sound==='function')sound('good')});
+  inp.addEventListener('input',()=>{err.textContent=''});
+  $i('nkNo').onclick=close;
+  del.onclick=()=>{store.set(KEY,'');paint();close()};
+  ov.addEventListener('click',e=>{if(e.target===ov)close()});
+  addEventListener('keydown',e=>{if(e.key==='Escape'&&!ov.hidden)close()});
+  paint();
+  // first visit: ask once, only when nothing else is on the screen. Returning visitors get a hello once per visit.
+  const busy=()=>{const v=$i('nvOv');return (v&&!v.hidden)||document.body.classList.contains('arena-open')||document.body.classList.contains('sdv-on')||document.querySelector('.intro')||document.querySelector('.a2hs-ov:not([hidden])')};
+  const ses={get(){try{return sessionStorage.getItem('nickHi')}catch(e){return '1'}},set(){try{sessionStorage.setItem('nickHi','1')}catch(e){}}};
+  promptT=setInterval(()=>{if(busy())return;clearInterval(promptT);const n=getName();
+    if(n){if(!ses.get()){ses.set();if(typeof toast==='function')toast(`ברוכים הבאים, ${n}!`)}}
+    else if(!store.get(SKIP,0)&&ov.hidden)open(true);
+  },900);
 })();
 </script>
 </body>
