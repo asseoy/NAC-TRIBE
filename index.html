@@ -1451,7 +1451,6 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
   <div class="nav-links" id="navLinks">
     <a class="l play" href="#games">משחקים</a>
     <a class="l" href="locker/?v=6">הלוקר</a>
-    <a class="l" href="buddy/">פוצצו את השיכוני</a>
       <a class="l" href="#spirit">הרוח</a>
     <a class="l" href="#about">על השבט</a>
     <a class="l" href="#timeline">ציר הזמן</a>
@@ -1518,26 +1517,7 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
     .lk-new{position:absolute;top:0;left:0;background:var(--yellow);color:#000;font-family:var(--display);font-size:1.4rem;padding:.1rem .8rem 0}
     @media (max-width:640px){.lk-ban{flex-direction:column;align-items:stretch;padding:14px}.lk-fan{width:100%;height:150px}.lk-fan img{width:96px;height:122px;margin:-61px 0 0 -48px}.lk-mid{align-items:center;text-align:center}}
     </style>
-    <a class="bd-ban" href="buddy/" aria-label="פוצצו את השיכוני – 51 כלים להרוס את השיכוני">
-      <div class="bd-art" aria-hidden="true"><img src="buddy/thumb.webp" alt="" loading="lazy"></div>
-      <div class="bd-mid"><span class="bd-new">חדש!</span><b>פוצצו את השיכוני</b><small>השיכוני בחולצה הצהובה, חדר מרופד ו־51 כלים: מחבטים, פיצוצים, נשקים, איתני הטבע ופסנתר שנופל מהתקרה. פיזיקה אמיתית, קומבואים ומטבעות.</small><i>זורקים, מפוצצים, מקפיאים, מחשמלים</i><span class="bd-go">לרסק ←</span></div>
-    </a>
-    <style>
-    .bd-ban{position:relative;display:flex;align-items:center;gap:22px;margin:-14px 0 34px;min-height:200px;padding:18px 24px;overflow:hidden;text-decoration:none;color:#fff;background:#111;border:2px solid #2a2a2a;transition:transform .15s,border-color .15s}
-    .bd-ban:hover{transform:translateY(-4px);border-color:var(--yellow)}
-    .bd-art{flex:none;width:300px;height:180px;border:3px solid #000;overflow:hidden;background:#2b2620}
-    .bd-art img{width:100%;height:100%;object-fit:cover;transition:transform .25s ease-out}
-    .bd-ban:hover .bd-art img{transform:scale(1.06) rotate(-1deg)}
-    .bd-mid{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0}
-    .bd-mid>*{max-width:100%}
-    .bd-mid b{font-family:var(--display);font-weight:700;font-size:clamp(46px,6.5vw,80px);line-height:.85;color:var(--yellow)}
-    .bd-mid small{font-size:1rem;color:#bdb6ae}
-    .bd-mid i{font-style:normal;font-family:var(--display);font-size:1.4rem;color:#fff;border:1px solid #444;padding:.05rem .7rem}
-    .bd-go{margin-top:6px;font-family:var(--display);font-size:1.7rem;background:var(--flag);color:#fff;padding:.2rem 1.2rem 0}
-    .bd-ban:hover .bd-go{background:var(--yellow);color:#000}
-    .bd-new{position:absolute;top:0;left:0;background:var(--yellow);color:#000;font-family:var(--display);font-size:1.4rem;padding:.1rem .8rem 0}
-    @media (max-width:640px){.bd-ban{flex-direction:column;align-items:stretch;padding:14px}.bd-art{width:100%;height:170px}.bd-mid{align-items:center;text-align:center}}
-    </style>
+    
     <div class="arcade-head">
       <div>
         <h2>משחקי השבט</h2>
@@ -9468,7 +9448,7 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
    normalized text, so they can't be read from the page source. Each code works once per device. */
 (()=>{
   const CODES=[
-    // { h:'<sha256 of the code>', msg:'...', give:{ xp:0, lockerCoins:0, crates:{mahsan:0}, buddyCoins:0, buddyWeapons:[], buddySkins:[] } }
+    // { h:'<sha256 of the code>', msg:'...', give:{ xp:0, lockerCoins:0, crates:{mahsan:0} } }
     { h:'8f0f97e140e126a4404a09eb1e14a53b7c742701c4290a5d1702d14daec22ee8', key:'2029b', msg:'קיבלתם 10,000 אסימונים ללוקר!', give:{ lockerCoins:10000 } },
     { h:'0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', key:'1111', msg:'קיבלתם 100,000 אסימונים ללוקר!', give:{ lockerCoins:100000 } }
   ];
@@ -9508,11 +9488,6 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
       if(g.crates){s.crates=s.crates||{};for(const k in g.crates)s.crates[k]=(s.crates[k]|0)+g.crates[k]}});
     // the locker and the game unlock their full collections themselves on the next visit
     if(g.lockerAll)edit('hanasi:grant',()=>({}),s=>{s.lockerAll=1});
-    if(g.buddyCoins||g.buddyWeapons||g.buddySkins||g.buddyAll)edit('bd:save:v1',()=>({}),s=>{
-      if(g.buddyAll)s.grantAll=1;
-      if(g.buddyCoins)s.coins=(+s.coins||120)+g.buddyCoins;
-      if(g.buddyWeapons){s.owned=s.owned||['bat','glove','grenade','pistol','fire','anvil'];for(const w of g.buddyWeapons)if(!s.owned.includes(w))s.owned.push(w)}
-      if(g.buddySkins){s.skins=s.skins||['crash'];for(const k of g.buddySkins)if(!s.skins.includes(k))s.skins.push(k)}});
   }
   const form=document.getElementById('codeForm'),inp=document.getElementById('codeIn'),msg=document.getElementById('codeMsg'),box=document.getElementById('codes');
   if(!form)return;
@@ -9757,7 +9732,7 @@ body.arena-open .sdv-btn,body.arena-open .sdv-panel,body.sdv-on .sdv-btn{display
     {k:['הכי ותיקה','הראשונה','הכי זקנה','הוותיקה'],s:['שכבה'],a:'השכבה הראשונה שמתועדת בשבט: '+layerLine(LAYERS[0])},
     {k:['פעמיים','=חזרו','שמות שחזרו'],a:'שמות שכבה שהיו פעמיים: '+B(TWICE.join(', '))+'. באתר הן "הראשונה" ו"השנייה".'},
     {k:['~האתר','=אתר'],s:['=בנה','=יצר','=עשה','=הכין'],a:'את האתר בנה '+B('איתן אסיאו')+', מתוך המאגר של שבט הנשיא. מצאתם טעות או עובדה חסרה? עדכנו את המאגר.'},
-    {k:['משחק','משחקים','ארקייד','פוקר','שש בש','פקמן','לוקר','שיכוני','פוצצו'],a:'באתר יש 17 משחקים: ארקייד הפלנגה, בלוק הנשיא, '+B('פקמן הנשיא')+', '+B('שש בש')+', '+B('פוקר')+' (שם אני הדילר, ואני מנצח), טורניר לשניים עד ארבעה, ועוד. יש גם את הלוקר עם ארגזים, ואת "פוצצו את השיכוני".'},
+    {k:['משחק','משחקים','ארקייד','פוקר','שש בש','פקמן','לוקר'],a:'באתר יש 17 משחקים: ארקייד הפלנגה, בלוק הנשיא, '+B('פקמן הנשיא')+', '+B('שש בש')+', '+B('פוקר')+' (שם אני הדילר, ואני מנצח), טורניר לשניים עד ארבעה, ועוד. יש גם את הלוקר עם ארגזים.'},
     {k:['=קוד','~הקוד','~קודים','~הקודים'],a:'קודים? תחפשו לבד. השטן לא מלשין.'},
     {k:['פנאט','נקודות','דרגה','דרגות'],a:'כל משחק באתר נותן '+B('נקודות פנאט')+', והדרגה שלכם מופיעה בסרגל העליון. ברמה הקשה, "מחנאות מעל שפיות", הנקודות כפולות.'},
     {k:['ראש השבט','ראשת השבט','=רכז','=רכזת','ראשת השבט','=מדריך','=מדריכה','=מדריכים','=מרכזים'],a:'שמות של צוות השבט אין לי במאגר, וגם לא הייתי מלשין. תשאלו בפעולה, בשלישי או בשישי.'},
