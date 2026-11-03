@@ -315,7 +315,19 @@ button.card:hover{transform:translateY(-4px);border-color:var(--yellow)}
   .daily .dbox .btn{width:100%}
   .mrow{gap:8px}.mc{width:30vw}
   .mcf b{font-size:17px}.mcf small{font-size:11px}.mcf img{height:58%}
-  .crimg{width:130px;height:137px}
+  .crimg{width:104px;height:110px}
+  .crates{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .crt{padding:12px 8px 10px}
+  .crt h3{font-size:28px;margin:4px 0 2px}
+  .crt p{display:none}
+  .crt .odds{height:7px;margin:6px 0 4px}
+  .crt .oddt{gap:1px 6px;font-size:10.5px;margin-bottom:8px;line-height:1.25}
+  .crt .acts{flex-direction:column;gap:6px}
+  .crt .acts .btn{min-width:0;width:100%;min-height:42px;font-size:19px}
+  .crt .price{font-size:19px}
+  .btn.five{font-size:17px;min-height:42px}
+  .toasts{top:auto;bottom:18px}
+  .toast{font-size:20px;text-align:center}
 }
 @media (max-width:340px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important}}
