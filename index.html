@@ -8959,8 +8959,7 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
   </div>
 </div>
 <script>
-/* Songs start with sound on the visitor's first tap or click (browsers block sound before that).
-   Muting or closing is remembered, and then nothing plays until the visitor picks a song.
+/* Songs play only when the visitor asks for them.
    The player stays on top during games, in a smaller size. */
 (()=>{
   const SONGS=[
@@ -9083,15 +9082,6 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
   muteB.onclick=()=>{const m=muteB.getAttribute('aria-pressed')!=='true';setMuted(m);off.set(m)};
   document.getElementById('mpClose').onclick=()=>{if(ready) player.stopVideo();mp.classList.remove('on');document.body.classList.remove('music-on');off.set(true)};
   document.addEventListener('click',e=>{const b=e.target.closest('.yt-play,.yt-inline');if(!b) return;const i=b.dataset.yt?SONGS.findIndex(x=>x.id===b.dataset.yt):+b.dataset.song;if(i>=0) play(i)});
-  // first tap/click/key anywhere starts the music, unless the visitor turned it off before
-  function first(e){
-    removeEventListener('pointerdown',first,true);removeEventListener('keydown',first,true);
-    if(off.get()||started) return;
-    if(hold){resumeAfter=true;return}
-    if(e.target.closest&&e.target.closest('.mp,.yt-play,.yt-inline')) return;
-    play(0);
-  }
-  addEventListener('pointerdown',first,true);addEventListener('keydown',first,true);
   // a game that plays its own audio (the jingle game) borrows the sound: hold(true) pauses this player, hold(false) resumes it
   window.tribeMusic={songs:SONGS,gameSongs:SONGS.concat(GAME_ONLY.filter(g=>!SONGS.some(x=>x.id===g.id))),api,
     hold(v){
@@ -10253,11 +10243,11 @@ html.s-purim .sdv-head::after{left:38px;top:2px;width:34px;height:9px;border-wid
   const play=()=>{const p=v.play();if(p&&p.catch)p.catch(()=>paintS());paintS()};
   const fromTop=sound=>{end.hidden=true;v.currentTime=0;v.muted=!sound;play()};
   function open(auto){
-    last=document.activeElement;ov.hidden=false;prevOverflow=document.documentElement.style.overflow;document.documentElement.style.overflow='hidden';
+    window.tribeMusic&&tribeMusic.hold(true);last=document.activeElement;ov.hidden=false;prevOverflow=document.documentElement.style.overflow;document.documentElement.style.overflow='hidden';
     if(auto&&matchMedia('(prefers-reduced-motion:reduce)').matches){end.hidden=true;v.muted=true;paintS()}else fromTop(!auto);
     s.focus({preventScroll:true});
   }
-  function close(){ls.set();v.pause();ov.hidden=true;document.documentElement.style.overflow=prevOverflow;if(last&&last.focus)last.focus({preventScroll:true})}
+  function close(){ls.set();v.pause();ov.hidden=true;window.tribeMusic&&tribeMusic.hold(false);document.documentElement.style.overflow=prevOverflow;if(last&&last.focus)last.focus({preventScroll:true})}
   s.onclick=()=>{if(v.paused||v.muted)fromTop(true);else{v.muted=true;paintS()}};
   $i('nvA').onclick=()=>fromTop(!v.muted);$i('nvRe').onclick=()=>fromTop(!v.muted);
   $i('nvX').onclick=close;$i('nvBack').onclick=close;
@@ -10270,6 +10260,155 @@ html.s-purim .sdv-head::after{left:38px;top:2px;width:34px;height:9px;border-wid
   const nav=document.querySelector('#navLinks a[href^="locker/"]');
   if(nav){const a=document.createElement('a');a.className='l';a.href='#';a.id='nvNav';a.textContent='המבזק';nav.insertAdjacentElement('afterend',a);a.addEventListener('click',e=>{e.preventDefault();open(false)})}
   if(ls.get()!=='1')open(true);
+})();
+</script>
+<style>
+/* phone first cleanup: tab bar, compact games, folded long lists. Everything phone-only sits in the media queries. */
+section[id]{scroll-margin-top:58px}
+.pl-prog{position:absolute;right:0;left:0;bottom:-3px;height:3px;background:var(--flag);transform:scaleX(0);transform-origin:right;pointer-events:none}
+button,a{-webkit-tap-highlight-color:transparent}
+.arena.open{animation:plArena .24s cubic-bezier(.2,.8,.2,1)}
+@keyframes plArena{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+.pl-deal .cab{animation:plDeal .42s cubic-bezier(.2,.9,.3,1.15) both}
+.pl-deal .cab:nth-child(2n){animation-delay:.05s}.pl-deal .cab:nth-child(3n){animation-delay:.1s}.pl-deal .cab:nth-child(4n){animation-delay:.15s}.pl-deal .cab:nth-child(5n){animation-delay:.2s}
+@keyframes plDeal{from{opacity:0;transform:translateY(26px) rotate(-1.5deg)}to{opacity:1;transform:none}}
+.pl-tabs,.pl-more{display:none}
+/* narrow laptops: the top links used to push the bar off the screen */
+@media (min-width:961px) and (max-width:1280px){nav.top{gap:.6rem;padding-left:.8rem}.nav-links{gap:.7rem}nav.top a.l{font-size:1.15rem}nav.top .brand{font-size:1.4rem;margin-left:.2rem}.rankpill{font-size:1.1rem}.rankpill span:last-child{display:none}.snd{font-size:1rem}}
+@media (max-width:960px){
+  body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
+  body.arena-open{padding-bottom:0}
+  footer{padding-bottom:1.6rem!important}
+  nav.top{overflow:visible;justify-content:space-between;padding:.4rem 1rem .4rem .7rem}
+  .menu-btn,.play-m,.sdv-btn,.mp-pill{display:none!important}
+  .mp{bottom:calc(70px + env(safe-area-inset-bottom));left:8px}
+  .mp-box{width:min(230px,62vw)}
+  .pl-tabs{position:fixed;right:0;left:0;bottom:0;z-index:140;display:grid;grid-template-columns:repeat(5,1fr);background:#000;padding-bottom:env(safe-area-inset-bottom);border-top:4px solid;border-image:repeating-linear-gradient(90deg,var(--flag) 0 34px,#000 34px 44px) 4}
+  body.arena-open .pl-tabs{display:none}
+  .pl-tabs a,.pl-tabs button{all:unset;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:60px;color:#bdb6ae;font-family:var(--display);font-size:1.12rem;line-height:1;cursor:pointer;transition:color .15s,transform .12s;touch-action:manipulation;position:relative}
+  .pl-tabs svg,.pl-tabs img{width:25px;height:25px;display:block;object-fit:contain}
+  .pl-tabs a:active,.pl-tabs button:active{transform:scale(.88)}
+  .pl-tabs .on{color:var(--yellow)}
+  .pl-tabs .on::before{content:"";position:absolute;top:0;right:22%;left:22%;height:3px;background:var(--yellow)}
+  .nav-links{position:fixed;top:auto;right:0;left:0;bottom:calc(64px + env(safe-area-inset-bottom));border-top:0}
+  .nav-links.open{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px 16px;background:#0b0b0b;border-top:4px solid var(--flag);max-height:72vh;overflow:auto;animation:plUp .24s cubic-bezier(.2,.9,.3,1.1);box-shadow:0 0 0 100vmax rgba(0,0,0,.66)}
+  @keyframes plUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+  .nav-links a.l{display:flex;align-items:center;justify-content:center;min-height:58px;padding:.2rem .4rem;background:#171615;border:2px solid #2a2a2a;font-size:1.65rem;line-height:1;text-align:center;opacity:1}
+  .nav-links a.l:active{border-color:var(--yellow);color:var(--yellow)}
+  .nav-links a.l[hidden]{display:none}
+}
+@media (max-width:700px){
+  .peek{display:none!important}
+  .wrap{padding-inline:16px}
+  section{padding-top:2.6rem!important;padding-bottom:2.6rem!important}
+  section h2{font-size:clamp(3rem,15vw,4.4rem)!important;line-height:.95;margin-bottom:.45rem}
+  .lede{font-size:1.02rem;line-height:1.45;margin-bottom:1.1rem}
+  .hero{padding:1.5rem 1.3rem 0 1rem}
+  .hero .side{padding-bottom:1.5rem}
+  .hero .founded{margin-top:1rem}
+  .values{display:none!important}
+  .hero-logo{width:min(250px,62vw);margin-bottom:.7rem}
+  .hero .motto{margin-bottom:.5rem}
+  .hero p{font-size:1.02rem;line-height:1.45;margin-bottom:.6rem}
+  .hero .cta{display:flex;justify-content:center;font-size:2.1rem;padding:.35rem 1rem}
+  #games .arcade-head{display:block;margin-bottom:1rem}
+  #games .plaque{display:none}
+  #games .lede{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;margin-bottom:0}
+  .lk-ban{flex-direction:row!important;align-items:center!important;gap:10px;margin:0 0 1.6rem!important;min-height:0;padding:10px!important}
+  .lk-fan{width:112px!important;height:104px!important}
+  .lk-fan img{width:62px!important;height:80px!important;margin:-40px 0 0 -31px!important;border-width:2px;border-bottom-width:6px}
+  .lk-fan .c1{transform:translateX(-27px) rotate(-10deg)}.lk-fan .c3{transform:translateX(27px) rotate(10deg)}
+  .lk-mid{align-items:flex-start!important;text-align:right!important;gap:3px}
+  .lk-mid b{font-size:2.7rem}
+  .lk-mid small,.lk-mid i{display:none}
+  .lk-go{margin-top:2px;font-size:1.45rem;padding:.1rem .9rem 0}
+  .lk-new{font-size:1.1rem}
+  .cabinets{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .cab{min-height:0;transition:transform .12s,border-color .12s}
+  .cab:active{transform:scale(.96);border-color:var(--yellow)}
+  .cab .art{height:96px}
+  .cab .body{padding:.5rem .55rem .6rem;gap:0;justify-content:center}
+  .cab .t{font-size:1.72rem;line-height:.98}
+  .cab .d,.cab .foot{display:none}
+  .cab .art-hl,.cab .art-time,.cab .art-blitz{height:160px;zoom:.6}
+  .about-values{margin-bottom:1.6rem}
+  .about-values>div{padding:.7rem .45rem}
+  .about-values b{font-size:1.5rem!important}
+  .about-values p{display:none}
+  .facts{columns:1}
+  .tl li{grid-template-columns:5.2rem 1fr;gap:.8rem;padding:.9rem 0}
+  .tl .yr{font-size:2.9rem}.tl li.big .yr{font-size:3.3rem}.tl .yr small{font-size:1.05rem}
+  .tl p{font-size:1rem;line-height:1.45}
+  .fac-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
+  .sym-grid{display:flex;align-items:stretch;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin-inline:-16px;padding:2px 16px 12px;scrollbar-width:none}
+  .sym-grid::-webkit-scrollbar{display:none}
+  .sym-grid>.sym{flex:0 0 76%;scroll-snap-align:center}
+  .slogans{margin-bottom:1.8rem}
+  .slogan{font-size:clamp(2rem,10vw,3rem)!important}
+  .pl-fold:not(.open){max-height:var(--fh);overflow:hidden;-webkit-mask:linear-gradient(#000 76%,transparent);mask:linear-gradient(#000 76%,transparent)}
+  .pl-more{display:block;width:100%;min-height:50px;margin:.7rem 0 .3rem;background:#000;color:#fff;border:2px solid var(--flag);font-family:var(--display);font-size:1.6rem;line-height:1;cursor:pointer}
+  .pl-more:active{background:var(--flag)}
+  .pl-more[hidden]{display:none}
+}
+@media (max-width:960px) and (max-height:480px){.pl-tabs a,.pl-tabs button{height:48px;flex-direction:row;gap:6px}body{padding-bottom:calc(52px + env(safe-area-inset-bottom))}.nav-links{bottom:calc(52px + env(safe-area-inset-bottom))}.mp{bottom:calc(58px + env(safe-area-inset-bottom))}}
+@media (prefers-reduced-motion:reduce){.pl-deal .cab,.arena.open,.nav-links.open{animation:none}}
+</style>
+<nav class="pl-tabs" id="plTabs" aria-label="ניווט ראשי">
+  <a href="#games" id="plGames"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M2 8h20v10H2zM6 10v2H4v2h2v2h2v-2h2v-2H8v-2zm9 1v2h2v-2zm3 3v2h2v-2z" fill-rule="evenodd"/></svg>משחקים</a>
+  <a href="locker/?v=6"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 3 2 7l2 5 3-1v10h10V11l3 1 2-5-6-4c-1 2-7 2-8 0z"/></svg>הלוקר</a>
+  <button type="button" id="plDevil"><img src="assets/devil.webp" alt="" width="25" height="25" loading="lazy">השטן</button>
+  <button type="button" id="plMusic" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 4h12v13.5a3.5 3 0 1 1-2-2.7V8h-8v11.5a3.5 3 0 1 1-2-2.7z"/></svg><span>שירים</span></button>
+  <button type="button" id="plMore" aria-expanded="false" aria-controls="navLinks"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5h18v3H3zm0 6h18v3H3zm0 6h18v3H3z"/></svg>עוד</button>
+</nav>
+<script>
+/* tab bar, reading progress, folded lists, back button closes a game */
+(()=>{
+  const $i=id=>document.getElementById(id),nav=document.querySelector('nav.top'),links=$i('navLinks'),games=$i('games'),phone=()=>matchMedia('(max-width:700px)').matches;
+  // progress line under the top bar
+  const prog=document.createElement('div');prog.className='pl-prog';prog.setAttribute('aria-hidden','true');nav.appendChild(prog);
+  let tick=false;const paint=()=>{tick=false;const d=document.documentElement,m=d.scrollHeight-innerHeight;prog.style.transform=`scaleX(${m>0?Math.min(1,scrollY/m):0})`};
+  addEventListener('scroll',()=>{if(!tick){tick=true;requestAnimationFrame(paint)}},{passive:true});paint();
+  // tabs drive the existing bot, music and menu, so those keep working the same everywhere
+  const more=$i('plMore'),mus=$i('plMusic'),gameTab=$i('plGames');
+  $i('plDevil').onclick=e=>{e.stopPropagation();links.classList.remove('open');$i('sdvBtn')?.click()};
+  mus.onclick=e=>{e.stopPropagation();links.classList.remove('open');if(document.body.classList.contains('music-on'))$i('mpClose').click();else $i('mpPill').click()};
+  more.onclick=e=>{e.stopPropagation();$i('menuBtn').click()};
+  new MutationObserver(()=>more.setAttribute('aria-expanded',links.classList.contains('open'))).observe(links,{attributes:true,attributeFilter:['class']});
+  const paintMusic=()=>{const on=document.body.classList.contains('music-on');mus.classList.toggle('on',on);mus.setAttribute('aria-pressed',on);mus.querySelector('span').textContent=on?'לכבות':'שירים'};
+  new MutationObserver(paintMusic).observe(document.body,{attributes:true,attributeFilter:['class']});
+  gameTab.addEventListener('click',()=>links.classList.remove('open'));
+  if('IntersectionObserver' in window&&games){
+    new IntersectionObserver(es=>gameTab.classList.toggle('on',es[0].isIntersecting),{rootMargin:'-45% 0px -45% 0px'}).observe(games);
+    const cabs=$i('cabinets');let dealt=false;
+    new IntersectionObserver((es,o)=>{if(!es[0].isIntersecting||dealt)return;dealt=true;o.disconnect();cabs.classList.add('pl-deal');setTimeout(()=>cabs.classList.remove('pl-deal'),1000)},{rootMargin:'0px 0px -12% 0px'}).observe(cabs);
+  }
+  // on a phone the games come right after the opening; the daily question follows them
+  const daily=$i('daily');if(daily&&games&&phone())games.after(daily);
+  // long lists open on demand on a phone
+  function fold(el,label,h,input){
+    if(!el)return;
+    el.classList.add('pl-fold');el.style.setProperty('--fh',h+'px');
+    const b=document.createElement('button');b.type='button';b.className='pl-more';b.textContent=label;el.after(b);
+    const set=o=>{el.classList.toggle('open',o);b.textContent=o?'לצמצם':label;b.setAttribute('aria-expanded',o)};
+    b.onclick=()=>{const o=!el.classList.contains('open');set(o);if(!o)el.closest('section').scrollIntoView({behavior:'smooth'})};
+    if(input){const q=$i(input);q&&q.addEventListener('input',()=>{const has=!!q.value.trim();if(has)el.classList.add('open');else set(b.textContent==='לצמצם');b.hidden=has})}
+  }
+  fold(document.querySelector('.facts'),'לכל העובדות',430);
+  fold(document.querySelector('.tl'),'לכל ציר הזמן',640);
+  fold($i('grid'),'לכל השכבות',620,'q');
+  fold($i('facGrid'),'לכל המתקנים',560,'facQ');
+  fold(document.querySelector('.songs'),'לכל השירים',520);
+  $i('facChips')?.addEventListener('click',()=>{const g=$i('facGrid'),b=g.nextElementSibling;if(g.classList.contains('open'))return;g.classList.add('open');b.textContent='לצמצם'});
+  // the phone's back button closes a game instead of leaving the site
+  const arena=$i('arena');let pushed=false,byBack=false;
+  if(arena){
+    new MutationObserver(()=>{const o=arena.classList.contains('open');
+      if(o&&!pushed){pushed=true;history.pushState({plGame:1},'')}
+      else if(!o&&pushed){pushed=false;if(!byBack)history.back()}
+      if(!o)byBack=false;
+    }).observe(arena,{attributes:true,attributeFilter:['class']});
+    addEventListener('popstate',()=>{if(pushed&&arena.classList.contains('open')){byBack=true;$i('arenaClose').click()}});
+  }
 })();
 </script>
 </body>
