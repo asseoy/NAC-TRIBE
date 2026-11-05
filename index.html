@@ -9269,7 +9269,7 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
     // { h:'<sha256 of the code>', msg:'...', give:{ xp:0, lockerCoins:0, crates:{mahsan:0} } }
     { h:'8f0f97e140e126a4404a09eb1e14a53b7c742701c4290a5d1702d14daec22ee8', key:'2029b', msg:'קיבלתם 10,000 אסימונים ללוקר!', give:{ lockerCoins:10000 } },
     { h:'0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c', key:'1111', msg:'קיבלתם 100,000 אסימונים ללוקר!', give:{ lockerCoins:100000 } },
-    { h:'6161b2838ffa6ce17b84db3b45b4f8437855ecf43e75de2d1ad0008eaae91aa0', key:'6969', msg:'קיבלתם מיליון אסימונים ללוקר!', give:{ lockerCoins:1000000 } }
+    { h:'6161b2838ffa6ce17b84db3b45b4f8437855ecf43e75de2d1ad0008eaae91aa0', key:'6969', msg:'קיבלתם מיליון אסימונים ללוקר!', give:{ lockerCoins:1000000 }, limit:2 }
   ];
   // prank codes: no reward, just the devil laughing at you (every time)
   const PRANK=[{ h:'592fbed6f4ef4a643b0c5dec00a9a32f69a4027aedb972265cd9237b7b31d564', msg:'אכלתם תלקרדה יא אפסים' },
@@ -9313,6 +9313,15 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
   {const used=store.get('codes',[]),seen=store.get('codesEnded',[]);
    for(const x of ENDED)if(used.includes(x.h)&&!seen.includes(x.h)){seen.push(x.h);store.set('codesEnded',seen);setTimeout(()=>endedNotice(x.msg),900)}}
   const say=(t,cls)=>{msg.textContent=t;msg.className=cls||''};
+  // a code with a limit: the first devices take a slot, kept as retained messages on the public brokers (the same ones the site already uses)
+  const claimSlot=k=>new Promise(done=>{
+    const SRC=['https://unpkg.com/mqtt@5.3.5/dist/mqtt.min.js','https://cdn.jsdelivr.net/npm/mqtt@5.3.5/dist/mqtt.min.js'],BROK=['wss://broker.emqx.io:8084/mqtt','wss://broker.hivemq.com:8884/mqtt','wss://test.mosquitto.org:8081/mqtt'];
+    let me=store.get('deviceId','');if(!me){me=Math.random().toString(36).slice(2,12);store.set('deviceId',me)}
+    const load=()=>window.mqtt?Promise.resolve():SRC.reduce((p,src)=>p.catch(()=>new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=()=>window.mqtt?res():rej();s.onerror=rej;document.head.appendChild(s)})),Promise.reject());
+    const base=`nachanasi/hc/${k.h.slice(0,16)}/`,slots={},cl=[];let live=0,ended=false;
+    const end=r=>{if(ended)return;ended=true;cl.forEach(c=>{try{c.end(true)}catch(_){}});done(r)};
+    load().then(()=>{BROK.forEach(u=>{let c;try{c=mqtt.connect(u,{clean:true,connectTimeout:5000,reconnectPeriod:0})}catch(_){return}cl.push(c);c.on('connect',()=>{live++;c.subscribe(base+'#',{qos:1})});c.on('message',(tp,b)=>{const n=tp.slice(base.length);try{const v=JSON.parse(b.toString());if(v&&v.id)slots[n]=slots[n]&&slots[n].t<v.t?slots[n]:v}catch(_){}});c.on('error',()=>{})});
+      setTimeout(()=>{if(!live)return end(null);const mine=Object.values(slots).some(v=>v.id===me);if(mine)return end(true);let free=0;for(let i=1;i<=k.limit;i++)if(!slots[i]){free=i;break}if(!free)return end(false);const v={id:me,t:Date.now()};cl.forEach(c=>{if(c.connected)c.publish(base+free,JSON.stringify(v),{qos:1,retain:true})});setTimeout(()=>{end(!slots[free]||slots[free].id===me)},2500)},5000)}).catch(()=>end(null))});
   form.addEventListener('submit',async e=>{
     e.preventDefault();
     const c=norm(inp.value);if(!c){inp.focus();return}
@@ -9323,6 +9332,7 @@ const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),
     if(!k){say('הקוד לא נכון','bad');box.classList.remove('shake');void box.offsetWidth;box.classList.add('shake');if(typeof sound==='function')sound('bad');return}
     const id=k.key||h;
     if(used.includes(id)&&!k.admin){say('כבר השתמשתם בקוד הזה','bad');return}
+    if(k.limit){say('בודק את הקוד...');const r=await claimSlot(k);if(r===null){say('אין חיבור כרגע, נסו שוב עוד רגע','bad');return}if(!r){say('מאוחר מדי, הקוד הזה כבר נגמר','bad');inp.value='';return}}
     give(k.give||{});if(!used.includes(id)){used.push(id);store.set('codes',used)}
     say(k.msg||'הקוד הופעל!','ok');inp.value='';if(typeof sound==='function')sound('win');if(typeof toast==='function')toast(k.msg||'הקוד הופעל!');
   });
