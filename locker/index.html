@@ -2,6 +2,10 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BSQH981GP3"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-BSQH981GP3');</script>
+
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>הלוקר של הנשיא</title>
 <meta name="description" content="הלוקר של שבט הנשיא: פותחים ארגזים ואוספים את כל הבגדים והציוד מקטלוג השבט. ככל שהפריט ישן יותר הוא נדיר יותר.">
@@ -81,5 +85,14 @@
 
 <script src="items.js?v=6"></script>
 <script src="locker.js?v=13"></script>
+<script>
+/* Google Analytics events in the locker: crates opened, items sold. Numbers only. */
+(()=>{const t=(n,p)=>{try{gtag('event',n,p||{})}catch(e){}};
+document.addEventListener('click',e=>{const el=e.target;if(!el.closest)return;
+ const f=el.closest('#crateList [data-five]'),o=el.closest('#crateList [data-open]'),b=el.closest('#crateList [data-buy]');
+ if(f)return t('locker_crate',{crate:f.dataset.five,how:'five'});if(o)return t('locker_crate',{crate:o.dataset.open,how:'open'});if(b)return t('locker_crate',{crate:b.dataset.buy,how:'buy'});
+ if(el.closest('#sellDupes'))return t('locker_sell_dupes');if(el.closest('[data-a="sell"]'))return t('locker_sell');
+ const m=el.closest('[data-m="again"]');if(m)return t('locker_crate',{crate:'again',how:'again'})},true)})();
+</script>
 </body>
 </html>
