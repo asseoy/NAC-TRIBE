@@ -10490,7 +10490,7 @@ button,a{-webkit-tap-highlight-color:transparent}
   const t=(n,p)=>{try{if(typeof gtag==='function')gtag('event',n,p||{})}catch(e){}};
   const $=s=>document.querySelector(s);
   // sections seen (once per visit) and how far down people scroll
-  try{const seen=new Set(),io=new IntersectionObserver(es=>es.forEach(e=>{const id=e.target.id;if(e.isIntersecting&&!seen.has(id)){seen.add(id);t('section_view',{section:id})}}),{threshold:.35});
+  try{const seen=new Set(),io=new IntersectionObserver(es=>es.forEach(e=>{const id=e.target.id;if(e.isIntersecting&&!seen.has(id)){seen.add(id);t('section_view',{section:id})}}),{rootMargin:'-45% 0px -45% 0px'});
     document.querySelectorAll('main section[id], section#daily, .dq').forEach(s=>{if(!s.id)s.id='daily';io.observe(s)})}catch(e){}
   {const marks=[25,50,75,100],done=new Set();addEventListener('scroll',()=>{const h=document.documentElement,p=(h.scrollTop+innerHeight)/h.scrollHeight*100;marks.forEach(m=>{if(p>=m-1&&!done.has(m)){done.add(m);t('scroll_depth',{percent:m})}})},{passive:true})}
   // arcade: open, finish (result screen), close with time played
