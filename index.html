@@ -1524,6 +1524,7 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
   // Add a line for each new episode. "date" is the day it becomes the daily episode.
   const EPS=[
     {n:1,date:'2026-11-07',title:'יום ראשון בזולה',lede:'החמשוש יושב בזולה עם קפה. אין משימות, אין לחץ, אין שביעסט. ואז הטלפון מצלצל.',src:'assets/ep/chamshush-01.mp4',poster:'assets/ep/chamshush-01.webp'},
+    {n:2,date:'2026-11-08',title:'50 שקל ליודה',lede:'שלוש דקות, חמישים שקל וקרטון ביצים. מה כבר יכול לקרות? הסופר, הקופאית רינה, ורמפה אחת מיותרת.',src:'assets/ep/chamshush-02.mp4',poster:'assets/ep/chamshush-02.webp'},
   ];
   const today=new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
   const live=EPS.filter(e=>e.date<=today);if(!live.length)return;
