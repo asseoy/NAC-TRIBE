@@ -10484,5 +10484,38 @@ button,a{-webkit-tap-highlight-color:transparent}
   },900);
 })();
 </script>
+<script>
+/* ===== Google Analytics events: what people do on the site. Numbers only: no names, no typed text. ===== */
+(()=>{
+  const t=(n,p)=>{try{if(typeof gtag==='function')gtag('event',n,p||{})}catch(e){}};
+  const $=s=>document.querySelector(s);
+  // sections seen (once per visit) and how far down people scroll
+  try{const seen=new Set(),io=new IntersectionObserver(es=>es.forEach(e=>{const id=e.target.id;if(e.isIntersecting&&!seen.has(id)){seen.add(id);t('section_view',{section:id})}}),{threshold:.35});
+    document.querySelectorAll('main section[id], section#daily, .dq').forEach(s=>{if(!s.id)s.id='daily';io.observe(s)})}catch(e){}
+  {const marks=[25,50,75,100],done=new Set();addEventListener('scroll',()=>{const h=document.documentElement,p=(h.scrollTop+innerHeight)/h.scrollHeight*100;marks.forEach(m=>{if(p>=m-1&&!done.has(m)){done.add(m);t('scroll_depth',{percent:m})}})},{passive:true})}
+  // arcade: open, finish (result screen), close with time played
+  {const arena=$('#arena'),stage=$('#stage');let open=false,since=0,game='',lastRes=null;
+    const name=()=>($('#arenaTitle')&&$('#arenaTitle').textContent.trim())||'?';
+    if(arena)new MutationObserver(()=>{const o=arena.classList.contains('open');if(o&&!open){open=true;since=Date.now();game=name();t('game_open',{game})}else if(!o&&open){open=false;t('game_close',{game,seconds:Math.round((Date.now()-since)/1000)})}}).observe(arena,{attributes:true,attributeFilter:['class']});
+    if(stage)new MutationObserver(()=>{const r=stage.querySelector('.result');if(r&&r!==lastRes){lastRes=r;const lv=r.querySelector('.lvtag');t('game_finish',{game:game||name(),level:lv?lv.textContent.trim():''})}else if(!r)lastRes=null}).observe(stage,{childList:true,subtree:true})}
+  // the daily episode
+  {const v=$('#epVideo');if(v){const ep=()=>($('#epTitle')&&$('#epTitle').textContent.trim())||'?';let half=false,started=false;
+    v.addEventListener('play',()=>{if(!started){started=true;t('episode_play',{episode:ep()})}});
+    v.addEventListener('timeupdate',()=>{if(!half&&v.duration&&v.currentTime/v.duration>=.5){half=true;t('episode_half',{episode:ep()})}});
+    v.addEventListener('ended',()=>t('episode_complete',{episode:ep()}));
+    v.addEventListener('loadstart',()=>{half=false;started=false})}}
+  // clicks: daily question, add to home screen, links to the game and the locker
+  document.addEventListener('click',e=>{const el=e.target;if(!el.closest)return;
+    const dq=el.closest('.dq-opts button');if(dq&&!dq.disabled){setTimeout(()=>t('daily_question_answer',{correct:dq.classList.contains('ok')?'yes':'no'}),60);return}
+    if(el.closest('#a2hsNav')||el.closest('#a2hsBar button, #a2hsBar a')){t('add_to_home_click');return}
+    if(el.closest('.ep-game')){t('chamshush_link');return}
+    if(el.closest('.lk-ban')){t('locker_link');return}
+  },true);
+  addEventListener('appinstalled',()=>t('add_to_home_installed'));
+  // שאלו את השטן: opened, and how many questions (not what was asked)
+  {const p=$('#sdvPanel');if(p){let wasOpen=false;new MutationObserver(ms=>{const o=!p.hidden;if(o&&!wasOpen)t('devil_open');wasOpen=o;
+    ms.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType===1&&n.classList.contains('sdv-m')&&n.classList.contains('u'))t('devil_question')}))}).observe(p,{attributes:true,attributeFilter:['hidden'],childList:true,subtree:true})}}
+})();
+</script>
 </body>
 </html>
