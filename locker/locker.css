@@ -331,3 +331,22 @@ button.card:hover{transform:translateY(-4px);border-color:var(--yellow)}
 }
 @media (max-width:340px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+
+/* ---------- חולצת הזהב ---------- */
+.gban{display:flex;align-items:center;gap:14px;margin-top:10px;padding:10px 14px;background:#000;border:2px solid #d4a017}
+.gban img{width:64px;height:64px;object-fit:cover;border:2px solid #d4a017;flex:none}
+.gban b{font-family:var(--disp);font-size:30px;line-height:1;color:#F3E03B;font-weight:700}
+.gban p{margin:2px 0 0;font-size:15px;color:var(--txt)}
+.gban p b{font-family:var(--body);font-size:inherit;color:#F3E03B}
+.gban.has{background:#d4a017;border-color:#000}.gban.has b,.gban.has p,.gban.has p b{color:#000}
+.crt .oddt .gd{color:#d4a017;font-weight:700}
+.card[data-id="gold"]{outline:3px solid #d4a017}
+.gold-ov{z-index:95}
+.gwin{position:relative;width:min(420px,88vw);background:#000;border:3px solid #d4a017;padding:22px 20px 18px;text-align:center;animation:gwin .6s cubic-bezier(.2,1.4,.4,1) both}
+.gwin img{width:70%;aspect-ratio:1;object-fit:cover;border:3px solid #d4a017;display:block;margin:0 auto 10px}
+.gwin h2{font-family:var(--disp);font-size:64px;line-height:.9;margin:4px 0 8px;color:#F3E03B;font-weight:700}
+.gwin p{margin:0 0 8px;font-size:17px}.gwin p b{color:#F3E03B}
+.gwin .gfull{font-family:var(--disp);font-size:30px;line-height:1;color:#d4a017}
+.gwin .acts{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.gstamp{position:absolute;top:14px;left:-10px;transform:rotate(-12deg);background:#FD1D1D;color:#fff;font-family:var(--disp);font-size:26px;line-height:1;padding:6px 10px 2px;border:2px solid #000}
+@keyframes gwin{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}

@@ -20,8 +20,13 @@ const RAR=[
   {n:'רגיל',     c:'#b8b2aa',val:2,  yrs:'2021 והלאה'},
 ];
 const ITEMS=LK_ITEMS.map((a,ix)=>({id:a[0],n:a[1],y:a[2],c:a[3],s:a[4],r:a[5],im:a[7],col:a[8],ix}));
+/* חולצת הזהב: 1 in 1000 per crate; whoever pulls it gets every item in the locker */
+const GOLD_P=0.001;
+const GOLD={id:'gold',n:'חולצת הזהב',y:0,c:'חולצות',s:'',r:0,im:1,col:'#d4a017',ix:-1,gold:1};
+ITEMS.push(GOLD);
+const goldHit=()=>rnd()<GOLD_P;
 const BYID=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
-const BYR=RAR.map((_,r)=>ITEMS.filter(i=>i.r===r));
+const BYR=RAR.map((_,r)=>ITEMS.filter(i=>i.r===r&&!i.gold));
 const CRATES=[
   {k:'sak',     n:'שק בגדים',    d:'שקית זבל מלאה בגדים ישנים שמישהו פינה מהמחסן. 3 בגדים בכל שק.',price:160,bag:1,
    cats:['חולצות','סווצ׳רטים','מכנסיים','פליזים','סרבלים'],w:[.6,2.4,7,15,30,45]},
@@ -34,9 +39,9 @@ const WEAR=[[.07,'חדש מהמחסן'],[.15,'כמעט חדש'],[.38,'נלבש �
 const wearName=w=>WEAR.find(x=>w<x[0])[1];
 
 /* atlas thumbnails (8×8 per sheet) for the reel; full photos everywhere else */
-const thStyle=it=>{const a=(it.ix/64)|0,k=it.ix%64,c=k%8,r=(k/8)|0;return `background-image:url(img/atlas${a}.webp);background-position:${c/7*100}% ${r/7*100}%`};
+const thStyle=it=>{if(it.gold)return 'background-image:url(img/gold_0.webp);background-size:cover;background-position:center';const a=(it.ix/64)|0,k=it.ix%64,c=k%8,r=(k/8)|0;return `background-image:url(img/atlas${a}.webp);background-position:${c/7*100}% ${r/7*100}%`};
 const imgSrc=(it,j=0)=>`img/${it.id}_${j}.webp`;
-const yrTxt=it=>it.y?String(it.y):'?';
+const yrTxt=it=>it.gold?'1 ל־1000':it.y?String(it.y):'?';
 
 /* ---------------- store ---------------- */
 const KEY='hanasi:locker';
@@ -55,7 +60,7 @@ function load(){
   return s;
 }
 function save(){if(lsOK){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}}
-const valOf=x=>{const it=BYID[x.i];return Math.round(RAR[it.r].val*(x.sg?2:1)*(1.2-x.w*.4))};
+const valOf=x=>{const it=BYID[x.i];if(it.gold)return 5000;return Math.round(RAR[it.r].val*(x.sg?2:1)*(1.2-x.w*.4))};
 
 /* ---------------- audio ---------------- */
 const AU={ctx:null,on:true};
@@ -109,6 +114,7 @@ function syncXP(){const xp=readXP();if(xp>S.xpSeen){const pool=(S.xpRem||0)+xp-S
 /* ---------------- collection ---------------- */
 /* fixed sections built from the catalog categories (small categories are folded together) */
 const GROUPS=[
+  {k:'gold', n:'חולצת הזהב',       f:i=>!!i.gold},
   {k:'mit',  n:'חולצות מתקן',      f:i=>i.c==='חולצות'&&i.s.startsWith('מתקן')},
   {k:'shirt',n:'חולצות',           f:i=>i.c==='חולצות'},
   {k:'outer',n:'סווצ׳רטים ופליזים', f:i=>i.c==='סווצ׳רטים'||i.c==='פליזים'},
@@ -220,16 +226,29 @@ function rollItem(cr){const w=cr.w,tot=w.reduce((a,b)=>a+b,0);let r=rnd()*tot,t=
   const of=t=>cr.cats?BYR[t].filter(i=>cr.cats.includes(i.c)):BYR[t];let pool=of(t);while(!pool.length&&t<5)pool=of(++t);return pick(pool)}
 function newInst(it,o){const age=it.y?clamp((2027-it.y)/35,0,1):.4;const w=clamp(rnd()*.55+age*.45*rnd()+age*.12,0,.999);
   return {u:uid(),i:it.id,w:+w.toFixed(4),sg:rnd()<.04?1:0,t:Date.now(),o,nw:1}}
+/* the prize: one copy of every locker item the player doesn't have yet; the celebration shows when the opening closes */
+function gotGold(){const m=ownMap();let n=0;ITEMS.forEach(it=>{if(!it.gold&&!m[it.id]){S.inv.push(newInst(it,'gold'));n++}});
+  S.goldPending={n,t:Date.now()};S.goldWins=(S.goldWins||0)+1;try{window.gtag&&gtag('event','locker_gold',{added:n})}catch(e){}}
+function goldShow(){const g=S.goldPending;if(!g)return;delete S.goldPending;save();
+  const ov=document.createElement('div');ov.className='ov gold-ov';
+  ov.innerHTML=`<div class="gwin"><div class="gstamp">1 ל־1000</div><img src="img/gold_0.webp" alt="חולצת הזהב"><h2>חולצת הזהב!</h2>
+    <p>הוצאתם את הפריט הכי נדיר בלוקר. בתור פרס קיבלתם את <b>כל הבגדים בלוקר</b>${g.n?`: ${fmt(g.n)} פריטים חדשים נכנסו לאוסף`:''}.</p>
+    <p class="gfull">האוסף שלכם מלא: ${fmt(ITEMS.length)}/${fmt(ITEMS.length)}</p>
+    <div class="acts"><button class="btn gold" data-g="lk">לאוסף המלא</button><button class="btn ghost" data-g="x">סגירה</button></div></div>`;
+  document.body.append(ov);SND.win(0);FX.rain(220,['#F3E03B','#d4a017','#fff','#FD1D1D']);
+  ov.onclick=e=>{const b=e.target.closest('[data-g]');if(!b)return;ov.remove();if(b.dataset.g==='lk')go('col');refresh()}}
 function renderCrates(){
   const d=$('#daily');
   if(S.daily!==today())d.innerHTML=`<div class="dbox"><span>יומי</span><div><b>הארגז היומי מחכה</b><p>ארגז מחסן חינם, פעם ביום.</p></div><button class="btn gold" id="dailyBtn">קבלו ארגז</button></div>`;
   else{const t=new Date();t.setHours(24,0,0,0);const m=Math.ceil((t-Date.now())/60000);d.innerHTML=`<div class="dbox done"><span>מחר</span><div><b>הארגז היומי נלקח</b><p>הארגז הבא עוד ${Math.floor(m/60)} שעות ו־${m%60} דקות.</p></div></div>`}
+  const hasG=S.inv.some(z=>z.i==='gold');
+  d.insertAdjacentHTML('beforeend',`<div class="gban${hasG?' has':''}"><img src="img/gold_0.webp" alt=""><div><b>חולצת הזהב</b><p>${hasG?'יש לכם אותה! אתם מהבודדים בשבט שהוציאו את חולצת הזהב.':`סיכוי של 1 ל־1000 בכל ארגז. מי שמוציא אותה מקבל את <b>כל ${fmt(ITEMS.length-1)} הבגדים בלוקר</b>.`}</p></div></div>`);
   $('#crateList').innerHTML=CRATES.map(c=>{const tot=c.w.reduce((a,b)=>a+b,0),own=S.crates[c.k]||0;
     return `<div class="crt">${own?`<span class="own">יש לכם ${own}</span>`:''}
     <div class="crimg">${crateArt(c.k)}</div>
     <h3>${c.n}</h3><p>${c.d}</p>
     <div class="odds">${c.w.map((w,r)=>w?`<i class="r${r}" style="flex:${w}"></i>`:'').join('')}</div>
-    <div class="oddt">${c.w.map((w,r)=>w?`<span class="r${r}">${RAR[r].n} ${(w/tot*100).toFixed(w/tot<.02?1:0)}%</span>`:'').join('')}</div>
+    <div class="oddt">${c.w.map((w,r)=>w?`<span class="r${r}">${RAR[r].n} ${(w/tot*100).toFixed(w/tot<.02?1:0)}%</span>`:'').join('')}<span class="gd">חולצת הזהב 0.1%</span></div>
     <div class="acts">${own?`<button class="btn gold" data-open="${c.k}">${c.bag?'פתחו שק':'פתחו ארגז'}</button>`:''}<button class="btn${own?' ghost':''}" data-buy="${c.k}" ${S.coins<c.price?'disabled':''}>קנו ופתחו · <span class="price">${fmt(c.price)}</span> אסימונים</button></div>
     ${!c.bag&&(own>=5||S.coins>=c.price*5)?`<button class="btn five" data-five="${c.k}">פתחו 5 בבת אחת${own>=5?'':`  · <span class="price">${fmt(c.price*5)}</span>`}</button>`:''}</div>`}).join('');
   const db=$('#dailyBtn');if(db)db.onclick=()=>{S.daily=today();S.crates.mahsan=(S.crates.mahsan||0)+1;save();const [x,y]=centerOf(db);FX.burst(x,y,50,['#F3E03B','#FD1D1D','#fff'],{up:1,sp:10});SND.coin();wallet('crates');toast('קיבלתם ארגז מחסן','gold');renderCrates()};
@@ -242,8 +261,8 @@ function openCrate(k,buy){
   const c=CR[k];if(opening)return;if(c.bag)return openBag(buy);
   if(buy){if(S.coins<c.price){SND.err();toast('אין מספיק אסימונים. שחקו במשחקי השבט!');return}S.coins-=c.price}
   else{if(!(S.crates[k]>0))return;S.crates[k]--}
-  const it=rollItem(c),x=newInst(it,k),first=!S.inv.some(z=>z.i===it.id);
-  S.inv.push(x);S.stats.opened++;save();wallet();
+  const it=goldHit()?GOLD:rollItem(c),x=newInst(it,k),first=!S.inv.some(z=>z.i===it.id);
+  S.inv.push(x);S.stats.opened++;if(it.gold)gotGold();save();wallet();
   const ov=resetOv();ov.style.setProperty('--rc',RAR[it.r].c);
   const crate=prepCrate(k);
   const st={done:false,skip:false};opening=st;
@@ -257,8 +276,8 @@ function openCrate(k,buy){
 function openBag(buy){
   const k='sak',c=CR[k];if(opening)return;
   if(buy){if(S.coins<c.price){SND.err();toast('אין מספיק אסימונים לשק');return}S.coins-=c.price}else{if(!(S.crates[k]>0))return;S.crates[k]--}
-  const got=[];for(let i=0;i<3;i++){const it=rollItem(c),x=newInst(it,k);got.push({it,x,first:!S.inv.some(z=>z.i===it.id)&&!got.some(g=>g.it.id===it.id)});S.inv.push(x)}
-  S.stats.opened++;save();wallet();
+  const got=[];for(let i=0;i<3;i++){const it=i===0&&goldHit()?GOLD:rollItem(c),x=newInst(it,k);got.push({it,x,first:!S.inv.some(z=>z.i===it.id)&&!got.some(g=>g.it.id===it.id)});S.inv.push(x)}
+  S.stats.opened++;if(got.some(g=>g.it.gold))gotGold();save();wallet();
   got.sort((a,b)=>b.it.r-a.it.r);
   const ov=resetOv();ov.style.setProperty('--rc',RAR[got[2].it.r].c);
   const box=$('#opCrate');box.hidden=false;box.className='op-crate op-bag';box.innerHTML=bagArt();box.style.animation='none';void box.offsetWidth;box.style.animation='';
@@ -313,8 +332,8 @@ function reveal(it,x,first,st,hit){
   const ov=$('#ovOpen'),rw=$('#reelWrap');rw.classList.add('out');setTimeout(()=>{rw.hidden=true;rw.classList.remove('out','stop')},360);$('#opSkip').hidden=true;ov.classList.add('lit');
   const win=$('#win');win.hidden=false;win.className='win r'+it.r;
   const more=(S.crates[x.o]>0)||S.coins>=(CR[x.o]?.price||1e9);
-  win.innerHTML=`<div class="stamp">${RAR[it.r].n}</div><div class="wc"><img src="${imgSrc(it)}" alt=""><div class="wi"><b>${esc(it.n)}</b><small>${esc(it.c)} · ${yrTxt(it)}</small></div></div>
-    <div class="wtags"><span class="rpill r${it.r}">${RAR[it.r].n}</span><span>${wearName(x.w)}</span>${x.sg?'<span class="gold">חתום ע״י ראש השבט!</span>':''}${first?'<span class="gold">חדש באוסף</span>':'<span>כפול</span>'}</div>
+  win.innerHTML=`<div class="stamp">${it.gold?'חולצת הזהב':RAR[it.r].n}</div><div class="wc"><img src="${imgSrc(it)}" alt=""><div class="wi"><b>${esc(it.n)}</b><small>${esc(it.c)} · ${yrTxt(it)}</small></div></div>
+    <div class="wtags"><span class="rpill r${it.r}">${RAR[it.r].n}</span><span>${wearName(x.w)}</span>${x.sg?'<span class="gold">חתום ע״י ראש השבט!</span>':''}${first?'<span class="gold">חדש באוסף</span>':'<span>כפול</span>'}${it.gold?'<span class="gold">+ כל הבגדים בלוקר!</span>':''}</div>
     <div class="acts">${more?`<button class="btn gold" data-w="again">עוד ארגז</button><button class="btn ghost" data-w="lk">לאוסף</button>`:`<button class="btn gold" data-w="lk">לאוסף</button><button class="btn ghost" data-w="x">סגירה</button>`}</div>`;
   const wc=$('.wc',win);
   if(from){const to=wc.getBoundingClientRect();const sx=from.width/to.width,dx=from.left+from.width/2-(to.left+to.width/2),dy=from.top+from.height/2-(to.top+to.height/2);
@@ -325,15 +344,15 @@ function reveal(it,x,first,st,hit){
   if(it.r===0)FX.rain(140,['#FD1D1D','#F3E03B','#fff','#000']);
   if(it.r<=1){ov.classList.remove('shake');void ov.offsetWidth;ov.classList.add('shake')}
   win.onclick=e=>{const b=e.target.closest('[data-w]');if(!b)return;const a=b.dataset.w;closeOpen();
-    if(a==='again')openCrate(x.o,!(S.crates[x.o]>0));else if(a==='lk')go('col')};
+    if(a==='again'&&!S.goldPending)openCrate(x.o,!(S.crates[x.o]>0));else if(a==='lk')go('col')};
   renderCrates();
 }
 
 function openFive(k){
   const c=CR[k];if(opening)return;const own=S.crates[k]||0;
   if(own>=5)S.crates[k]-=5;else{if(S.coins<c.price*5){SND.err();toast('אין מספיק אסימונים לחמישה ארגזים');return}S.coins-=c.price*5}
-  const got=[];for(let i=0;i<5;i++){const it=rollItem(c),x=newInst(it,k);got.push({it,x,first:!S.inv.some(z=>z.i===it.id)&&!got.some(g=>g.it.id===it.id)});S.inv.push(x)}
-  S.stats.opened+=5;save();wallet();
+  const got=[];for(let i=0;i<5;i++){const it=goldHit()?GOLD:rollItem(c),x=newInst(it,k);got.push({it,x,first:!S.inv.some(z=>z.i===it.id)&&!got.some(g=>g.it.id===it.id)});S.inv.push(x)}
+  S.stats.opened+=5;if(got.some(g=>g.it.gold))gotGold();save();wallet();
   got.sort((a,b)=>b.it.r-a.it.r);const best=got[got.length-1].it.r;
   const ov=resetOv();ov.style.setProperty('--rc',RAR[best].c);
   const crate=prepCrate(k),st={done:false,skip:false,multi:1};opening=st;
@@ -360,7 +379,7 @@ function deal(got,st,k){
   st.timers=[];let t=900;cards.forEach((_,i)=>{t+=i===cards.length-1&&got[i].it.r<=2?1300:700;st.timers.push(setTimeout(()=>flip(i),t))});
 }
 
-function closeOpen(){const ov=$('#ovOpen');ov.hidden=true;ov.classList.remove('lit','shake');$('#win').innerHTML='';if(opening){opening.done=true;clearTimeout(opening.t0);clearTimeout(opening.t1);clearTimeout(opening.t2);(opening.timers||[]).forEach(clearTimeout);opening=null}$('#multi').hidden=true;$('#multi').innerHTML='';refresh()}
+function closeOpen(){const ov=$('#ovOpen');ov.hidden=true;ov.classList.remove('lit','shake');$('#win').innerHTML='';if(opening){opening.done=true;clearTimeout(opening.t0);clearTimeout(opening.t1);clearTimeout(opening.t2);(opening.timers||[]).forEach(clearTimeout);opening=null}$('#multi').hidden=true;$('#multi').innerHTML='';refresh();if(S.goldPending)setTimeout(goldShow,250)}
 $('#opSkip').onclick=()=>{if(!opening)return;opening.skip=true;const st=opening;
   if(st.multi){clearTimeout(st.t0);clearTimeout(st.t1);clearTimeout(st.t2);st.skipDeal&&st.skipDeal();return}
   if(!$('#opCrate').hidden){clearTimeout(st.t0);clearTimeout(st.t1);$('#opCrate').hidden=true;const x=S.inv[S.inv.length-1];reel(BYID[x.i],x,!S.inv.slice(0,-1).some(z=>z.i===x.i),st)}};
