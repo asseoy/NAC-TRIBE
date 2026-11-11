@@ -160,7 +160,7 @@ function inspect(it,x){
   const ov=$('#ovInspect');ov.hidden=false;
   const copies=S.inv.filter(z=>z.i===it.id);
   const views=it.im>1?`<div class="views">${Array.from({length:it.im},(_,j)=>`<button data-j="${j}" class="${j?'':'on'}" style="background-image:url(${imgSrc(it,j)})" aria-label="תמונה ${j+1}"></button>`).join('')}</div>`:'';
-  const orig=(x.o||'').startsWith('trade:')?`טרייד עם ${esc(x.o.slice(6))}`:x.o==='daily'?'ארגז יומי':(CR[x.o]?CR[x.o].n:'הלוקר');
+  const orig=(x.o||'').startsWith('trade:')?`טרייד עם ${esc(x.o.slice(6))}`:x.o==='daily'?'ארגז יומי':x.o==='chamshush'?'חימשוש במשחק חמשוש':x.o==='gold'?'הפרס של חולצת הזהב':(CR[x.o]?CR[x.o].n:'הלוקר');
   ov.innerHTML=`<div class="insp r${it.r}"><button class="x" aria-label="סגירה">✕</button>
    <div class="tilt"><div class="tcard"><div class="tface"><img src="${imgSrc(it,0)}" alt="${esc(it.n)}">${x.sg?'<span class="sig">חתום ע״י ראש השבט</span>':''}</div>${it.im>1?`<div class="tface b"><img src="${imgSrc(it,1)}" alt=""></div>`:''}</div>${views}</div>
    <div class="info"><span class="rpill">${RAR[it.r].n} · ${RAR[it.r].yrs}</span><h3>${esc(it.n)}</h3>
@@ -443,10 +443,22 @@ try{const used=JSON.parse(localStorage.getItem('hanasi:codes')||'[]');
   }}catch(e){}
 /* a code on the main site can grant the whole collection */
 try{const g=JSON.parse(localStorage.getItem('hanasi:grant')||'null');if(g&&g.lockerAll){let n=0;ITEMS.forEach(it=>{if(!S.inv.some(x=>x.i===it.id)){S.inv.push(newInst(it,'archive'));n++}});localStorage.removeItem('hanasi:grant');save();if(n)setTimeout(()=>toast(`קיבלתם את כל הבגדים: ${n} פריטים חדשים באוסף`,'gold'),900)}}catch(e){}
+/* clothes earned in the חמשוש game wait in a shared inbox (same origin) until the locker takes them */
+const INBOX='hanasi:lk:inbox';
+function drainInbox(){if(!lsOK)return;let a=null;try{a=JSON.parse(localStorage.getItem(INBOX)||'null')}catch(e){}
+  if(!Array.isArray(a)||!a.length)return;
+  let n=0;
+  a.forEach(q=>{const it=q&&BYID[q.i];if(!it)return;const x=newInst(it,'chamshush');if(q.t)x.t=+q.t||x.t;S.inv.push(x);n++});
+  save();try{localStorage.removeItem(INBOX)}catch(e){}
+  if(!n)return;wallet();try{if(!$('#colList').closest('[hidden]'))renderCol()}catch(e){}
+  setTimeout(()=>toast(n===1?'בגד חדש הגיע מחמשוש!':n+' בגדים חדשים הגיעו מחמשוש!','gold'),500);
+  try{if(typeof gtag==='function')gtag('event','locker_from_chamshush',{count:n})}catch(e){}}
+addEventListener('storage',e=>{if(e.key===INBOX&&e.newValue)drainInbox()});
+drainInbox();
 if(S.fresh){delete S.fresh;save();setTimeout(()=>toast('ברוכים הבאים ללוקר! קיבלתם 2 ארגזים במתנה','gold'),600)}
 syncXP();wallet();
 let v0='crates';try{v0=sessionStorage.getItem('lk:v')||'crates'}catch(e){}go(v0);
-addEventListener('focus',()=>{syncXP();wallet()});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncXP();wallet()}});
+addEventListener('focus',()=>{syncXP();wallet();drainInbox()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncXP();wallet();drainInbox()}});
 if(window.__LK_TEST__)window.__lk={S:()=>S,ITEMS,openCrate,go,save};
 })();
