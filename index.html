@@ -1435,6 +1435,29 @@ html.night .fireflies{opacity:1}
 html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
 @keyframes eggshake{20%{transform:translate(-9px,6px) rotate(-.5deg)}40%{transform:translate(9px,-6px) rotate(.5deg)}60%{transform:translate(-6px,-4px)}80%{transform:translate(6px,4px)}}
 </style>
+<style>
+/* קרב פלנגות */
+.sl{position:relative;width:100%;height:100%;min-height:100vh;min-height:100dvh;overflow:hidden;background:#160708;touch-action:none;user-select:none;-webkit-user-select:none}
+.sl-cv{position:absolute;inset:0;display:block;outline:none;cursor:crosshair}
+.sl-hud{position:absolute;top:10px;right:12px;display:flex;gap:6px;z-index:2;pointer-events:none}
+.sl-hud span{background:#000;border:2px solid #2a2a2a;padding:2px 10px 0;font-family:var(--display);font-size:1.15rem;color:#bdb6ae;line-height:1.1;text-align:center}
+.sl-hud b{display:block;font-size:1.9rem;color:#fff;line-height:.95;font-weight:700}
+.sl-lb{position:absolute;top:10px;left:12px;margin:0;padding:6px 10px;list-style:none;background:rgba(0,0,0,.72);border:2px solid #2a2a2a;min-width:170px;z-index:2;pointer-events:none;font-size:.95rem}
+.sl-lb li{display:flex;justify-content:space-between;gap:12px;color:#d8d2ca;line-height:1.45}
+.sl-lb li b{font-family:var(--display);font-size:1.2rem;color:#fff;font-weight:400}
+.sl-lb li.me,.sl-lb li.me b{color:#F3E03B}
+.sl-map{position:absolute;bottom:12px;left:12px;width:120px;height:120px;z-index:2;pointer-events:none}
+.sl-x{position:absolute;bottom:14px;right:14px;z-index:3;background:#A8121B;color:#fff;border:2px solid #000;font-family:var(--display);font-size:1.4rem;padding:2px 16px 0;cursor:pointer}
+.sl-boost{display:none;position:absolute;bottom:70px;right:14px;z-index:3;width:86px;height:86px;border-radius:50%;background:#F3E03B;color:#000;border:3px solid #000;font-family:var(--display);font-size:1.5rem;touch-action:none}
+.sl-boost.on{background:#fff;transform:scale(.94)}
+@media (pointer:coarse){.sl-boost{display:block}.sl-lb{font-size:.8rem;min-width:130px}.sl-hud b{font-size:1.5rem}.sl-map{width:90px;height:90px}}
+.sl-msg{position:absolute;top:22%;left:50%;transform:translateX(-50%);z-index:3;pointer-events:none;font-family:var(--display);font-size:clamp(2rem,6vw,3.4rem);color:#F3E03B;text-shadow:3px 3px 0 #000;opacity:0;white-space:nowrap}
+.sl-msg.on{animation:slMsg 1.6s ease-out both}
+@keyframes slMsg{0%{opacity:0;transform:translateX(-50%) scale(.6)}12%{opacity:1;transform:translateX(-50%) scale(1.08)}22%{transform:translateX(-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-20px)}}
+.sl-over{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.72);padding:12px}
+.sl-over[hidden]{display:none}
+.sl-start .sl-art{height:118px}
+</style>
 </head>
 <body>
 <div class="scarf-v" aria-hidden="true"></div>
@@ -6344,6 +6367,10 @@ const GAMES=[
   desc:'הפלנגה האדומה־שחורה־אפורה יוצאת לדרך. אספו את סמל השבט על הלוח: כל סמל מאריך אותה ומאיץ אותה. רק אל תתנגשו בקירות או בפלנגה עצמה.',
   how:'חצים או WASD במחשב, החלקה או כפתורי כיוון בטלפון. רווח עוצר את המשחק.',
   lv:{easy:'קצב איטי שעולה לאט. טוב להתחלה.',mid:'קצב רגיל שמאיץ עם כל סמל.',hard:'מהיר כבר מההתחלה ומאיץ מהר. מחנאות מעל שפיות.'}},
+ {id:'slither',title:'קרב פלנגות',art:'sl',feature:1,fmt:v=>v.toLocaleString('he-IL')+' נק׳',
+  desc:'זירה מלאה בפלנגות קלועות. אכלו חרוזים כדי לגדול, גרמו לפלנגות אחרות להתנגש בכם ובלעו את מה שנשאר מהן. מי תהיה הפלנגה הכי ארוכה בזירה?',
+  how:'העכבר מכוון, לחיצה או רווח להאצה. בטלפון האצבע מכוונת וכפתור האצה בצד.',
+  lv:{easy:'מעט פלנגות, איטיות ופחות חכמות. מקום לגדול בשקט.',mid:'זירה מלאה. חלק מהפלנגות ינסו לחתוך לכם את הדרך.',hard:'הרבה פלנגות מהירות ואגרסיביות שצדות כל מי שקטן מהן. מחנאות מעל שפיות.'}},
  {id:'pac',title:'פקמן הנשיא',art:'pm',feature:1,fmt:v=>v.toLocaleString('he-IL')+' נק׳',
   desc:'לילה במחנה. אכלו את כל הגרעינים במבוך לפני שראש השבט, הרכזת, אחראי המחסן והמדריך מבית דני תופסים אתכם. סמל השבט הופך אותם לכחולים, ואז אתם רודפים. 24 שלבים בשישה אזורים, מהמחנה ועד מחנאות מעל שפיות.',
   how:'חצים או WASD במחשב, החלקה או כפתורי כיוון בטלפון. רווח עוצר את המשחק.',
@@ -6413,6 +6440,7 @@ function artHTML(k){
   if(k==='blitz') return '<b>SAN MARCO?</b>';
   if(k==='quiz') return Array.from({length:12},(_,i)=>`<span class="${i<7?'on':''}" style="width:${35+i*5}%"></span>`).join('');
   if(k==='snake') return '<canvas class="snake-art"></canvas>';
+  if(k==='sl') return '<canvas class="sl-art"></canvas>';
   if(k==='party') return [['#ec2a3a','left:14px;bottom:12px'],['#2f7bf0','right:14px;top:12px'],['#36b24a','left:14px;top:12px'],['#F3E03B','right:14px;bottom:12px']].map(([c,p])=>`<i style="background:${c};color:${c};${p}"></i>`).join('')+'<b>2·3·4</b>';
   if(k==='blk') return '<canvas class="blk-art"></canvas>';
   if(k==='pm') return '<canvas class="pm-art"></canvas>';
@@ -6425,6 +6453,7 @@ function renderCabinets(){
    <div class="body"><span class="t">${g.title}</span><span class="d">${g.desc}</span>
    <div class="foot"><span class="bests">${g.multi?'<span class="bk bk-multi">2–4 שחקנים · מסך אחד</span>':['easy','mid','hard'].map(k=>{const b=best(g.id+':'+k);return `<span class="bk bk-${k}"><i>${LEVELS[k]}</i>${b==null?'—':g.fmt(b)}</span>`}).join('')}</span><span class="go">שחקו</span></div></div></button>`).join('');
   document.querySelectorAll('#cabinets canvas.snake-art').forEach(drawSnakeArt);
+  document.querySelectorAll('#cabinets canvas.sl-art').forEach(c=>{if(typeof drawSlArt==='function')drawSlArt(c)});
   document.querySelectorAll('#cabinets canvas.blk-art').forEach(drawBlkArt);
   document.querySelectorAll('#cabinets canvas.sb-art').forEach(drawSbArt);
   document.querySelectorAll('#cabinets canvas.pk-art').forEach(drawPkArt);
@@ -8951,7 +8980,306 @@ function quizPlay(stage,lvl,ctl){
   return ()=>{if(cd)cd.stop();clearTimeout(nextT)};
 }
 
-const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),fdle:leveled(fdlePlay),jingle:leveled(jinglePlay),wings:leveled(wingsPlay),hl:leveled(hlPlay),time:leveled(timePlay),blitz:leveled(blitzPlay),quiz:leveled(quizPlay),snake:leveled(snakePlay,{direct:1}),party:leveled(partyPlay,{direct:1}),block:leveled(blockPlay,{direct:1}),pac:leveled(pacPlay,{direct:1}),shesh:leveled(sheshPlay,{direct:1}),poker:leveled(pokerPlay,{direct:1})};
+/* SL-GAME-START */
+/* ================= GAME: קרב פלנגות =================
+   An arena of braided פלנגות. Steer with the mouse or a finger, eat beads to grow,
+   make others crash into your cord, and swallow what they leave behind.
+   World units are pixels at zoom 1. Bodies are a trail of points; collisions use a
+   spatial hash of body samples rebuilt every frame. */
+const SL_NAMES=['חמשוש','שביעסט','רשג״ד','הזולה','פלוגה ב׳','הדרקון','מדריך תורן','סנדה','קשר שטוח','לולאה כפולה','חימשוש','שמיכה','גרעין','קשיו','טוסט','זיפ','מחסנאי','פעיל צעיר','NA-C','מחנאי','יודה','ענתות 33','אקסל','מתקן','צעיף אדום','חלוץ','קשר סיני','שטוחה','הנשיא','שכבה ג׳','הדגל','תורן לילה'];
+function slSprite(col,w0){                 // one braid strand ("grain") drawn once, then stamped with a transform
+  const c=document.createElement('canvas'),s=Math.ceil(w0*1.25);c.width=c.height=s;
+  const x=c.getContext('2d');braidLens(x,s/2,s/2,1,0,0,1,w0*.5,w0*.25,col,Math.max(.8,w0*.035));return c;
+}
+function drawSlArt(cv){
+  const w=cv.clientWidth||320,h=cv.clientHeight||120,ctx=hiDPI(cv,w,h);
+  ctx.fillStyle='#121112';ctx.fillRect(0,0,w,h);
+  ctx.fillStyle='rgba(255,255,255,.05)';for(let x=10;x<w;x+=22)for(let y=10;y<h;y+=22){ctx.beginPath();ctx.arc(x,y,1.2,0,7);ctx.fill()}
+  const beads=['#ec2a3a','#2f6fe0','#2fa84a','#f06aa8','#ececee','#7b3fc4'];
+  for(let i=0;i<26;i++){const x=(i*73)%w,y=(i*41)%h;ctx.fillStyle=beads[i%6];ctx.beginPath();ctx.arc(x,y,3,0,7);ctx.fill()}
+  const P=[psTri('#5fb6f0'),psTri('#2f6fe0'),psTri('#2f6fe0'),psTri('#22306e')];   // the card is drawn before PS_* exist, so only hoisted helpers here
+  drawCord(ctx,[[w*.92,h*.25],[w*.62,h*.25],[w*.62,h*.62],[w*.42,h*.62]],13,1,P);
+  drawCord(ctx,[[w*.08,h*.82],[w*.3,h*.82],[w*.3,h*.42]],17);
+}
+function slPlay(stage,lvl,ctl){
+  const PHONE=matchMedia('(pointer:coarse)').matches;
+  const CFG={easy:{R:2200,bots:10,turn:.72,look:.7,aggr:0,boost:.15,spd:.9},
+             mid:{R:2600,bots:16,turn:.9,look:1,aggr:.35,boost:.35,spd:1},
+             hard:{R:2900,bots:22,turn:1.05,look:1.25,aggr:.8,boost:.6,spd:1.06}}[lvl];
+  const NB=Math.round(CFG.bots*(PHONE?.7:1)),R=CFG.R,V=200,STEP=6,CELL=110;
+  const LV={easy:'קל',mid:'בינוני',hard:'קשה'};
+  let raf=0,offs=[],T0=0;
+  const on=(el,ev,fn,opt)=>{el.addEventListener(ev,fn,opt);offs.push(()=>el.removeEventListener(ev,fn,opt))};
+  const arena=$('#arena');
+  function teardown(){cancelAnimationFrame(raf);raf=0;offs.forEach(f=>f());offs=[]}
+  const fmt=n=>Math.round(n).toLocaleString('he-IL');
+  const nick=()=>(window.tribeNick&&tribeNick())||'אתם';
+
+  /* ---------- start screen (same look as פלנגה סנייק) ---------- */
+  function showStart(){
+    teardown();arena.classList.remove('pt-full');document.body.classList.remove('pt-open');
+    const bests=['easy','mid','hard'].map(k=>{const b=best('slither:'+k);return `<span><i>${LV[k]}</i>${b==null?'—':fmt(b)}</span>`}).join('');
+    stage.innerHTML=`<div class="ps ps-start panel sl-start">
+      <canvas class="ps-preview sl-art" aria-hidden="true"></canvas>
+      <h4 class="ps-title">קרב פלנגות</h4>
+      <p class="ps-lead">הזירה מלאה בפלנגות. אכלו חרוזים כדי לגדול, תנו לאחרות להתנגש בפלנגה שלכם, ותבלעו את מה שנשאר מהן. אם הראש שלכם נוגע בפלנגה אחרת, נגמר.</p>
+      <div class="ps-how"><span><b>במחשב</b>העכבר מכוון, לחיצה או רווח להאצה</span><span><b>בטלפון</b>אצבע על המסך מכוונת, כפתור האצה בצד</span></div>
+      <div class="seg ps-lv" role="group" aria-label="רמת קושי">${['easy','mid','hard'].map(k=>`<button data-l="${k}" aria-pressed="${k===lvl}">${LV[k]}</button>`).join('')}</div>
+      <p class="ps-lvd">${esc(ctl.g.lv[lvl])}</p>
+      <button class="bigbtn ps-go">לזירה</button>
+      <p class="ps-bests">השיאים שלכם: ${bests}</p>
+    </div>`;
+    drawSlArt(stage.querySelector('.sl-art'));
+    stage.querySelectorAll('.ps-lv button').forEach(b=>b.onclick=()=>{if(b.dataset.l===lvl)return;sound('tick');store.set('lvl:slither',b.dataset.l);ctl.go(b.dataset.l)});
+    const go=stage.querySelector('.ps-go');go.onclick=()=>{sound('tick');startGame()};go.focus({preventScroll:true});
+  }
+
+  /* ---------- the match ---------- */
+  function startGame(){
+    teardown();arena.classList.add('pt-full');document.body.classList.add('pt-open');
+    stage.innerHTML=`<div class="sl">
+      <canvas class="sl-cv" tabindex="0" aria-label="זירת קרב הפלנגות"></canvas>
+      <div class="sl-hud"><span>אורך<b id="slLen">0</b></span><span>ניצחונות<b id="slKill">0</b></span><span>מקום<b id="slRank">-</b></span></div>
+      <ol class="sl-lb" id="slLb"></ol>
+      <canvas class="sl-map" width="120" height="120"></canvas>
+      <button class="sl-x" type="button">יציאה</button>
+      <button class="sl-boost" type="button" aria-label="האצה">האצה</button>
+      <div class="sl-msg" id="slMsg"></div>
+      <div class="sl-over" hidden></div>
+    </div>`;
+    const root=stage.querySelector('.sl'),cv=root.querySelector('.sl-cv'),mapc=root.querySelector('.sl-map'),mctx=mapc.getContext('2d'),over=root.querySelector('.sl-over');
+    let W=0,H=0,ctx=null,DPR=1;
+    const size=()=>{W=root.clientWidth;H=root.clientHeight;DPR=Math.min(PHONE?1.5:2,devicePixelRatio||1);cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';ctx=cv.getContext('2d')};
+    size();on(window,'resize',size);
+    root.querySelector('.sl-x').onclick=()=>{endMatch(true)};
+
+    /* sprites: strands per colour triple, beads per colour */
+    const W0=40,strandC=new Map(),beadC=new Map();
+    const strand=col=>{const k=col.join();let s=strandC.get(k);if(!s){s=slSprite(col,W0);strandC.set(k,s)}return s};
+    const bead=hex=>{let s=beadC.get(hex);if(!s){s=document.createElement('canvas');s.width=s.height=32;const b=s.getContext('2d'),g=b.createRadialGradient(16,16,0,16,16,16);
+      g.addColorStop(0,hex);g.addColorStop(.42,hex);g.addColorStop(.5,hex+'88');g.addColorStop(1,hex+'00');b.fillStyle=g;b.fillRect(0,0,32,32);
+      b.fillStyle='rgba(255,255,255,.55)';b.beginPath();b.arc(13,12,3,0,7);b.fill();beadC.set(hex,s)}return s};
+    const BEAD_COLS=PS_COLS.map(c=>c[1]).filter(h=>h!=='#34343a');
+
+    /* ---------- snakes ---------- */
+    let snakes=[],food=[],fx=[],sid=0,kills=0,maxL=0,player=null,dead=false,deadT=0,msgT=0,lastBlip=0;
+    const width=L=>20+26*(1-Math.exp(-L/6000));
+    function mkSnake(x,y,L,pal,name,bot){
+      const a=Math.random()*Math.PI*2,s={id:++sid,bot,name,pal,x,y,a,ta:a,L,path:[],boost:false,alive:true,kills:0,think:0,drop:0,targ:null,born:performance.now()};
+      for(let d=L;d>=0;d-=STEP)s.path.push([x-Math.cos(a)*d,y-Math.sin(a)*d]);
+      s.strands=pal.pal.map(strand);s.head=pal.pal[1];return s;
+    }
+    const rndPos=(minR,maxR)=>{const r=Math.sqrt(Math.random()*(maxR*maxR-minR*minR)+minR*minR),t=Math.random()*Math.PI*2;return [Math.cos(t)*r,Math.sin(t)*r]};
+    function spawnBot(far){
+      let x,y,tries=0;
+      do{[x,y]=rndPos(200,R*.88);tries++}while(player&&player.alive&&far&&Math.hypot(x-player.x,y-player.y)<900&&tries<30);
+      const big=Math.random();const L=big<.12?2200+Math.random()*3500:big<.45?700+Math.random()*1300:260+Math.random()*400;
+      const used=new Set(snakes.map(s=>s.name));const name=SL_NAMES.find(n=>!used.has(n)&&Math.random()<.3)||SL_NAMES[(Math.random()*SL_NAMES.length)|0];
+      snakes.push(mkSnake(x,y,L,psPalette(),name,true));
+    }
+    function addFood(x,y,v,col,logo){food.push({x,y,v,col:col||BEAD_COLS[(Math.random()*BEAD_COLS.length)|0],r:logo?16:4+Math.min(9,v*.55),logo:!!logo,ph:Math.random()*6,eat:null})}
+    const FOOD_N=Math.round(R*R/(PHONE?5200:4200));
+    function topUpFood(){while(food.length<FOOD_N){const [x,y]=rndPos(0,R*.97);if(Math.random()<.006)addFood(x,y,15,'#F3E03B',1);else addFood(x,y,1+((Math.random()*3)|0))}}
+
+    player=mkSnake(0,0,300,PS_TRIBE,nick(),false);snakes.push(player);
+    for(let i=0;i<NB;i++)spawnBot(true);
+    topUpFood();
+
+    /* ---------- input ---------- */
+    let px=W/2+100,py=H/2,keyTurn=0,boostKey=false,boostTouch=false,touchId=null;
+    on(cv,'pointermove',e=>{if(e.pointerType==='mouse'){px=e.clientX-root.getBoundingClientRect().left;py=e.clientY-root.getBoundingClientRect().top}});
+    on(cv,'pointerdown',e=>{const b=root.getBoundingClientRect();if(e.pointerType==='mouse'){boostKey=true}else{if(touchId==null){touchId=e.pointerId;px=e.clientX-b.left;py=e.clientY-b.top}else boostTouch=true}});
+    on(window,'pointerup',e=>{if(e.pointerType==='mouse')boostKey=false;else if(e.pointerId===touchId)touchId=null;else boostTouch=false});
+    on(cv,'pointermove',e=>{if(e.pointerType!=='mouse'&&e.pointerId===touchId){const b=root.getBoundingClientRect();px=e.clientX-b.left;py=e.clientY-b.top}});
+    const bb=root.querySelector('.sl-boost');
+    on(bb,'pointerdown',e=>{e.stopPropagation();boostTouch=true;bb.classList.add('on')});
+    on(bb,'pointerup',()=>{boostTouch=false;bb.classList.remove('on')});on(bb,'pointerleave',()=>{boostTouch=false;bb.classList.remove('on')});
+    let mouseUsed=false;on(cv,'mousemove',()=>{mouseUsed=true});
+    on(window,'keydown',e=>{if(e.code==='Space'){boostKey=true;e.preventDefault()}if(e.code==='ArrowLeft'||e.code==='KeyA')keyTurn=-1;if(e.code==='ArrowRight'||e.code==='KeyD')keyTurn=1});
+    on(window,'keyup',e=>{if(e.code==='Space')boostKey=false;if((e.code==='ArrowLeft'||e.code==='KeyA')&&keyTurn<0)keyTurn=0;if((e.code==='ArrowRight'||e.code==='KeyD')&&keyTurn>0)keyTurn=0});
+    cv.focus({preventScroll:true});
+
+    /* ---------- spatial hash of body samples ---------- */
+    let grid=new Map();
+    const key=(cx,cy)=>cx*73856093^cy*19349663;
+    function rebuild(){
+      grid=new Map();
+      for(const s of snakes){if(!s.alive)continue;s.samples=samples(s,.55);
+        const r=width(s.L)*.5;for(let i=3;i<s.samples.length;i++){const [x,y]=s.samples[i],k=key(Math.floor(x/CELL),Math.floor(y/CELL));let a=grid.get(k);if(!a)grid.set(k,a=[]);a.push(x,y,r,s.id)}}
+    }
+    function hit(x,y,r,selfId){
+      const cx=Math.floor(x/CELL),cy=Math.floor(y/CELL);
+      for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const a=grid.get(key(cx+i,cy+j));if(!a)continue;
+        for(let k=0;k<a.length;k+=4){if(a[k+3]===selfId)continue;const dx=a[k]-x,dy=a[k+1]-y,rr=a[k+2]+r;if(dx*dx+dy*dy<rr*rr)return a[k+3]}}
+      return 0;
+    }
+    /* points along the trail from the head, every f×width */
+    function samples(s,f){
+      const out=[[s.x,s.y]],w=width(s.L),gap=w*f,P=s.path;let need=gap,acc=0,lx=s.x,ly=s.y;
+      for(let i=P.length-1;i>=0&&acc<s.L;i--){const [x,y]=P[i],d=Math.hypot(x-lx,y-ly);if(d<1e-6)continue;
+        while(need<=acc+d&&need<=s.L){const t=(need-acc)/d;out.push([lx+(x-lx)*t,ly+(y-ly)*t]);need+=gap}
+        acc+=d;lx=x;ly=y}
+      return out;
+    }
+
+    /* ---------- AI ---------- */
+    function think(s){
+      const w=width(s.L),look=(140+w*2)*CFG.look;let best=null,bd=1e9;
+      // danger: probe three directions ahead
+      const probe=a=>{for(let d=w;d<=look;d+=w*.9){const x=s.x+Math.cos(a)*d,y=s.y+Math.sin(a)*d;if(x*x+y*y>(R-w*1.5)**2||hit(x,y,w*.5,s.id))return d}return 1e9};
+      const f0=probe(s.a);
+      if(f0<look){const l=probe(s.a-.7),r=probe(s.a+.7);s.ta=s.a+(l>r?-1.1:1.1);s.boost=false;s.think=.12;return}
+      // aggression: cut in front of a smaller snake's head
+      if(CFG.aggr&&Math.random()<CFG.aggr){for(const o of snakes){if(o===s||!o.alive||o.L>s.L*1.1)continue;const d=Math.hypot(o.x-s.x,o.y-s.y);if(d<520&&d<bd){bd=d;best=o}}
+        if(best){const lead=Math.min(260,bd*.7);s.ta=Math.atan2(best.y+Math.sin(best.a)*lead-s.y,best.x+Math.cos(best.a)*lead-s.x);s.boost=bd<320&&s.L>500&&Math.random()<CFG.boost;s.think=.25;return}}
+      // food: densest nearby target, favour big beads
+      let fd=1e9,ft=null;for(let i=0;i<food.length;i+=2){const f=food[i],d=Math.hypot(f.x-s.x,f.y-s.y)/(f.v+1);if(d<fd){fd=d;ft=f}}
+      if(ft)s.ta=Math.atan2(ft.y-s.y,ft.x-s.x)+(Math.random()-.5)*.3;
+      if(s.x*s.x+s.y*s.y>(R*.8)**2)s.ta=Math.atan2(-s.y,-s.x);
+      s.boost=ft&&ft.v>=6&&Math.random()<CFG.boost*.5&&s.L>500;
+      s.think=.2+Math.random()*.25;
+    }
+
+    /* ---------- death: the cord turns into beads ---------- */
+    function kill(s,by){
+      s.alive=false;const pts=samples(s,.5),cols=[...new Set(s.pal.pal.map(t=>t[1]))],v=Math.max(1,Math.min(14,s.L/pts.length/14));
+      pts.forEach((p,i)=>{if(i%1===0)addFood(p[0]+(Math.random()-.5)*14,p[1]+(Math.random()-.5)*14,v,cols[i%cols.length])});
+      for(let i=0;i<18;i++)fx.push({x:s.x,y:s.y,vx:(Math.random()-.5)*420,vy:(Math.random()-.5)*420,l:.7,c:cols[i%cols.length]});
+      const k=snakes.find(o=>o.id===by);if(k){k.kills++;if(k===player){kills++;flash(`בלעתם את ${s.name}!`);sound('good')}}
+      if(s===player){dead=true;deadT=performance.now();sound('bad')}
+    }
+    function flash(t){const m=root.querySelector('#slMsg');m.textContent=t;m.classList.remove('on');void m.offsetWidth;m.classList.add('on')}
+    function blip(){if(!soundOn)return;const n=performance.now();if(n-lastBlip<70)return;lastBlip=n;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain(),t=actx.currentTime;o.type='sine';o.frequency.setValueAtTime(700+Math.random()*300,t);o.frequency.exponentialRampToValueAtTime(1300,t+.05);g.gain.setValueAtTime(.025,t);g.gain.exponentialRampToValueAtTime(.0001,t+.07);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.08)}catch(e){}}
+
+    /* ---------- update ---------- */
+    let last=performance.now(),zoom=1,camX=0,camY=0,lbT=0;
+    function update(dt){
+      // player steering
+      if(player.alive){
+        if(keyTurn)player.ta=player.a+keyTurn*1.2;
+        else if(mouseUsed||touchId!=null||PHONE)player.ta=Math.atan2(py-H/2,px-W/2);
+        player.boost=(boostKey||boostTouch)&&player.L>320;
+      }
+      for(const s of snakes){if(!s.alive)continue;
+        if(s.bot){s.think-=dt;if(s.think<=0)think(s)}
+        const w=width(s.L),tr=(s.bot?CFG.turn:1)*3.9/(1+w/70);
+        let da=((s.ta-s.a+Math.PI*3)%(Math.PI*2))-Math.PI;s.a+=Math.max(-tr*dt,Math.min(tr*dt,da));
+        const sp=V*(s.bot?CFG.spd:1)*(s.boost?2.05:1);s.x+=Math.cos(s.a)*sp*dt;s.y+=Math.sin(s.a)*sp*dt;
+        if(s.boost){s.L=Math.max(300,s.L-75*dt);s.drop-=dt;if(s.drop<=0){s.drop=.11;const t=s.path[Math.max(0,s.path.length-((s.L/STEP)|0))]||[s.x,s.y];addFood(t[0],t[1],5,s.pal.cols?s.pal.cols[0]:'#ec2a3a')}}
+        const lp=s.path[s.path.length-1];if(!lp||Math.hypot(s.x-lp[0],s.y-lp[1])>=STEP)s.path.push([s.x,s.y]);
+        const keep=Math.ceil(s.L/STEP)+4;if(s.path.length>keep*1.5)s.path=s.path.slice(-keep);
+      }
+      rebuild();
+      // collisions: wall and other cords
+      for(const s of snakes){if(!s.alive)continue;const w=width(s.L);
+        if(s.x*s.x+s.y*s.y>(R-w*.5)**2){kill(s,0);continue}
+        if(performance.now()-s.born<1200)continue;           // short spawn grace
+        const by=hit(s.x+Math.cos(s.a)*w*.35,s.y+Math.sin(s.a)*w*.35,w*.38,s.id);if(by)kill(s,by)}
+      // eating
+      for(let i=food.length-1;i>=0;i--){const f=food[i];
+        if(f.eat){const s=f.eat;if(!s.alive){f.eat=null;continue}const dx=s.x-f.x,dy=s.y-f.y,d=Math.hypot(dx,dy);f.x+=dx*Math.min(1,dt*14);f.y+=dy*Math.min(1,dt*14);
+          if(d<8){s.L+=f.logo?160:f.v*12;if(s===player)blip();food.splice(i,1)}continue}
+        for(const s of snakes){if(!s.alive)continue;const w=width(s.L),rr=w*.5+f.r+18;const dx=s.x-f.x,dy=s.y-f.y;if(dx*dx+dy*dy<rr*rr){f.eat=s;break}}}
+      snakes=snakes.filter(s=>s.alive||s===player);
+      while(snakes.filter(s=>s.bot).length<NB)spawnBot(true);
+      topUpFood();
+      fx=fx.filter(p=>(p.l-=dt)>0);fx.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.92;p.vy*=.92});
+      if(player.alive)maxL=Math.max(maxL,player.L);
+    }
+
+    /* ---------- render ---------- */
+    function drawSnake(s,z){
+      const w=width(s.L),pts=samples(s,.37);if(pts.length<2)return;
+      const sx=x=>(x-camX)*z+W/2,sy=y=>(y-camY)*z+H/2;
+      // quick reject when fully off screen
+      let vis=false;for(let i=0;i<pts.length;i+=4){const x=sx(pts[i][0]),y=sy(pts[i][1]);if(x>-80&&x<W+80&&y>-80&&y<H+80){vis=true;break}}
+      if(!vis)return;
+      ctx.setTransform(DPR,0,0,DPR,0,0);ctx.lineCap='round';ctx.lineJoin='round';
+      ctx.beginPath();ctx.moveTo(sx(pts[0][0]),sy(pts[0][1]));for(let i=1;i<pts.length;i++)ctx.lineTo(sx(pts[i][0]),sy(pts[i][1]));
+      ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=w*z*1.1;ctx.save();ctx.translate(w*z*.1,w*z*.16);ctx.stroke();ctx.restore();
+      ctx.strokeStyle='#0c0c0d';ctx.lineWidth=w*z*1.04;ctx.stroke();ctx.strokeStyle='#2a2a2e';ctx.lineWidth=w*z*.84;ctx.stroke();
+      const k=w/W0*z,sz=Math.ceil(W0*1.25);
+      for(let i=pts.length-1;i>=1;i--){                     // tail first so the head end sits on top
+        const [x0,y0]=pts[i-1],[x1,y1]=pts[i];let ux=x0-x1,uy=y0-y1;const ul=Math.hypot(ux,uy)||1;ux/=ul;uy/=ul;
+        const side=i%2?-1:1,cx=x1-uy*side*w*.19,cy=y1+ux*side*w*.19,ang=Math.atan2(uy,ux)+.42*side;
+        const c=Math.cos(ang)*k,sn=Math.sin(ang)*k;
+        ctx.setTransform(c*DPR,sn*DPR,-sn*DPR,c*DPR,sx(cx)*DPR,sy(cy)*DPR);ctx.drawImage(s.strands[i%4],-sz/2,-sz/2);
+      }
+      // the head: a tied knot with eyes
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+      const hx=sx(s.x),hy=sy(s.y),hr=w*.58*z,ca=Math.cos(s.a),sa=Math.sin(s.a);
+      ctx.fillStyle=s.head[1];ctx.strokeStyle='#0c0c0d';ctx.lineWidth=Math.max(1.5,2.5*z);ctx.beginPath();ctx.arc(hx,hy,hr,0,7);ctx.fill();ctx.stroke();
+      ctx.fillStyle=s.head[0];ctx.beginPath();ctx.arc(hx-hr*.3,hy-hr*.3,hr*.45,0,7);ctx.fill();
+      ctx.strokeStyle=s.head[2];ctx.lineWidth=Math.max(1,w*.08*z);ctx.beginPath();ctx.arc(hx,hy,hr*.62,s.a+1.9,s.a+4.4);ctx.stroke();
+      const look=s===player?Math.atan2(py-H/2,px-W/2):s.a;
+      for(const sd of[-1,1]){const ex=hx+ca*hr*.38-sa*sd*hr*.48,ey=hy+sa*hr*.38+ca*sd*hr*.48;
+        ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ex,ey,hr*.3,0,7);ctx.fill();
+        ctx.fillStyle='#111';ctx.beginPath();ctx.arc(ex+Math.cos(look)*hr*.12,ey+Math.sin(look)*hr*.12,hr*.16,0,7);ctx.fill()}
+      if(s.boost){ctx.globalAlpha=.25;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(hx,hy,hr*1.5,0,7);ctx.fill();ctx.globalAlpha=1}
+      if(z>.45){ctx.font=`700 ${Math.round(Math.max(14,17*z+4))}px Karantina, Impact, sans-serif`;ctx.textAlign='center';ctx.fillStyle=s===player?'#F3E03B':'rgba(255,255,255,.85)';
+        ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineWidth=3;ctx.strokeText(s.name,hx,hy-hr-8);ctx.fillText(s.name,hx,hy-hr-8)}
+    }
+    function render(now){
+      const target=player;camX+=(target.x-camX)*.18;camY+=(target.y-camY)*.18;
+      const base=Math.min(W,H)/(PHONE?700:820),zt=base*Math.max(.5,1.15-(width(player.L)-20)*.016);zoom+=(zt-zoom)*.04;const z=zoom;
+      ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='#160708';ctx.fillRect(0,0,W,H);
+      // arena floor + dots
+      const ax=(0-camX)*z+W/2,ay=(0-camY)*z+H/2;
+      ctx.fillStyle='#121112';ctx.beginPath();ctx.arc(ax,ay,R*z,0,7);ctx.fill();
+      ctx.save();ctx.beginPath();ctx.arc(ax,ay,R*z,0,7);ctx.clip();
+      const g=60*z,ox=((W/2-camX*z)%g+g)%g,oy=((H/2-camY*z)%g+g)%g;ctx.fillStyle='rgba(255,255,255,.055)';
+      for(let x=ox;x<W;x+=g)for(let y=oy;y<H;y+=g){ctx.fillRect(x-1,y-1,2.2,2.2)}
+      ctx.restore();
+      // border: the scarf ring
+      ctx.lineWidth=16*z;ctx.setLineDash([46*z,22*z]);ctx.strokeStyle='#A8121B';ctx.beginPath();ctx.arc(ax,ay,R*z,0,7);ctx.stroke();
+      ctx.lineDashOffset=-34*z;ctx.strokeStyle='#000';ctx.setLineDash([22*z,46*z]);ctx.stroke();ctx.setLineDash([]);ctx.lineDashOffset=0;
+      // beads
+      const t=now/1000;
+      for(const f of food){const x=(f.x-camX)*z+W/2,y=(f.y-camY)*z+H/2;if(x<-30||x>W+30||y<-30||y>H+30)continue;
+        if(f.logo&&LOGO_IMG.complete){const s=f.r*2.4*z*(1+.08*Math.sin(t*3+f.ph));ctx.drawImage(LOGO_IMG,x-s/2,y-s/2,s,s);continue}
+        const r=f.r*z*(1+.15*Math.sin(t*4+f.ph))*2;ctx.drawImage(bead(f.col),x-r,y-r,r*2,r*2)}
+      // snakes, small first
+      const order=snakes.filter(s=>s.alive).sort((a,b)=>a.L-b.L);for(const s of order)drawSnake(s,z);
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+      for(const p of fx){ctx.globalAlpha=Math.max(0,p.l/.7);ctx.fillStyle=p.c;ctx.beginPath();ctx.arc((p.x-camX)*z+W/2,(p.y-camY)*z+H/2,5*z,0,7);ctx.fill()}ctx.globalAlpha=1;
+      // minimap
+      mctx.clearRect(0,0,120,120);mctx.fillStyle='rgba(0,0,0,.6)';mctx.beginPath();mctx.arc(60,60,58,0,7);mctx.fill();mctx.strokeStyle='#A8121B';mctx.lineWidth=3;mctx.stroke();
+      for(const s of snakes){if(!s.alive)continue;const r=s===player?4:Math.min(4,1.5+s.L/2500);if(s!==player&&s.L<1500)continue;mctx.fillStyle=s===player?'#F3E03B':s.head[1];mctx.beginPath();mctx.arc(60+s.x/R*56,60+s.y/R*56,r,0,7);mctx.fill()}
+    }
+    function hud(now){
+      if(now-lbT<250)return;lbT=now;
+      const al=snakes.filter(s=>s.alive).sort((a,b)=>b.L-a.L),rank=al.indexOf(player)+1;
+      root.querySelector('#slLen').textContent=fmt(player.L/10);root.querySelector('#slKill').textContent=kills;root.querySelector('#slRank').textContent=rank?`${rank}/${al.length}`:'-';
+      root.querySelector('#slLb').innerHTML=al.slice(0,PHONE?5:8).map((s,i)=>`<li class="${s===player?'me':''}"><span>${i+1}. ${esc(s.name)}</span><b>${fmt(s.L/10)}</b></li>`).join('')+(rank>(PHONE?5:8)?`<li class="me"><span>${rank}. ${esc(player.name)}</span><b>${fmt(player.L/10)}</b></li>`:'');
+    }
+    function frame(now){
+      raf=requestAnimationFrame(frame);
+      const dt=Math.min(.05,(now-last)/1000);last=now;
+      if(!dead)update(dt);else{fx=fx.filter(p=>(p.l-=dt)>0);fx.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt})}
+      render(now);hud(now);
+      if(dead&&now-deadT>1300&&over.hidden)endMatch(false);
+    }
+    function endMatch(quit){
+      cancelAnimationFrame(raf);raf=0;
+      const score=Math.round(maxL/10),al=snakes.filter(s=>s.alive).length;
+      if(quit&&score<=30){showStart();return}
+      const isBest=ctl.best(score);ctl.xp(Math.round(score/25+kills*4));
+      over.hidden=false;
+      ctl.result(over,{num:fmt(score),title:isBest?'שיא חדש!':quit?'יצאתם מהזירה':'הפלנגה נקרעה',
+        text:`הגעתם לאורך ${fmt(score)} ובלעתם ${kills} ${kills===1?'פלנגה':'פלנגות'}. ${quit?'':'הראש שלכם פגע בפלנגה אחרת או בגדר.'}`,
+        again:'עוד קרב',onAgain:()=>startGame()});
+      over.querySelector('[data-act=close]').onclick=()=>{closeGame()};
+      over.querySelectorAll('[data-lvmenu]').forEach(b=>b.onclick=()=>showStart());
+    }
+    T0=performance.now();last=T0;raf=requestAnimationFrame(frame);
+    if(window.__SL_TEST__)window.__sl={get player(){return player},get snakes(){return snakes},get food(){return food},kill,update,render,endMatch};
+  }
+  showStart();
+  return ()=>{teardown();arena.classList.remove('pt-full');document.body.classList.remove('pt-open')};
+}
+
+/* SL-GAME-END */
+const RUN={tower:leveled(towerPlay),year:leveled(yearPlay),dle:leveled(dlePlay),fdle:leveled(fdlePlay),jingle:leveled(jinglePlay),wings:leveled(wingsPlay),hl:leveled(hlPlay),time:leveled(timePlay),blitz:leveled(blitzPlay),quiz:leveled(quizPlay),snake:leveled(snakePlay,{direct:1}),slither:leveled(slPlay,{direct:1}),party:leveled(partyPlay,{direct:1}),block:leveled(blockPlay,{direct:1}),pac:leveled(pacPlay,{direct:1}),shesh:leveled(sheshPlay,{direct:1}),poker:leveled(pokerPlay,{direct:1})};
 
 /* ================= CONTENT ================= */
 (function layersGrid(){
