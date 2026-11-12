@@ -1467,6 +1467,7 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
   <div class="nav-links" id="navLinks">
     <a class="l" href="#episode">הפרק היומי</a>
     <a class="l play" href="#games">משחקים</a>
+    <a class="l" href="#pcgames">משחקי מחשב</a>
     <a class="l" href="locker/?v=6">הלוקר</a>
       <a class="l" href="#spirit">הרוח</a>
     <a class="l" href="#about">על השבט</a>
@@ -1590,6 +1591,44 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
     @media (max-width:640px){.lk-ban{flex-direction:column;align-items:stretch;padding:14px}.lk-fan{width:100%;height:150px}.lk-fan img{width:96px;height:122px;margin:-61px 0 0 -48px}.lk-mid{align-items:center;text-align:center}}
     </style>
     
+    <div class="pc-games" id="pcgames">
+      <div class="pc-head"><h2>משחקי מחשב</h2><p>שלושה משחקים גדולים בתלת־ממד שנבנו במיוחד לשבט. משחקים במקלדת ובעכבר, וכל משחק נפתח בחלון חדש.</p></div>
+      <div class="pc-grid">
+        <a class="pc-card" href="https://asseoy.github.io/hamishlachat/" target="_blank" rel="noopener">
+          <span class="pc-new">חדש!</span><img src="assets/pc/mishlachat.webp" alt="צלילה בשונית האלמוגים" loading="lazy">
+          <div class="pc-body"><small>הרפתקה וצלילה</small><b>האי של המשלחת</b><p>משלחת המחקר נעלמה. צוללים בשונית כמו באילת, אוספים 60 פריטים, בונים ציוד ומגלים מה קרה לתמר.</p><span class="pc-go">לצלול ←</span></div>
+        </a>
+        <a class="pc-card" href="https://asseoy.github.io/hamigdal/" target="_blank" rel="noopener">
+          <img src="assets/pc/migdal.webp" alt="חניך על במה במגדל" loading="lazy">
+          <div class="pc-body"><small>פרקור</small><b>המגדל</b><p>50 קומות של עמודים, חבלים וקשירות. ריצה על קירות, סלטות ונדנוד על חבלים עד הפסגה.</p><span class="pc-go">לטפס ←</span></div>
+        </a>
+        <a class="pc-card" href="https://asseoy.github.io/halayla67/" target="_blank" rel="noopener">
+          <img src="assets/pc/halayla67.webp" alt="היצור בחושך" loading="lazy">
+          <div class="pc-body"><small>משחק אימה</small><b>הלילה של ה־67</b><p>לילה בטיול חנוכה בדרום. יצאתם שלושה לעשות פיפי, ומשהו מחכה בחושך. עם פנס בלבד.</p><span class="pc-go">אם אתם אמיצים ←</span></div>
+        </a>
+      </div>
+      <p class="pc-phone">המשחקים האלה בנויים למחשב. בטלפון הם עדיין לא עובדים טוב.</p>
+    </div>
+    <style>
+    .pc-games{margin:-6px 0 40px}
+    .pc-head h2{font-family:var(--display);font-weight:700;font-size:clamp(44px,6vw,72px);line-height:.9;margin:0 0 6px}
+    .pc-head p{color:#bdb6ae;margin:0 0 16px;max-width:60ch}
+    .pc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .pc-card{position:relative;display:flex;flex-direction:column;background:#111;border:2px solid #2a2a2a;color:#fff;text-decoration:none;overflow:hidden;transition:transform .15s,border-color .15s}
+    .pc-card:hover{transform:translateY(-4px);border-color:var(--yellow)}
+    .pc-card img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-bottom:2px solid #2a2a2a}
+    .pc-body{display:flex;flex-direction:column;gap:6px;padding:12px 16px 16px;flex:1}
+    .pc-body small{color:var(--yellow);font-size:.95rem}
+    .pc-body b{font-family:var(--display);font-weight:700;font-size:clamp(34px,3.6vw,46px);line-height:.9}
+    .pc-body p{margin:0;color:#cfc8c0;font-size:1rem;line-height:1.5;flex:1}
+    .pc-go{align-self:flex-start;margin-top:6px;font-family:var(--display);font-size:1.5rem;background:var(--flag);color:#fff;padding:.15rem 1.1rem 0}
+    .pc-card:hover .pc-go{background:var(--yellow);color:#000}
+    .pc-new{position:absolute;top:0;left:0;z-index:2;background:var(--yellow);color:#000;font-family:var(--display);font-size:1.3rem;padding:.1rem .8rem 0}
+    .pc-phone{display:none;margin:12px 0 0;color:#bdb6ae;border-right:4px solid var(--yellow);padding-right:10px}
+    @media (max-width:900px){.pc-grid{grid-template-columns:1fr 1fr}}
+    @media (max-width:640px){.pc-grid{grid-template-columns:1fr}.pc-phone{display:block}}
+    </style>
+
     <div class="arcade-head">
       <div>
         <h2>משחקי השבט</h2>
