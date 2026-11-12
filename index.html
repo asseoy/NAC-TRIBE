@@ -1592,11 +1592,15 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
     </style>
     
     <div class="pc-games" id="pcgames">
-      <div class="pc-head"><h2>משחקי מחשב</h2><p>שלושה משחקים גדולים בתלת־ממד שנבנו במיוחד לשבט. משחקים במקלדת ובעכבר, וכל משחק נפתח בחלון חדש.</p></div>
+      <div class="pc-head"><h2>משחקי מחשב</h2><p>ארבעה משחקים גדולים בתלת־ממד שנבנו במיוחד לשבט. משחקים במקלדת ובעכבר, וכל משחק נפתח בחלון חדש.</p></div>
       <div class="pc-grid">
         <a class="pc-card" href="https://asseoy.github.io/hamishlachat/" target="_blank" rel="noopener">
           <span class="pc-new">חדש!</span><img src="assets/pc/mishlachat.webp" alt="צלילה בשונית האלמוגים" loading="lazy">
           <div class="pc-body"><small>הרפתקה וצלילה</small><b>האי של המשלחת</b><p>משלחת המחקר נעלמה. צוללים בשונית כמו באילת, אוספים 60 פריטים, בונים ציוד ומגלים מה קרה לתמר.</p><span class="pc-go">לצלול ←</span></div>
+        </a>
+        <a class="pc-card" href="https://asseoy.github.io/chamshush/" target="_blank" rel="noopener">
+          <img src="assets/pc/chamshush.webp" alt="חמשוש על אופניים בשכונה" loading="lazy">
+          <div class="pc-body"><small>עולם פתוח</small><b>חמשוש</b><p>אתם החמשוש, והשביעסט לא מפסיק להתקשר. רוכבים בשכונה, מביאים טוסט מסודוך, עושים משימות ומרוויחים חולצות. אפשר גם עם חבר אונליין.</p><span class="pc-go">לרכוב ←</span></div>
         </a>
         <a class="pc-card" href="https://asseoy.github.io/hamigdal/" target="_blank" rel="noopener">
           <img src="assets/pc/migdal.webp" alt="חניך על במה במגדל" loading="lazy">
@@ -1613,19 +1617,19 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
     .pc-games{margin:-6px 0 40px}
     .pc-head h2{font-family:var(--display);font-weight:700;font-size:clamp(44px,6vw,72px);line-height:.9;margin:0 0 6px}
     .pc-head p{color:#bdb6ae;margin:0 0 16px;max-width:60ch}
-    .pc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .pc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
     .pc-card{position:relative;display:flex;flex-direction:column;background:#111;border:2px solid #2a2a2a;color:#fff;text-decoration:none;overflow:hidden;transition:transform .15s,border-color .15s}
     .pc-card:hover{transform:translateY(-4px);border-color:var(--yellow)}
     .pc-card img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-bottom:2px solid #2a2a2a}
     .pc-body{display:flex;flex-direction:column;gap:6px;padding:12px 16px 16px;flex:1}
     .pc-body small{color:var(--yellow);font-size:.95rem}
-    .pc-body b{font-family:var(--display);font-weight:700;font-size:clamp(34px,3.6vw,46px);line-height:.9}
+    .pc-body b{font-family:var(--display);font-weight:700;font-size:clamp(32px,3vw,44px);line-height:.9}
     .pc-body p{margin:0;color:#cfc8c0;font-size:1rem;line-height:1.5;flex:1}
     .pc-go{align-self:flex-start;margin-top:6px;font-family:var(--display);font-size:1.5rem;background:var(--flag);color:#fff;padding:.15rem 1.1rem 0}
     .pc-card:hover .pc-go{background:var(--yellow);color:#000}
     .pc-new{position:absolute;top:0;left:0;z-index:2;background:var(--yellow);color:#000;font-family:var(--display);font-size:1.3rem;padding:.1rem .8rem 0}
     .pc-phone{display:none;margin:12px 0 0;color:#bdb6ae;border-right:4px solid var(--yellow);padding-right:10px}
-    @media (max-width:900px){.pc-grid{grid-template-columns:1fr 1fr}}
+    @media (max-width:1100px){.pc-grid{grid-template-columns:1fr 1fr}}
     @media (max-width:640px){.pc-grid{grid-template-columns:1fr}.pc-phone{display:block}}
     </style>
 
