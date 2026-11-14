@@ -113,7 +113,7 @@ addEventListener('keydown', e => { inp.keys[e.code] = true; if (e.code === 'Spac
 addEventListener('keyup', e => { inp.keys[e.code] = false; });
 addEventListener('blur', () => { inp.keys = {}; inp.drag = null; });
 const cvs = $('gl');
-cvs.addEventListener('pointerdown', e => { if (F.paused) return; inp.drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }; F.auto = null; const j = $('joy'); j.classList.remove('hidden'); j.style.left = e.clientX + 'px'; j.style.top = e.clientY + 'px'; j.firstChild.style.transform = ''; cvs.setPointerCapture(e.pointerId); });
+cvs.addEventListener('pointerdown', e => { if (F.paused) return; inp.drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY }; F.auto = null; const j = $('joy'); j.classList.remove('hidden'); j.style.left = e.clientX + 'px'; j.style.top = e.clientY + 'px'; j.firstChild.style.transform = ''; try { cvs.setPointerCapture(e.pointerId); } catch { } });
 cvs.addEventListener('pointermove', e => { if (!inp.drag || e.pointerId !== inp.drag.id) return; inp.drag.x = e.clientX; inp.drag.y = e.clientY; const dx = clamp(e.clientX - inp.drag.x0, -55, 55), dy = clamp(e.clientY - inp.drag.y0, -55, 55); $('joy').firstChild.style.transform = `translate(${dx}px,${dy}px)`; });
 const endDrag = e => { if (inp.drag && e.pointerId === inp.drag.id) { inp.drag = null; $('joy').classList.add('hidden'); } };
 cvs.addEventListener('pointerup', endDrag); cvs.addEventListener('pointercancel', endDrag);
