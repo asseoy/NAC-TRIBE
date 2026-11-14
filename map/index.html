@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>המפה של הנשיא · שבט הנשיא</title>
+<meta name="description" content="טסים עם הדרקון של השבט מעל הארץ – ובכל מקום מחכה משחק של השבט.">
+<meta property="og:title" content="המפה של הנשיא">
+<meta property="og:description" content="טסים עם הדרקון של השבט מעל הארץ – ובכל מקום מחכה משחק של השבט.">
+<meta property="og:image" content="https://asseoy.github.io/NAC-TRIBE/assets/pc/hadrakon.webp">
+<meta name="theme-color" content="#0e1620">
+<link rel="icon" href="../assets/pc/hadrakon.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karantina:wght@400;700&family=Frank+Ruhl+Libre:wght@500;700;900&family=Heebo:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/map.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<div id="hud" class="hidden">
+  <a id="back" href="../#pcgames">→ לאתר השבט</a>
+  <div id="visit"><b id="visitN">0</b>/7 עולמות</div>
+  <button id="tod" type="button">יום</button>
+  <div id="mini"><canvas id="miniC" width="180" height="330"></canvas><small>לחצו על שער – והדרקון יטוס אליו</small></div>
+  <div id="pad" class="hidden"><button id="bBoost" type="button">מהר</button><button id="bFire" type="button">אש</button></div>
+  <div id="near" class="hidden"></div>
+  <div id="joy" class="hidden"><i></i></div>
+  <div id="hint"></div>
+</div>
+
+<div id="panel" class="hidden">
+  <div class="pcard">
+    <img id="pImg" alt="">
+    <div class="pbody">
+      <small id="pGenre"></small>
+      <b id="pTitle"></b>
+      <em id="pPlace"></em>
+      <p id="pDesc"></p>
+      <p class="pnote" id="pNote">המשחק הזה בנוי למחשב עם מקלדת ועכבר.</p>
+      <div class="pbtns"><a id="pGo" class="btn big" target="_blank" rel="noopener">לשחק ←</a><button id="pBack" class="btn" type="button">להמשיך לטוס</button></div>
+    </div>
+  </div>
+</div>
+
+<div id="intro" class="screen">
+  <div class="menuWrap">
+    <div class="over">שבט הנשיא מציג</div>
+    <h1 class="title">המפה של הנשיא</h1>
+    <p class="sub">טסים עם הדרקון של השבט מעל הארץ. בכל מקום מחכה שער – ומאחוריו משחק של השבט.</p>
+    <button class="btn big" id="btnGo" type="button" disabled>טוענים את הארץ…</button>
+    <p class="keys" id="keysHelp"></p>
+  </div>
+</div>
+<div id="done" class="hidden"><small>ביקרת בכל 7 העולמות</small><b>נוסע מתמיד של השבט</b></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

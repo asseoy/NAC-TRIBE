@@ -1593,6 +1593,10 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
     
     <div class="pc-games" id="pcgames">
       <div class="pc-head"><h2>משחקי מחשב</h2><p>שבעה משחקים גדולים בתלת־ממד שנבנו במיוחד לשבט. משחקים במקלדת ובעכבר, וכל משחק נפתח בחלון חדש.</p></div>
+      <a class="pc-map" href="map/">
+        <img src="assets/pc/map.webp" alt="הדרקון של השבט טס מעל החוף, ושערים למשחקים" loading="lazy">
+        <div class="pc-map-body"><small>חדש! עולם אחד לכל המשחקים</small><b>המפה של הנשיא</b><p>טסים עם הדרקון של השבט מעל הארץ – מחדרה ועד אילת. בכל מקום מחכה שער, ומאחוריו משחק של השבט. עובד גם בטלפון.</p><span class="pc-go">להמריא ←</span></div>
+      </a>
       <div class="pc-grid">
         <a class="pc-card feat" href="https://asseoy.github.io/snapir/" target="_blank" rel="noopener">
           <span class="pc-new">חדש!</span><img src="assets/pc/snapir.webp" alt="סנפיר הכריש עם סרט השבט ליד להקת הכרישים" loading="lazy">
@@ -1626,7 +1630,7 @@ html.egg-shake .hero,html.egg-shake main{animation:eggshake .45s 4!important}
       <p class="pc-phone">המשחקים האלה בנויים למחשב. בטלפון הם עדיין לא עובדים טוב.</p>
     </div>
     <style>
-    .pc-games{margin:-6px 0 40px}
+    .pc-games{margin:-6px 0 40px}.pc-map{display:flex;align-items:stretch;margin:0 0 14px;background:#111;border:2px solid #2a2a2a;color:#fff;text-decoration:none;overflow:hidden;transition:transform .15s,border-color .15s}.pc-map:hover{transform:translateY(-4px);border-color:var(--yellow)}.pc-map img{display:block;width:52%;aspect-ratio:16/9;object-fit:cover;border-left:2px solid #2a2a2a}.pc-map-body{display:flex;flex-direction:column;gap:6px;padding:16px 20px;flex:1;justify-content:center}.pc-map-body small{color:var(--yellow);font-size:1rem}.pc-map-body b{font-family:var(--display);font-weight:700;font-size:clamp(40px,5vw,72px);line-height:.9}.pc-map-body p{margin:0;color:#cfc8c0;font-size:1.05rem;line-height:1.5}.pc-map:hover .pc-go{background:var(--yellow);color:#000}@media (max-width:640px){.pc-map{flex-direction:column}.pc-map img{width:100%;border-left:0;border-bottom:2px solid #2a2a2a}}
     .pc-head h2{font-family:var(--display);font-weight:700;font-size:clamp(44px,6vw,72px);line-height:.9;margin:0 0 6px}
     .pc-head p{color:#bdb6ae;margin:0 0 16px;max-width:60ch}
     .pc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.pc-card.feat{grid-column:span 2}.pc-card.feat .pc-body b{font-size:clamp(40px,4vw,60px)}
