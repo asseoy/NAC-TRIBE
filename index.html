@@ -404,6 +404,9 @@ body.pt-open .mp{opacity:0;pointer-events:none}
 .ch-fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:30;display:none}
 @media (max-width:900px){.ch-side{display:none}.ch-game{--chw:max(260px,min(620px,calc(100vw - 1.6rem),calc(100vh - 300px)))}}
 @media (max-width:520px){.ch-pl{font-size:1.15rem}.ch-b{font-size:1.1rem;padding:0 .5rem}.ch-start .seg button{font-size:1.2rem;padding:0 .6rem}}
+.ch-pc.nudge .chp{animation:chNudge .35s}
+@keyframes chNudge{25%{transform:translateX(-8%)}75%{transform:translateX(8%)}}
+.ch-sq.sel.lock::after{box-shadow:inset 0 0 0 4px #fd1d1d}
 
 /*CHESS-CSS-END*/
 /* ===== SHESH BESH ===== */
@@ -5237,7 +5240,7 @@ function chessPlay(stage,lvl,ctl){
   /* ---------- the game ---------- */
   function startGame(g){
     teardown();
-    const G={mode:g.mode,lvl:g.lvl||lvl,me:g.color||0,moves:[],sans:[],over:null,tm:[],flip:(g.mode==='ai'||g.mode==='online')&&g.color===1,sel:-1,targets:[],hint:null,think:false,drawOffer:false};
+    const G={mode:g.mode,lvl:g.lvl||lvl,me:g.color||0,moves:[],sans:[],over:null,tm:[],touch:g.mode==='online',locked:-1,flip:(g.mode==='ai'||g.mode==='online')&&g.color===1,sel:-1,targets:[],hint:null,think:false,drawOffer:false};
     E.load(E.START);
     const meName=g.mode==='duo'?['לבן','שחור']:g.mode==='online'?['אתם','החבר']:['אתם',FOE[G.lvl]];
     const nameOf=side=>g.mode==='duo'?meName[side]:side===G.me?meName[0]:meName[1];
@@ -5267,7 +5270,7 @@ function chessPlay(stage,lvl,ctl){
     function paintSquares(){
       const last=G.moves.length?E.S.hist.length?E.S.hist[E.S.hist.length-1].m:0:0;
       const chk=E.inCheck()?E.S.k[E.S.side]:-1;
-      sqEls.forEach((el,i)=>{const s=fromIdx(i);const f=E.fileOf(s),r=E.rankOf(s);el.className='ch-sq '+((f+r)%2?'lt':'dk')+(last&&(s===E.mFrom(last)||s===E.mTo(last))?' last':'')+(s===G.sel?' sel':'')+(s===chk?' chk':'')+(G.targets.includes(s)?(E.S.b[s]||(E.mFl(G.tm[G.targets.indexOf(s)])&2)?' cap':' tg'):'')});
+      sqEls.forEach((el,i)=>{const s=fromIdx(i);const f=E.fileOf(s),r=E.rankOf(s);el.className='ch-sq '+((f+r)%2?'lt':'dk')+(last&&(s===E.mFrom(last)||s===E.mTo(last))?' last':'')+(s===G.sel?' sel'+(G.locked===s?' lock':''):'')+(s===chk?' chk':'')+(G.targets.includes(s)?(E.S.b[s]||(E.mFl(G.tm[G.targets.indexOf(s)])&2)?' cap':' tg'):'')});
       $q('.ch-files').innerHTML=[...Array(8)].map((_,c)=>`<i>${'abcdefgh'[G.flip?7-c:c]}</i>`).join('');
       $q('.ch-ranks').innerHTML=[...Array(8)].map((_,r)=>`<i>${G.flip?r+1:8-r}</i>`).join('');
     }
@@ -5290,7 +5293,7 @@ function chessPlay(stage,lvl,ctl){
         el.querySelector('.ch-th').hidden=!(G.think&&E.S.side===side)});
       const ol=$q('.ch-moves');let o='';for(let i=0;i<G.sans.length;i+=2)o+=`<li><span>${G.sans[i]}</span><span>${G.sans[i+1]||''}</span></li>`;ol.innerHTML=o;ol.scrollTop=ol.scrollHeight;
       const st=$q('.ch-status');
-      if(G.over)st.textContent='';else if(E.inCheck())st.textContent='שח!';else if(g.mode==='online')st.textContent=E.S.side===G.me?'התור שלכם':'התור של החבר';else if(g.mode==='ai')st.textContent=E.S.side===G.me?'התור שלכם':'';else st.textContent=`התור של ${nameOf(E.S.side)}`;
+      if(G.over)st.textContent='';else if(E.inCheck())st.textContent='שח!';else if(g.mode==='online')st.textContent=E.S.side===G.me?(G.locked>=0?'נגעת נסעת – הזיזו את הכלי שבחרתם':'התור שלכם · נגעת נסעת'):'התור של החבר';else if(g.mode==='ai')st.textContent=E.S.side===G.me?'התור שלכם':'';else st.textContent=`התור של ${nameOf(E.S.side)}`;
       st.classList.toggle('chk',!G.over&&E.inCheck());
     }
     function paintArrow(){arrows.innerHTML='';if(!G.hint)return;const [x1,y1]=xyOf(E.mFrom(G.hint)),[x2,y2]=xyOf(E.mTo(G.hint));const a=[x1/100*100+50,y1/100*100+50],b=[x2+50,y2+50];
@@ -5302,7 +5305,7 @@ function chessPlay(stage,lvl,ctl){
     function doMove(m,remote){
       const f=E.mFrom(m),t=E.mTo(m),fl=E.mFl(m);const L=E.legal();const sanS=E.san(m,L);let capSq=t,capPiece=E.S.b[t];if(fl&2){capSq=t+(E.S.side?16:-16);capPiece=E.S.b[capSq]}
       let castle=null;if(fl&4)castle=t===6?[7,5]:t===2?[0,3]:t===118?[119,117]:[112,115];
-      E.make(m);G.moves.push(E.uci(m));G.sans.push(sanS);G.sel=-1;G.targets=[];G.hint=null;G.drawOffer=false;
+      E.make(m);G.moves.push(E.uci(m));G.sans.push(sanS);G.sel=-1;G.targets=[];G.locked=-1;G.hint=null;G.drawOffer=false;
       const st=E.status();if(st.over)G.over=st;
       sound(st.over?'win':E.inCheck()?'bad':capPiece?'drop':fl&4?'perfect':'tick');
       paint({from:f,to:t,capSq,capPiece,castle});save();
@@ -5324,13 +5327,14 @@ function chessPlay(stage,lvl,ctl){
     let drag=null;
     const sqAt=(cx,cy)=>{const r=board.getBoundingClientRect();const c=Math.floor((cx-r.left)/r.width*8),row=Math.floor((cy-r.top)/r.height*8);if(c<0||c>7||row<0||row>7)return -1;return fromIdx(row*8+c)};
     function select(s){const p=E.S.b[s];if(!p||((p&E.BLACK)?1:0)!==E.S.side){G.sel=-1;G.targets=[];G.tm=[];paintSquares();return false}
-      const L=E.legal().filter(m=>E.mFrom(m)===s);G.sel=s;G.tm=L;G.targets=L.map(m=>E.mTo(m));paintSquares();return true}
+      const L=E.legal().filter(m=>E.mFrom(m)===s);G.sel=s;G.tm=L;G.targets=L.map(m=>E.mTo(m));if(G.touch&&L.length&&G.locked<0){G.locked=s;paintSide()}paintSquares();return true}
     function tryTo(s){const ms=(G.tm||[]).filter(m=>E.mTo(m)===s);if(!ms.length)return false;
       if(ms.length>1&&E.mPro(ms[0])){askPromo(ms);return true}doMove(ms[0]);return true}
     function askPromo(ms){const pr=$q('.ch-promo');const white=E.S.side===0;pr.hidden=false;pr.innerHTML='<p>הרגלי הגיע לקצה! לבחור כלי:</p>'+[5,4,3,2].map(t=>`<button data-t="${t}">${chPieceSVG('pnbrq'[t-1],white)}</button>`).join('');
       pr.querySelectorAll('button').forEach(b=>b.onclick=()=>{pr.hidden=true;doMove(ms.find(m=>E.mPro(m)===+b.dataset.t))})}
     on(board,'pointerdown',e=>{if(!humanTurn())return;const s=sqAt(e.clientX,e.clientY);if(s<0)return;e.preventDefault();
       if(G.sel>=0&&G.targets.includes(s)){tryTo(s);return}
+      if(G.touch&&G.locked>=0&&s!==G.locked){toast('נגעת נסעת! חייבים להזיז את הכלי שנגעתם בו');sound('bad');const el=pcs.querySelector(`.ch-pc[data-s="${G.locked}"]`);if(el){el.classList.remove('nudge');void el.offsetWidth;el.classList.add('nudge')}return}
       if(!select(s))return;const el=pcs.querySelector(`.ch-pc[data-s="${s}"]`);if(!el)return;
       drag={s,el,x0:e.clientX,y0:e.clientY,moved:false};el.classList.add('drag');try{board.setPointerCapture(e.pointerId)}catch(_){}});
     on(board,'pointermove',e=>{if(!drag)return;const r=board.getBoundingClientRect(),dx=e.clientX-drag.x0,dy=e.clientY-drag.y0;if(Math.abs(dx)+Math.abs(dy)>4)drag.moved=true;
