@@ -407,6 +407,10 @@ body.pt-open .mp{opacity:0;pointer-events:none}
 .ch-pc.nudge .chp{animation:chNudge .35s}
 @keyframes chNudge{25%{transform:translateX(-8%)}75%{transform:translateX(8%)}}
 .ch-sq.sel.lock::after{box-shadow:inset 0 0 0 4px #fd1d1d}
+.ch-guide{position:absolute;top:0;left:0;z-index:7;background:#f1efeb;color:#000;font-family:var(--display);font-size:1.05rem;padding:0 .5rem;border:2px solid #000}
+.ch-guide[hidden],.ch-code2[hidden]{display:none}
+.ch-code2{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);z-index:21;display:flex;gap:.4rem;background:#111;border:2px solid var(--yellow);padding:.6rem}
+.ch-code2 input{font-family:var(--display);font-size:1.6rem;width:6ch;text-align:center;background:#000;color:#fff;border:2px solid #444}
 
 /*CHESS-CSS-END*/
 /* ===== SHESH BESH ===== */
@@ -5240,7 +5244,7 @@ function chessPlay(stage,lvl,ctl){
   /* ---------- the game ---------- */
   function startGame(g){
     teardown();
-    const G={mode:g.mode,lvl:g.lvl||lvl,me:g.color||0,moves:[],sans:[],over:null,tm:[],touch:g.mode==='online'||g.mode==='duo',locked:-1,flip:(g.mode==='ai'||g.mode==='online')&&g.color===1,sel:-1,targets:[],hint:null,think:false,drawOffer:false};
+    const G={mode:g.mode,lvl:g.lvl||lvl,me:g.color||0,moves:[],sans:[],over:null,tm:[],touch:g.mode==='online'||g.mode==='duo',locked:-1,guide:!!store.get('ch:guide',false),gm:0,gid:0,flip:(g.mode==='ai'||g.mode==='online')&&g.color===1,sel:-1,targets:[],hint:null,think:false,drawOffer:false};
     E.load(E.START);
     const meName=g.mode==='duo'?['לבן','שחור']:g.mode==='online'?['אתם','החבר']:['אתם',FOE[G.lvl]];
     const nameOf=side=>g.mode==='duo'?meName[side]:side===G.me?meName[0]:meName[1];
@@ -5258,7 +5262,7 @@ function chessPlay(stage,lvl,ctl){
         <button class="ch-b" data-a="resign">כניעה</button>
         <button class="ch-b" data-a="menu">תפריט</button>
       </div>
-      <div class="ch-promo" hidden></div><div class="ch-end" hidden></div><canvas class="ch-fx" aria-hidden="true"></canvas>
+      <div class="ch-guide" hidden>מדריך סודי</div><div class="ch-code2" hidden><input inputmode="numeric" maxlength="4" aria-label="קוד"><button class="ch-b ch-ok">אישור</button><button class="ch-b ch-x">ביטול</button></div><div class="ch-promo" hidden></div><div class="ch-end" hidden></div><canvas class="ch-fx" aria-hidden="true"></canvas>
     </div>`;
     const $q=s=>stage.querySelector(s),board=$q('.ch-board'),sqs=$q('.ch-sqs'),pcs=$q('.ch-pcs'),arrows=$q('.ch-arrows');
     // squares
@@ -5296,9 +5300,21 @@ function chessPlay(stage,lvl,ctl){
       if(G.over)st.textContent='';else if(E.inCheck())st.textContent='שח!';else if(g.mode==='online')st.textContent=E.S.side===G.me?(G.locked>=0?'נגעת נסעת – הזיזו את הכלי שבחרתם':'התור שלכם · נגעת נסעת'):'התור של החבר';else if(g.mode==='ai')st.textContent=E.S.side===G.me?'התור שלכם':'';else st.textContent=G.locked>=0?'נגעת נסעת – הזיזו את הכלי שבחרתם':`התור של ${nameOf(E.S.side)} · נגעת נסעת`;
       st.classList.toggle('chk',!G.over&&E.inCheck());
     }
-    function paintArrow(){arrows.innerHTML='';if(!G.hint)return;const [x1,y1]=xyOf(E.mFrom(G.hint)),[x2,y2]=xyOf(E.mTo(G.hint));const a=[x1/100*100+50,y1/100*100+50],b=[x2+50,y2+50];
-      arrows.innerHTML=`<defs><marker id="chah" markerWidth="4" markerHeight="4" refX="2.2" refY="2" orient="auto"><path d="M0 0L4 2L0 4z" fill="#F3E03B"/></marker></defs><line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#F3E03B" stroke-width="16" stroke-linecap="round" marker-end="url(#chah)" opacity=".85"/>`}
+    function paintArrow(){arrows.innerHTML='';const parts=[];if(G.guide&&G.gm){const [gx1,gy1]=xyOf(E.mFrom(G.gm)),[gx2,gy2]=xyOf(E.mTo(G.gm));parts.push(`<defs><marker id="chgh" markerWidth="4" markerHeight="4" refX="2.2" refY="2" orient="auto"><path d="M0 0L4 2L0 4z" fill="#f1efeb"/></marker></defs><line x1="${gx1+50}" y1="${gy1+50}" x2="${gx2+50}" y2="${gy2+50}" stroke="#f1efeb" stroke-width="18" stroke-linecap="round" marker-end="url(#chgh)" opacity=".9"/><rect x="${gx2+6}" y="${gy2+6}" width="88" height="88" fill="none" stroke="#f1efeb" stroke-width="6" stroke-dasharray="14 10"/>`)}arrows.innerHTML=parts.join('');if(!G.hint)return;const [x1,y1]=xyOf(E.mFrom(G.hint)),[x2,y2]=xyOf(E.mTo(G.hint));const a=[x1/100*100+50,y1/100*100+50],b=[x2+50,y2+50];
+      arrows.innerHTML+=`<defs><marker id="chah" markerWidth="4" markerHeight="4" refX="2.2" refY="2" orient="auto"><path d="M0 0L4 2L0 4z" fill="#F3E03B"/></marker></defs><line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#F3E03B" stroke-width="16" stroke-linecap="round" marker-end="url(#chah)" opacity=".85"/>`}
     const paint=anim=>{paintSquares();paintPieces(anim);paintSide();paintArrow()};
+    const guideSide=()=>!G.over&&(g.mode==='duo'||E.S.side===G.me);
+    function runGuide(){ // secret guide (code 2222): the strongest move for whoever the human is
+      G.gm=0;paintArrow();const badge=$q('.ch-guide');if(badge)badge.hidden=!G.guide;
+      if(!G.guide||!guideSide())return;const id='g'+(++G.gid),key=G.moves.length;const w=chWorker();
+      const fin=u=>{if(id!=='g'+G.gid||key!==G.moves.length||!G.guide)return;const m=u&&E.fromUci(u);if(m){G.gm=m;paintArrow()}};
+      if(!w||w.broken){later(()=>{const r=E.think({ms:700});fin(r.move?E.uci(r.move):null)},30);return}
+      const hd=e=>{if(e.data.id!==id)return;w.removeEventListener('message',hd);fin(e.data.uci)};w.addEventListener('message',hd);w.postMessage({id,fen:E.START,moves:G.moves,opts:{ms:1500}})}
+    function toggleGuide(){G.guide=!G.guide;store.set('ch:guide',G.guide);sound(G.guide?'perfect':'tick');toast(G.guide?'המדריך הסודי הופעל – החץ הלבן הוא המהלך הכי טוב':'המדריך הסודי כובה');runGuide()}
+    let codeBuf='';on(window,'keydown',e=>{if(e.target&&e.target.tagName==='INPUT')return;if(/^\d$/.test(e.key)){codeBuf=(codeBuf+e.key).slice(-4);if(codeBuf==='2222'){codeBuf='';toggleGuide()}}else codeBuf=''});
+    { // phone: tap your own name bar 4 times quickly to type the code
+      let taps=0,tt=0;on($q('.ch-bot'),'click',()=>{const now=Date.now();taps=now-tt<600?taps+1:1;tt=now;if(taps>=4){taps=0;const pr=$q('.ch-code2');pr.hidden=false;const inp=pr.querySelector('input');inp.value='';inp.focus()}});
+      const pr=$q('.ch-code2'),inp=pr.querySelector('input');const ok=()=>{pr.hidden=true;if(inp.value.trim()==='2222')toggleGuide()};pr.querySelector('.ch-ok').onclick=ok;inp.onkeydown=e=>{if(e.key==='Enter')ok();if(e.key==='Escape')pr.hidden=true};pr.querySelector('.ch-x').onclick=()=>{pr.hidden=true}}
     const humanTurn=()=>!G.over&&!G.think&&(g.mode==='duo'||E.S.side===G.me);
     function save(){if(g.mode==='online')return;store.set('ch:save',G.over?null:{mode:g.mode,lvl:G.lvl,color:G.me,moves:G.moves.slice()})}
 
@@ -5310,7 +5326,7 @@ function chessPlay(stage,lvl,ctl){
       sound(st.over?'win':E.inCheck()?'bad':capPiece?'drop':fl&4?'perfect':'tick');
       paint({from:f,to:t,capSq,capPiece,castle});save();
       if(g.mode==='online'&&!remote&&net)net.send(`hanasi/chess/${netCode}/${g.host?'g':'h'}`,{t:'mv',u:E.uci(m),n:G.moves.length});
-      if(G.over)later(()=>finish(G.over),G.over.why==='mate'?900:500);else maybeAI();
+      if(G.over)later(()=>finish(G.over),G.over.why==='mate'?900:500);else{maybeAI();runGuide()}
     }
     function maybeAI(){
       if(g.mode!=='ai'||G.over||E.S.side===G.me)return;const o=AIO[G.lvl];G.think=true;paintSide();const id=++thinkId;const t0=performance.now();
@@ -5344,11 +5360,11 @@ function chessPlay(stage,lvl,ctl){
     on(board,'pointerup',endDrag);on(board,'pointercancel',endDrag);
     // keyboard: Esc deselect handled globally by arena; arrows not needed
     // ---- controls ----
-    stage.querySelectorAll('.ch-b').forEach(b=>b.onclick=()=>{const a=b.dataset.a;sound('tick');
-      if(a==='flip'){G.flip=!G.flip;paint()}
+    stage.querySelectorAll('.ch-ctl .ch-b').forEach(b=>b.onclick=()=>{const a=b.dataset.a;sound('tick');
+      if(a==='flip'){G.flip=!G.flip;paint();runGuide()}
       if(a==='menu'){teardown();netClose();showStart()}
       if(a==='undo'){if(G.over&&g.mode==='ai'&&G.over.why==='resign'){G.over=null;$q('.ch-end').hidden=true}if(G.over)return;thinkId++;G.think=false;
-        let n=g.mode==='ai'?(E.S.side===G.me?2:1):1;n=Math.min(n,G.moves.length);for(let i=0;i<n;i++){E.unmake();G.moves.pop();G.sans.pop()}G.sel=-1;G.targets=[];G.locked=-1;G.hint=null;paint();save();if(g.mode==='ai')maybeAI()}
+        let n=g.mode==='ai'?(E.S.side===G.me?2:1):1;n=Math.min(n,G.moves.length);for(let i=0;i<n;i++){E.unmake();G.moves.pop();G.sans.pop()}G.sel=-1;G.targets=[];G.locked=-1;G.hint=null;paint();save();if(g.mode==='ai')maybeAI();runGuide()}
       if(a==='hint'){if(!humanTurn())return;const w=chWorker();const id=++thinkId;b.disabled=true;const fin=u=>{b.disabled=false;if(id!==thinkId)return;const m=u&&E.fromUci(u);if(m){G.hint=m;paintArrow()}};
         if(!w||w.broken){const r=E.think({ms:600});fin(r.move?E.uci(r.move):null);return}const hd=e=>{if(e.data.id!==id)return;w.removeEventListener('message',hd);fin(e.data.uci)};w.addEventListener('message',hd);w.postMessage({id,fen:E.START,moves:G.moves,opts:{ms:900}})}
       if(a==='resign'){if(G.over)return;if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent='בטוח?';later(()=>{b.classList.remove('arm');b.textContent='כניעה'},2500);return}
@@ -5393,7 +5409,7 @@ function chessPlay(stage,lvl,ctl){
     // ---- replay a saved game ----
     for(const u of (g.moves||[])){const m=E.fromUci(u);if(!m)break;G.sans.push(E.san(m));E.make(m);G.moves.push(u)}
     const st0=E.status();if(st0.over)G.over=st0;
-    paint();if(G.over)finish(G.over);else maybeAI();
+    paint();if(G.over)finish(G.over);else{maybeAI();runGuide()}
     if(g.mode==='online')toast(G.me===0?'אתם לבן – אתם מתחילים':'אתם שחור – החבר מתחיל');
   }
   showStart();
