@@ -5240,7 +5240,7 @@ function chessPlay(stage,lvl,ctl){
   /* ---------- the game ---------- */
   function startGame(g){
     teardown();
-    const G={mode:g.mode,lvl:g.lvl||lvl,me:g.color||0,moves:[],sans:[],over:null,tm:[],touch:g.mode==='online',locked:-1,flip:(g.mode==='ai'||g.mode==='online')&&g.color===1,sel:-1,targets:[],hint:null,think:false,drawOffer:false};
+    const G={mode:g.mode,lvl:g.lvl||lvl,me:g.color||0,moves:[],sans:[],over:null,tm:[],touch:g.mode==='online'||g.mode==='duo',locked:-1,flip:(g.mode==='ai'||g.mode==='online')&&g.color===1,sel:-1,targets:[],hint:null,think:false,drawOffer:false};
     E.load(E.START);
     const meName=g.mode==='duo'?['לבן','שחור']:g.mode==='online'?['אתם','החבר']:['אתם',FOE[G.lvl]];
     const nameOf=side=>g.mode==='duo'?meName[side]:side===G.me?meName[0]:meName[1];
@@ -5293,7 +5293,7 @@ function chessPlay(stage,lvl,ctl){
         el.querySelector('.ch-th').hidden=!(G.think&&E.S.side===side)});
       const ol=$q('.ch-moves');let o='';for(let i=0;i<G.sans.length;i+=2)o+=`<li><span>${G.sans[i]}</span><span>${G.sans[i+1]||''}</span></li>`;ol.innerHTML=o;ol.scrollTop=ol.scrollHeight;
       const st=$q('.ch-status');
-      if(G.over)st.textContent='';else if(E.inCheck())st.textContent='שח!';else if(g.mode==='online')st.textContent=E.S.side===G.me?(G.locked>=0?'נגעת נסעת – הזיזו את הכלי שבחרתם':'התור שלכם · נגעת נסעת'):'התור של החבר';else if(g.mode==='ai')st.textContent=E.S.side===G.me?'התור שלכם':'';else st.textContent=`התור של ${nameOf(E.S.side)}`;
+      if(G.over)st.textContent='';else if(E.inCheck())st.textContent='שח!';else if(g.mode==='online')st.textContent=E.S.side===G.me?(G.locked>=0?'נגעת נסעת – הזיזו את הכלי שבחרתם':'התור שלכם · נגעת נסעת'):'התור של החבר';else if(g.mode==='ai')st.textContent=E.S.side===G.me?'התור שלכם':'';else st.textContent=G.locked>=0?'נגעת נסעת – הזיזו את הכלי שבחרתם':`התור של ${nameOf(E.S.side)} · נגעת נסעת`;
       st.classList.toggle('chk',!G.over&&E.inCheck());
     }
     function paintArrow(){arrows.innerHTML='';if(!G.hint)return;const [x1,y1]=xyOf(E.mFrom(G.hint)),[x2,y2]=xyOf(E.mTo(G.hint));const a=[x1/100*100+50,y1/100*100+50],b=[x2+50,y2+50];
@@ -5348,7 +5348,7 @@ function chessPlay(stage,lvl,ctl){
       if(a==='flip'){G.flip=!G.flip;paint()}
       if(a==='menu'){teardown();netClose();showStart()}
       if(a==='undo'){if(G.over&&g.mode==='ai'&&G.over.why==='resign'){G.over=null;$q('.ch-end').hidden=true}if(G.over)return;thinkId++;G.think=false;
-        let n=g.mode==='ai'?(E.S.side===G.me?2:1):1;n=Math.min(n,G.moves.length);for(let i=0;i<n;i++){E.unmake();G.moves.pop();G.sans.pop()}G.sel=-1;G.targets=[];G.hint=null;paint();save();if(g.mode==='ai')maybeAI()}
+        let n=g.mode==='ai'?(E.S.side===G.me?2:1):1;n=Math.min(n,G.moves.length);for(let i=0;i<n;i++){E.unmake();G.moves.pop();G.sans.pop()}G.sel=-1;G.targets=[];G.locked=-1;G.hint=null;paint();save();if(g.mode==='ai')maybeAI()}
       if(a==='hint'){if(!humanTurn())return;const w=chWorker();const id=++thinkId;b.disabled=true;const fin=u=>{b.disabled=false;if(id!==thinkId)return;const m=u&&E.fromUci(u);if(m){G.hint=m;paintArrow()}};
         if(!w||w.broken){const r=E.think({ms:600});fin(r.move?E.uci(r.move):null);return}const hd=e=>{if(e.data.id!==id)return;w.removeEventListener('message',hd);fin(e.data.uci)};w.addEventListener('message',hd);w.postMessage({id,fen:E.START,moves:G.moves,opts:{ms:900}})}
       if(a==='resign'){if(G.over)return;if(!b.classList.contains('arm')){b.classList.add('arm');b.textContent='בטוח?';later(()=>{b.classList.remove('arm');b.textContent='כניעה'},2500);return}
