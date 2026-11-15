@@ -5244,7 +5244,7 @@ function chessPlay(stage,lvl,ctl){
   /* ---------- the game ---------- */
   function startGame(g){
     teardown();
-    const G={mode:g.mode,lvl:g.lvl||lvl,me:g.color||0,moves:[],sans:[],over:null,tm:[],touch:g.mode==='online'||g.mode==='duo',locked:-1,guide:!!store.get('ch:guide',false),gm:0,gid:0,flip:(g.mode==='ai'||g.mode==='online')&&g.color===1,sel:-1,targets:[],hint:null,think:false,drawOffer:false};
+    const G={mode:g.mode,lvl:g.lvl||lvl,me:g.color||0,moves:[],sans:[],over:null,tm:[],touch:false,locked:-1,guide:!!store.get('ch:guide',false),gm:0,gid:0,flip:(g.mode==='ai'||g.mode==='online')&&g.color===1,sel:-1,targets:[],hint:null,think:false,drawOffer:false};
     E.load(E.START);
     const meName=g.mode==='duo'?['לבן','שחור']:g.mode==='online'?['אתם','החבר']:['אתם',FOE[G.lvl]];
     const nameOf=side=>g.mode==='duo'?meName[side]:side===G.me?meName[0]:meName[1];
@@ -5297,7 +5297,7 @@ function chessPlay(stage,lvl,ctl){
         el.querySelector('.ch-th').hidden=!(G.think&&E.S.side===side)});
       const ol=$q('.ch-moves');let o='';for(let i=0;i<G.sans.length;i+=2)o+=`<li><span>${G.sans[i]}</span><span>${G.sans[i+1]||''}</span></li>`;ol.innerHTML=o;ol.scrollTop=ol.scrollHeight;
       const st=$q('.ch-status');
-      if(G.over)st.textContent='';else if(E.inCheck())st.textContent='שח!';else if(g.mode==='online')st.textContent=E.S.side===G.me?(G.locked>=0?'נגעת נסעת – הזיזו את הכלי שבחרתם':'התור שלכם · נגעת נסעת'):'התור של החבר';else if(g.mode==='ai')st.textContent=E.S.side===G.me?'התור שלכם':'';else st.textContent=G.locked>=0?'נגעת נסעת – הזיזו את הכלי שבחרתם':`התור של ${nameOf(E.S.side)} · נגעת נסעת`;
+      if(G.over)st.textContent='';else if(E.inCheck())st.textContent='שח!';else if(g.mode==='online')st.textContent=E.S.side===G.me?'התור שלכם':'התור של החבר';else if(g.mode==='ai')st.textContent=E.S.side===G.me?'התור שלכם':'';else st.textContent=`התור של ${nameOf(E.S.side)}`;
       st.classList.toggle('chk',!G.over&&E.inCheck());
     }
     function paintArrow(){arrows.innerHTML='';const parts=[];if(G.guide&&G.gm){const [gx1,gy1]=xyOf(E.mFrom(G.gm)),[gx2,gy2]=xyOf(E.mTo(G.gm));parts.push(`<defs><marker id="chgh" markerWidth="4" markerHeight="4" refX="2.2" refY="2" orient="auto"><path d="M0 0L4 2L0 4z" fill="#f1efeb"/></marker></defs><line x1="${gx1+50}" y1="${gy1+50}" x2="${gx2+50}" y2="${gy2+50}" stroke="#f1efeb" stroke-width="18" stroke-linecap="round" marker-end="url(#chgh)" opacity=".9"/><rect x="${gx2+6}" y="${gy2+6}" width="88" height="88" fill="none" stroke="#f1efeb" stroke-width="6" stroke-dasharray="14 10"/>`)}arrows.innerHTML=parts.join('');if(!G.hint)return;const [x1,y1]=xyOf(E.mFrom(G.hint)),[x2,y2]=xyOf(E.mTo(G.hint));const a=[x1/100*100+50,y1/100*100+50],b=[x2+50,y2+50];
